@@ -1,0 +1,14 @@
+{
+  "name": "b62a7ce18a5d99ad",
+  "main": "b62a7ce18a5d99ad@684.js",
+  "version": "684.0.0",
+  "homepage": "https://observablehq.com/d/b62a7ce18a5d99ad",
+  "author": {
+    "name": "WRran",
+    "url": "https://observablehq.com/@hydrogen"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}

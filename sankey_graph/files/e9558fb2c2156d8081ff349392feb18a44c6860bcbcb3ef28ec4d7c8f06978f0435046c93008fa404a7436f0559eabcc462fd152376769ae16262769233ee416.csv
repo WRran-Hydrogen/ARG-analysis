@@ -1,0 +1,84 @@
+﻿source,target,value
+Other Host-associated,Uroviricota,470
+Digestive,Uroviricota,2015
+Unclassfied,Uroviricota,265
+Marine,Hofneiviricota,1
+Other engineered,Uroviricota,35
+Soil,Preplasmiviricota,1
+Soil,Uroviricota,339
+Marine,Unassign,15
+Bioreactor,Uroviricota,100
+Freshwater,Uroviricota,1250
+Marine,Uroviricota,192
+Bioreactor,Unassign,3
+Other engineered,Unassign,1
+Other Host-associated,Unassign,7
+Digestive,Unassign,10
+Wastewater,Uroviricota,24
+Freshwater,Unassign,18
+Soil,Unassign,18
+Other enviroment,Uroviricota,170
+Other enviroment,Unassign,6
+Plants,Uroviricota,85
+Other enviroment,Nucleocytoviricota,11
+Wastewater,Nucleocytoviricota,4
+Wastewater,Unassign,5
+Freshwater,Nucleocytoviricota,311
+Plants,Unassign,1
+Plants,Nucleocytoviricota,12
+Solid,Uroviricota,21
+Plants,Hofneiviricota,3
+Marine,Nucleocytoviricota,58
+Soil,Hofneiviricota,1
+Thermal,Nucleocytoviricota,3
+Thermal,Uroviricota,10
+Soil,Nucleocytoviricota,35
+Thermal,Unassign,2
+Other engineered,Hofneiviricota,2
+Digestive,Phixviricota,1
+Bioreactor,Nucleocytoviricota,5
+Digestive,Nucleocytoviricota,3
+Other enviroment,Hofneiviricota,8
+Solid,Nucleocytoviricota,1
+Other Host-associated,Hofneiviricota,1
+Unclassfied,Hofneiviricota,1
+Digestive,Hofneiviricota,1
+Other Host-associated,Nucleocytoviricota,1
+Microbial,Uroviricota,92
+Uroviricota,Proteobacteriota,95
+Uroviricota,Bacteroidota,113
+Uroviricota,Firmicuteota,503
+Hofneiviricota,Patescibacteria,1
+Uroviricota,Spirochaetota,2
+Uroviricota,Actinobacteriota,568
+Uroviricota,Campylobacterota,1
+Preplasmiviricota,Actinobacteriota,1
+Uroviricota,Fibrobacterota,1
+Uroviricota,Cyanobacteriota,38
+Hofneiviricota,Proteobacteriota,12
+Uroviricota,Cloacimonadota,1
+Uroviricota,Fusobacteriota,2
+Uroviricota,Acidobacteriota,1
+Uroviricota,Verrucomicrobiota,1
+Uroviricota,Chlamydiota,1
+Hofneiviricota,Firmicuteota,1
+Uroviricota,Chloroflexota,1
+Proteobacteriota,Isolate taxonomy,74
+Bacteroidota,Isolate taxonomy,30
+Firmicuteota,Isolate taxonomy,72
+Patescibacteria,Isolate taxonomy,1
+Spirochaetota,Isolate taxonomy,2
+Actinobacteriota,Isolate taxonomy,490
+Campylobacterota,Isolate taxonomy,1
+Fibrobacterota,Isolate taxonomy,1
+Bacteroidota,CRISPR spacer match,83
+Firmicuteota,CRISPR spacer match,439
+Cyanobacteriota,CRISPR spacer match,38
+Proteobacteriota,CRISPR spacer match,34
+Actinobacteriota,CRISPR spacer match,80
+Cloacimonadota,CRISPR spacer match,1
+Fusobacteriota,CRISPR spacer match,2
+Acidobacteriota,CRISPR spacer match,1
+Verrucomicrobiota,CRISPR spacer match,1
+Chlamydiota,Isolate taxonomy,1
+Chloroflexota,CRISPR spacer match,1
