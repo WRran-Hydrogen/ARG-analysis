@@ -1,0 +1,14 @@
+{
+  "name": "@hydrogen/buble-world-map",
+  "main": "daa222fd779c02c9@410.js",
+  "version": "410.0.0",
+  "homepage": "https://observablehq.com/@hydrogen/buble-world-map",
+  "author": {
+    "name": "WRran",
+    "url": "https://observablehq.com/@hydrogen"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
