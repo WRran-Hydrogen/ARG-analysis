@@ -29,7 +29,11 @@ See individual script files for usage instructions.
 
 ## Data
 
-Supporting data available on Figshare: [10.xx/figshare.xxxx]()
+Supporting data (domain distance, molecular docking, motif, phylogeny, and more) is available on Figshare:
+
+**https://figshare.com/articles/dataset/_/31942782**
+
+Citation: xiong, yao (2026). SBL-virus Supporting Data. figshare. Dataset. https://figshare.com/articles/dataset/_/31942782
 
 ## License
 
