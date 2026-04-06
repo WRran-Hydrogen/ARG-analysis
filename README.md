@@ -29,11 +29,24 @@ See individual script files for usage instructions.
 
 ## Data
 
-Supporting data (domain distance, molecular docking, motif, phylogeny, and more) is available on Figshare:
+Supporting data is organized into a **Figshare Collection** with 10 themed datasets:
 
-**https://figshare.com/articles/dataset/_/31942782**
+| Dataset | Description |
+|---------|-------------|
+| Global Distribution Data | Geographic prevalence and location data |
+| Motif Data | Motif node and edge relationships |
+| Phylogeny Data | Phylogenetic trees (NCLDV, PF families) |
+| Prophage Data | Prophage identification and InPhage data |
+| DomainDistance Data | Pairwise domain distance calculations |
+| OriginalFile Data | FASTA files, seed sequences, FIMO results |
+| SelectionPressure Data | MG94 selection pressure analysis |
+| MolecularDocking Data | PDB structures, PLIP analysis, docking results |
+| Gephi Network Data | Network visualization files |
+| Protein Structure Data | Predicted tertiary structures (PDB) |
 
-Citation: xiong, yao (2026). SBL-virus Supporting Data. figshare. Dataset. https://figshare.com/articles/dataset/_/31942782
+**Figshare Collection**: https://figshare.com/collections/_/8403348
+
+Citation: xiong, yao (2026). SBL-virus Supporting Data. figshare. Collection. https://figshare.com/collections/_/8403348
 
 ## License
 
