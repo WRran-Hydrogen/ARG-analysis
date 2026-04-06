@@ -40,7 +40,7 @@ Supporting data is organized into a **Figshare Collection** with 13 datasets:
 | DomainDistance Data | 31942914 | 10.6084/m9.figshare.31942914 |
 | OriginalFile Data | 31942917 | 10.6084/m9.figshare.31942917 |
 | SelectionPressure Data | 31942920 | 10.6084/m9.figshare.31942920 |
-| MolecularDocking Data | 31946658 | 10.6084/m9.figshare.31946658 |
+| MolecularDocking Data | 31946697 | 10.6084/m9.figshare.31946658 |
 | Gephi Network Data | 31942926 | 10.6084/m9.figshare.31942926 |
 | Protein Structure Data (Part 1) | 31942962 | 10.6084/m9.figshare.31942962 |
 | Protein Structure Data (Part 2) | 31943334 | 10.6084/m9.figshare.31943334 |
