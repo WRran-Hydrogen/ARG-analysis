@@ -29,7 +29,7 @@ See individual script files for usage instructions.
 
 ## Data
 
-Supporting data is organized into a **Figshare Collection** with 10 themed datasets:
+Supporting data is organized into a **Figshare Collection** with 12 themed datasets across 3 parts:
 
 | Dataset | Description |
 |---------|-------------|
@@ -42,7 +42,9 @@ Supporting data is organized into a **Figshare Collection** with 10 themed datas
 | SelectionPressure Data | MG94 selection pressure analysis |
 | MolecularDocking Data | PDB structures, PLIP analysis, docking results |
 | Gephi Network Data | Network visualization files |
-| Protein Structure Data | Predicted tertiary structures (PDB) |
+| Protein Structure Data (Part 1) | Predicted tertiary structures (PDB) - Part 1 |
+| Protein Structure Data (Part 2) | Predicted tertiary structures (PDB) - Part 2 |
+| Protein Structure Data (Part 3) | Predicted tertiary structures (PDB) - Part 3 |
 
 **Figshare Collection**: https://figshare.com/collections/_/8403348
 
