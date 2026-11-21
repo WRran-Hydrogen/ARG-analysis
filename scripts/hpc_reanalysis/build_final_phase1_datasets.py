@@ -281,6 +281,52 @@ def parse_hmmsearch_domtbl(path, filter_ids=None):
     return hits
 
 
+def merge_same_family_pieces(best_hit, hit_list, hlen):
+    """Merge co-linear hits of the winning family into one domain; return (merged_hit, hmm_cov).
+
+    `hit_list` must contain only eligible candidates (see resolve_strict_cl0013): same-family hits in
+    the winning hit's own envelope cluster, or same-family hits that win their own cluster. Hits in
+    clusters won by another family (CL0013 or not) are never merged.
+    A further hit of the same Pfam family is accepted as another piece of the same domain when it
+      - does not overlap an accepted piece in the protein by >= OV_THRESH aa (alternative alignment),
+      - is co-linear with every accepted piece (sequence order == HMM order), and
+      - adds >= 50% new HMM match states (excludes tandem repeats of the same model region).
+    Coverage is the union of the pieces' HMM intervals / HMM length, so a real internal deletion
+    (model positions missing from the protein) still lowers coverage, whereas a domain split by a
+    poorly scoring or inserted segment is measured over its full extent. The merged envelope spans
+    all pieces, so the exported domain slice contains the whole domain (insertions are removed later
+    by hmmalign as lowercase insert states).
+    """
+    pieces = [best_hit]
+    others = sorted(
+        (h for h in hit_list if h["pfam_acc"] == best_hit["pfam_acc"] and h is not best_hit),
+        key=lambda h: -h["dom_score"],
+    )
+    for h in others:
+        if any(interval_overlap(h["env_from"], h["env_to"], p["env_from"], p["env_to"]) >= OV_THRESH for p in pieces):
+            continue
+        if not all((h["env_from"] > p["env_to"]) == (h["hmm_from"] > p["hmm_from"]) for p in pieces):
+            continue
+        covered = set()
+        for p in pieces:
+            covered.update(range(p["hmm_from"], p["hmm_to"] + 1))
+        h_states = set(range(h["hmm_from"], h["hmm_to"] + 1))
+        if len(h_states - covered) >= 0.5 * len(h_states):
+            pieces.append(h)
+
+    hmm_states = set()
+    for p in pieces:
+        hmm_states.update(range(p["hmm_from"], p["hmm_to"] + 1))
+    hmm_cov = round(min(1.0, len(hmm_states) / max(hlen, 1)), 4)
+
+    merged = dict(best_hit)
+    merged["env_from"] = min(p["env_from"] for p in pieces)
+    merged["env_to"] = max(p["env_to"] for p in pieces)
+    merged["n_pieces"] = len(pieces)
+    merged["hmm_cov_best"] = round(min(1.0, (best_hit["hmm_to"] - best_hit["hmm_from"] + 1) / max(hlen, 1)), 4)
+    return merged, hmm_cov
+
+
 def resolve_strict_cl0013(hit_list, acc_to_clan, hmm_lens):
     """Overlapping-envelope Pfam competition strictly choosing the highest CL0013 bitscore."""
     n = len(hit_list)
@@ -339,10 +385,17 @@ def resolve_strict_cl0013(hit_list, acc_to_clan, hmm_lens):
                     pf00768_sc = h["dom_score"]
 
     dual_flag = ("PF13354" in all_cl_accs) and ("PF00768" in all_cl_accs)
-    chosen = max((top for top, _ in cl13_clusters), key=lambda h: (h["dom_score"], h["env_to"] - h["env_from"]))
-    acc = chosen["pfam_acc"]
-    hlen = hmm_lens.get(acc, chosen["qlen"])
-    hmm_cov = round(min(1.0, (chosen["hmm_to"] - chosen["hmm_from"] + 1) / max(hlen, 1)), 4)
+    best_hit = max((top for top, _ in cl13_clusters), key=lambda h: (h["dom_score"], h["env_to"] - h["env_from"]))
+    acc = best_hit["pfam_acc"]
+    hlen = hmm_lens.get(acc, best_hit["qlen"])
+    # A single domain can be reported by hmmsearch as several hits of the same family (divergent
+    # middle region or an internal insertion). Merge co-linear pieces before measuring coverage,
+    # drawing candidates only from the winning hit's own envelope cluster or from clusters that the
+    # same family wins outright (never from regions won by another family).
+    own_cluster = next(ch for top, ch in clusters if top is best_hit)
+    candidates = [h for h in own_cluster if h["pfam_acc"] == acc]
+    candidates += [top for top, _ in clusters if top["pfam_acc"] == acc and top is not best_hit]
+    chosen, hmm_cov = merge_same_family_pieces(best_hit, candidates, hlen)
 
     if acc in FOCAL:
         cat = f"focal_{acc}"
@@ -428,6 +481,8 @@ def extract_domain_slice_and_build_record(uid, orig_uid, prot, dom, dual, pf1335
         "pf00768_dom_score": pf00768_sc,
         "dom_score": dom["dom_score"],
         "hmm_cov": hmm_cov,
+        "hmm_cov_best_piece": dom.get("hmm_cov_best", hmm_cov),
+        "n_domain_pieces": dom.get("n_pieces", 1),
         "pass_cov60": hmm_cov >= 0.60,
         "pass_cov65": hmm_cov >= 0.65,
         "pass_cov70": hmm_cov >= 0.70,
@@ -1359,7 +1414,7 @@ def finalize_and_export(viral_records, bac_records, fimo_summary, v_cat_counts, 
     v_cols = [
         "uid", "orig_uid", "source", "pfam_category", "winning_acc",
         "dual_PF13354_PF00768_GA", "pf13354_dom_score", "pf00768_dom_score",
-        "dom_score", "hmm_cov", "pass_cov60", "pass_cov65", "pass_cov70",
+        "dom_score", "hmm_cov", "hmm_cov_best_piece", "n_domain_pieces", "pass_cov60", "pass_cov65", "pass_cov70",
         "seq_len", "env_from", "env_to", "dom_start", "dom_end", "dom_len",
         "fimo_r1_min_p", "fimo_r1_n_motifs", "pass_fimo_1e5", "pass_fimo_1e10",
         "viral_origin_tier", "mmseqs85_cluster_id", "viral_nr85_rep_uid", "viral_cluster_size", "in_viral_nr85_rep",
@@ -1382,7 +1437,7 @@ def finalize_and_export(viral_records, bac_records, fimo_summary, v_cat_counts, 
     b_cols = [
         "uid", "orig_uid", "source_db", "pfam_category", "winning_acc",
         "dual_PF13354_PF00768_GA", "pf13354_dom_score", "pf00768_dom_score",
-        "dom_score", "hmm_cov", "pass_cov60", "pass_cov65", "pass_cov70",
+        "dom_score", "hmm_cov", "hmm_cov_best_piece", "n_domain_pieces", "pass_cov60", "pass_cov65", "pass_cov70",
         "seq_len", "env_from", "env_to", "dom_start", "dom_end", "dom_len",
         "fimo_r1_min_p", "fimo_r1_n_motifs", "pass_fimo_1e5", "pass_fimo_1e10",
         "mmseqs85_cluster_id", "bac_cluster_size", "in_nr85_rep", "in_tree_balanced",
@@ -1414,7 +1469,7 @@ def write_prelim_viral_catalog(viral_records):
     v_cols = [
         "uid", "orig_uid", "source", "pfam_category", "winning_acc",
         "dual_PF13354_PF00768_GA", "pf13354_dom_score", "pf00768_dom_score",
-        "dom_score", "hmm_cov", "pass_cov60", "pass_cov65", "pass_cov70",
+        "dom_score", "hmm_cov", "hmm_cov_best_piece", "n_domain_pieces", "pass_cov60", "pass_cov65", "pass_cov70",
         "seq_len", "env_from", "env_to", "dom_start", "dom_end", "dom_len",
         "fimo_r1_min_p", "fimo_r1_n_motifs", "pass_fimo_1e5", "pass_fimo_1e10",
         "cds_verified", "has_SXXK_in_dom", "motif1_SXXK_hmm", "motif2_class", "motif3_KTG_hmm", "has_omega_E166",
