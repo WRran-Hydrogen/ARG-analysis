@@ -1,161 +1,127 @@
-# Viral Serine-β-Lactamase (SBL) Full Re-Analysis: Methods, Checkpoints & Session Memorize Reference
+# Viral Serine-β-Lactamase / PRE (`CL0013`) Re-Analysis: Methods, Checkpoints & Session Reference
 
-> **Purpose**: Authoritative, reproducible Materials & Methods specification **and** complete HPC/local execution handoff (`Memorize`) for the full upgrade of:
-> *"Global analyses reveal the diversity and functional evolution of viral serine-β-lactamase genes linked to antibiotic resistance"*
-> Last updated: `2026-11-21` (Phases 0–2 completed and verified on the HPC cluster; Phases 3–6 staged and ready for execution).
+> **Purpose**: Authoritative, reproducible Materials & Methods specification **and** complete HPC/local execution handoff (`Memorize`) for the full revision of:
+> *"Global analyses reveal the diversity and functional evolution of viral serine-β-lactamase / penicillin-recognizing enzymes (`CL0013`)"*
+> Last updated: `2026-11-21` (**Stage 1 Completed**: Strict CL0013 bitscore taxonomy, own-seed FIMO, `hmm_cov >= 0.65`, independent domain-slice `nr85`, CARD + catalytic functional stratification, tagged bacterial prophages, strict structural hallmark Phase 2 `Tier 1`, and locked Primary HGT protocol).
+>
+> ⚠️ **Stage 1 must be re-run before Stage 2.** The counts in Sections 2–3 were produced by the scripts *before* the 2026-11-21 review fixes: (i) CARD reference set now excludes PBP-type entries (mecA/mecC, PBP1a/2b/2x/3); (ii) Class A Ω-loop requires the `E166-x-x-L-N` signature (previously any glutamate in the window) with A2M match-state verification; (iii) whole viral contigs inside bacterial assemblies/MAGs are tagged `viral_contig` and excluded from bacterial sets (no longer treated as prophages); (iv) PF13354/PF00768 trees are rooted only with PF00144 + PF00905; (v) `cov60` sensitivity applied to bacteria too; (vi) revised Phase 2 `Tier 1` (see Section 3). Re-run with `scripts/hpc_reanalysis/run_phase1_phase2_rebuild.sh` (`--stage curate` → Phase 2 → `--stage finalize`) and update the numbers below.
 
 ---
 
-## 1. Environment, Compute Infrastructure & File Map
+## 1. Environment, Compute Infrastructure & Repository Layout
 
 ### 1.1 Compute Infrastructure & Verified Software Versions
-- **HPC Cluster**: institutional Slurm cluster (partitions: `compute` [77 nodes, 7-day limit]; default QOS). Outbound HTTPS downloads (NCBI RefSeq / GTDB) executed from login node via `aria2c 1.37.0` + `curl`; all HMM/geNomad/CheckV/eggNOG/MMseqs2/tree/HyPhy workloads executed on `compute` nodes.
-- **Software Versions & Install Locations on the HPC Cluster**:
-  - **HMMER `3.4`**: `$HPC_HOME/.pixi/bin/hmmsearch`, `hmmalign`
-  - **MMseqs2 `18.8cc5c`**: `$HPC_HOME/.pixi/bin/mmseqs`
-  - **MEME Suite / FIMO `5.5.9`**: `$HPC_HOME/micromamba/envs/sbl/bin/meme`, `fimo`
-  - **CheckV `v1.0.3`** (DB `checkv-db-v1.5`, 13 GB): `$HPC_HOME/micromamba/envs/checkV/bin/checkv`
-  - **geNomad `1.7`** (`genomad_db` v1.7, 2.8 GB, IMG/VR viral screening) & **`1.8.1`** (bacterial 8-shard screening): `$HPC_HOME/micromamba/envs/genomad/bin/genomad`
-  - **eggNOG-mapper** (`emapper.py -m diamond`, DB `$HPC_HOME/eggnog_db`): `$HPC_HOME/micromamba/envs/eggnog/bin/emapper.py`
-  - **Prodigal `-p meta`** (`51cc034a`): `$HPC_HOME/.pixi/bin/prodigal`
-  - **Phylogenetics & Selection Tools (Phases 3–5)**: `MAFFT 7.526` (`module load MAFFT/7.526`), `MUSCLE 5.3`, `ClipKIT 2.14.0`, `trimAl v1.5.rev0`, `pal2nal.pl`, `seqkit v2.14.0`, `IQ-TREE 2.4.0`, `HyPhy 2.5.93(MP)`, `Foldseek 10.941cd33`, `Python 3.13` (`envs/sbl`).
+- **HPC Cluster**: institutional Slurm cluster (`compute` partition; outbound HTTPS downloads from login node via `aria2c 1.37.0` + `curl`).
+- **Dual Environment Specification**:
+  - **Local baseline audit environment** ([`environment.yml`](../environment.yml)): `python=3.11`, `meme=5.0.5`, `hmmer=3.4`, `muscle=5.3`, `hyphy=2.5.93`, `iqtree>=2.2`, `clipkit>=2.10`.
+  - **HPC 2026 re-analysis environment** ([`envs/hpc.yml`](../envs/hpc.yml)):
+    - **HMMER `3.4`**, **MMseqs2 `18.8cc5c`**, **MEME/FIMO `5.5.9`**, **DIAMOND `2.1.24`**
+    - **CheckV `v1.0.3`** (`checkv-db-v1.5`, 13 GB)
+    - **geNomad `1.7`** (`genomad_db` v1.7 — IMG/VR viral screening) **and `geNomad 1.8.1`** (bacterial 8-shard screening & Marine MAGs)
+    - **eggNOG-mapper `2.1.12`**, **Prodigal `2.6.3` (`-p meta`)**
+    - **MAFFT `7.526`**, **MUSCLE `5.3`**, **ClipKIT `2.14.0`**, **trimAl `1.5.0`**, **PAL2NAL `14.1`**
+    - **IQ-TREE `2.4.0`** (with fallback `/Phylo/bin/iqtree2` `2.3.6`), **PastML `1.9.42`** / `ete4`, **HyPhy `2.5.93(MP)`**, **Foldseek `10.941cd33`**, **Python `3.13`**
 
-### 1.2 Master Workspace Directory Tree (HPC + Local)
-- **HPC Root**: `$SBL_HPC_BASE/`
-  - `inputs/` — Uploaded `PerSequence_Bacterial_Audit.tsv`, `PF*_SARG.faa`, `PF*_seed.faa`, `CL0013_official.hmm`, `PF*_official.hmm`, viral fallback `ARG_cds.fna`
-  - `00_checkv/out/` — Fresh CheckV v1.0.3 (DB v1.5) output across all `5,618` viral contigs (`Job 5113663`)
-  - `01_curated_datasets/` — Initial Scheme B viral decontamination (`Job 5117517`), `r1_meme/meme.txt`, and `mosaic_audit/` (`Job 5113697` + `clean_mosaic_euk.py`)
-  - `01b_bacterial_ref_db/` — GTDB `3,000` representative bacterial genomes (`Job 5113993`), 8-shard `geNomad` (`Job 5117565`), and `marine_mags/` (`259` MAGs, `Job 5113811`)
-  - `01_final_curated/` — **Authoritative final Phase 1 protein, domain-core, and CDS outputs** (`Job 5118649`)
-  - `02_genomic_context/` — **100%-coverage Phase 2 viral genomic neighborhood & confidence tier catalog** (`Job 5118649`)
-  - `03_alignment_and_trees/` .. `06_structure_and_ecology/` — Staged for Phases 3–6
-- **Upstream HPC Annotation Jobs**:
-  - `51cc034a` (Job `5113325`): Prodigal `-p meta` across all `5,618` `sbl_contigs.fna` (`340,422` ORFs)
-  - `6ca11f3e` (Job `5113378`): `geNomad v1.7` end-to-end across all `5,618` `sbl_contigs.fna`
-  - `de0940b0` (Job `5113374`, `5h44m42s`): Full-genome `Pfam-A.hmm` (53,275 HMMs) `--cut_ga` on `340,422` viral ORFs (`201,317` hits)
-  - `8ee5379a` (Job `5113454`, `9h48m24s`): Full-genome `eggNOG-mapper` on `340,422` viral ORFs (`103,146` queries scanned, `103,110` annotated)
-- **Local Self-Contained Master Repository (this repository)**:
-  - `docs/METHODS_AND_PIPELINE.md` — Master methods & pipeline document
-  - `docs/private/` — Peer-review correspondence (kept locally, not version-controlled)
-  - `scripts/` (`01`–`09`, `run_pipeline.py --verify`) & `scripts/hpc_reanalysis/` (all 11 HPC Phase 1–2 pipeline scripts)
-  - `data/curated_2026/` — All 39 tree-ready (`*_dom.faa`, `*_combined_tree_dom.faa`), 1:1 CDS-verified (`*_cds.fna`, `*_dom_cds.fna`), and `CL0013` auxiliary/outgroup FASTAs from `01_final_curated/`
-  - `data/metadata/` (`information.xlsx`, `Pfam-A.clans.tsv`, `sum_high.*`, `no_HGT.*`, `Prophage_*`) & `data/structures/` (`ref_pdbs/` + `ProteinStructure/` 1,507 PDBs + `1ewz` CIF)
-  - `results/reanalysis_2026/` — All 17 Phase 1/1B/2 audit catalogs, summary tables, and `Phase2_Viral_Genomic_Neighborhoods_Full.tsv`
-  - `results/tables/`, `results/supplementary_data/`, `figures/` — Baseline `Table_S01–S13` and `Fig_S01–S05`.
+### 1.2 Self-Contained Repository & HPC Directory Map
+- **GitHub Repository Root**: configures local paths via [`config/local.env.example`](../config/local.env.example) / [`scripts/sbl_config.py`](../scripts/sbl_config.py) and HPC paths via [`config/hpc.env.example`](../config/hpc.env.example) / [`scripts/hpc_reanalysis/hpc_config.py`](../scripts/hpc_reanalysis/hpc_config.py).
+  - `data/curated_2026/` — Stage 1 curated 2026 protein, domain-slice (`env ± 10 aa`), 1:1 verified CDS (`*.fna`), viral & bacterial `nr85` clusters, `rep1..rep5` + `phylo_rep` combined tree inputs, `cov60`/`cov70` sensitivity inputs, Sister-PRE outgroups, and `CL0013` non-PRE biological outgroups (`PF04960`, `PF06089`, `PF27310`).
+  - `data/hmm_models/` & `data/sequences/` — Official Pfam HMMs (`CL0013_official.hmm` + all 8 single-family HMMs) and official seed alignments (including `PF00768_seed.faa` & `PF02113_seed.faa` fetched from InterPro REST API).
+  - `results/reanalysis_2026/` — Authoritative Stage 1/2 summary reports and per-sequence / per-locus TSV catalogs (`Final_Viral_SBL_Catalog.tsv`, `Final_Bacterial_TripleSource_Catalog.tsv`, `Phase2_Viral_Genomic_Neighborhoods_Full.tsv`).
+  - `results/tables/`, `results/supplementary_data/`, `figures/` — Currently hold baseline `5,701` outputs (`Table_S01–S13`, `Fig_S01–S05`), to be migrated to the **2026 curated `nr85` primary cohort** in Stage 4 upon completion of Stages 2–4.
+  - `scripts/hpc_reanalysis/` — Complete HPC workflow scripts (`run_phase1.py`, `clean_mosaic_euk.py`, `select_gtdb_genomes.py`, `scan_gtdb_sbls.py`, `extract_sbl_contigs_and_shard.py`, `process_marine_mags.py`, `build_final_phase1_datasets.py`, `build_phase2_neighborhoods.py`, `hpc_config.py`).
 
 ---
 
-## 2. Phase 1: Viral Decontamination & Domain-Level Curation (Completed)
+## 2. Stage 1 (Completed): Revised Phase 1/1B Decontamination, Strict Clan Taxonomy, Functional Stratification & Domain-Slice `nr85`
 
-### 2.1 Viral Sources & 1:1 Nucleotide CDS Mapping
-1. **IMG/VR v4 Curated Baseline**: `5,701` viral SBL proteins encoded on `5,618` unique contigs (`sbl_contigs.fna`, covering `100.0%` of baseline final loci). Each protein was mapped back to its nucleotide CDS and genomic coordinates via:
-   - Exact/substring amino-acid match against 16-part Prodigal `-p meta` ORFs (`51cc034a/orf/*.fna`, Table 11 + alternative start codons `GTG/TTG/ATT/ATC/CTG`): `5,358` exact + `314` substring;
-   - Strict 1:1 translation-verified fallback against `ARG_cds.fna` (capturing `28` non-standard/GVMAG ORFs);
-   - **Total verified viral CDS mapping**: **`5,700 / 5,701 (99.98%)`**.
-2. **Arctic MOSAiC Viral Proteome Addition & Eukaryotic Purge**:
-   - Original MOSAiC search (`$SBL_HPC_RAW_INPUT_DIR/sbl.hmm`, `-E 1e-5` vs `mosaic_virus.faa`, `650 MB`) yielded `sbl_mosaic.tsv` (`28 PF00144 + 1 PF00905`) and `mosaic_virus_pf00144.faa` (`29` seqs; union = `30`, zero overlap with IMG/VR `5,701`).
-   - Re-scanning the full `mosaic_virus.faa` with official `CL0013_official.hmm --cut_ga` (Job `5113697`, union = `83` candidates) followed by full `Pfam-A.hmm` (53,275 HMMs) `--cut_ga` overlapping-envelope competition eliminated **`51` non-penicillin-recognizing `CL0013` enzymes** (`49` `PF04960:Glutaminase` — 43 from *Phycodnaviridae* — and `2` `PF06089:Asparaginase_II`) plus `1` below-GA hit, leaving `31` focal/aux hits (`28 PF00144`, `1 PF00905`, `2 PF00768`).
-   - **Cross-domain co-binning purge (`clean_mosaic_euk.py`)**: Querying all `31` inferred MOSAiC contigs against `$SBL_HPC_RAW_INPUT_DIR/euk_info.tsv` detected and purged **`6` `PF00144` `unknown`-taxonomic entries** overlapping eukaryotic MAGs (`bacillariophyta`, `chrysophyceae`, `amoebozoa`, `euglenozoa`, `mbat_multi.43`), yielding **`25` clean MOSAiC viral SBLs** (`22 PF00144` [incl. `15` `caudoviricetes` vMAGs], `1 PF00905`, `2 PF00768`). Because MOSAiC contig `.fna` bins are not staged in `$SBL_HPC_RAW_INPUT_DIR`, MOSAiC sequences are included in Phase 3/4 protein phylogenies & HGT analyses (`contig_context_available = False`) and excluded from nucleic-acid-only HyPhy runs.
+### 2.1 Viral Sources, Decontamination & 1:1 CDS Verification
+1. **IMG/VR v4 Baseline (`n = 5,701` across `5,618` contigs)**:
+   - 1:1 translation-verified CDS mapping (`99.98%`, `5,700 / 5,701`) against 16-part Prodigal `-p meta` ORFs + `ARG_cds.fna`.
+   - **Scheme B Joint Decontamination (`geNomad v1.7` + `CheckV v1.0.3` / DB v1.5)**: Excluded `8` geNomad plasmids, `620` host-flank provirus contaminants (`126` geNomad + `494` CheckV), `163` chromosome/plasmid-dominant non-viral contigs, and `215` unverified non-summary fragments (rescuing only `4` fragments with `checkv_viral_genes >= 1 & host_genes == 0`), leaving **`4,695`** surviving IMG/VR proteins (`drop_no_pfam_ga = 82`, `drop_non_CL0013_only = 46`).
+2. **Arctic MOSAiC Viral Addition (`clean_mosaic_euk.py`)**:
+   - Re-scanned full `mosaic_virus.faa` (650 MB) with `CL0013_official.hmm --cut_ga` + full `Pfam-A.hmm --cut_ga` competition (`83` -> `31` PRE hits, excluding `49` `PF04960` + `2` `PF06089`), then purged `6` contigs overlapping eukaryotic MAGs in `euk_info.tsv` -> **`25` clean MOSAiC viral PREs** (`22 PF00144`, `1 PF00905`, `2 PF00768`; protein phylogenies only, `contig_context_available = False`).
 
-### 2.2 Scheme B Joint Viral Decontamination (`geNomad v1.7` + `CheckV v1.0.3`)
-To strictly prevent bacterial chromosomal flanking contamination or plasmid false positives (Comments #9, #10), every IMG/VR viral SBL locus (`n = 5,701`) was filtered at **gene-coordinate resolution** using both `geNomad v1.7` (`6ca11f3e`) and fresh `CheckV v1.0.3` (`checkv-db-v1.5`, `5113663`):
-1. **`DROP_genomad_plasmid` (`n = 8`)**: Contig classified in `sbl_contigs_plasmid_summary.tsv` (`plasmid_score = 0.704–0.960`).
-2. **`DROP_genomad_host_flank` (`n = 126`)**: Contig contains a `geNomad` provirus region (`401` contigs / `406` SBLs), but the SBL ORF coordinates fall strictly **outside** the provirus boundaries (in the bacterial host flank).
-3. **`DROP_checkv_host_flank` (`n = 494`)**: Contig flagged `provirus == Yes` in CheckV `contamination.tsv`, and the SBL ORF has zero or minority overlap with CheckV `viral` regions (residing in a CheckV `host` region). Together, geNomad + CheckV excised **`620` bacterial host-flank SBL loci**.
-4. **`DROP_nonviral_chrom_or_plasmid` (`n = 163`)**: Contig absent from `geNomad virus_summary` and highest aggregated geNomad score is `chromosome_score` or `plasmid_score`.
-5. **Scheme B Fragment Rescue Rule** for contigs absent from `virus_summary` whose highest score is `virus_score`:
-   - **`KEEP_Tier3_CheckV_Rescued` (`n = 4`)**: Retained ONLY IF `checkv_viral_genes >= 1` AND `checkv_host_genes == 0`;
-   - **`DROP_nonviral_unverified_fragment` (`n = 215`)**: Otherwise excluded.
-- **Total IMG/VR viral SBLs surviving Scheme B**: **`4,695`** (`4,691 KEEP_VIRAL` + `4 Tier3_Rescued`, out of `5,701`; `1,006` excluded).
+### 2.2 Verification of All 8 Clan `CL0013` Members (Including `PF27310`)
+InterPro REST Pfam Stockholm headers directly verify all 8 official Clan `CL0013` (`#=GF CL CL0013`) entries:
+- **Penicillin-Recognizing Enzymes (PRE)**: `PF00144.31` (`Beta-lactamase`, LENG=329, GA=27.0), `PF00905.29` (`Transpeptidase`, LENG=300, GA=22.1), `PF13354.14` (`Beta-lactamase2`, LENG=256, GA=22.0), `PF00768.26` (`Peptidase_S11`, LENG=239, GA=27.6), `PF02113.22` (`Peptidase_S13`, LENG=445, GA=22.8).
+- **Non-PRE Outgroup Enzymes**: `PF04960.22` (`Glutaminase`, LENG=286, GA=27.0), `PF06089.19` (`Asparaginase_II`, LENG=322, GA=25.0), `PF27310.2` (`HrcA_C_epsilon`, `#=GF CL CL0013`, LENG=188, GA=27.0).
 
-### 2.3 Official Pfam-A `--cut_ga` Overlapping-Envelope & Focal-Family Priority Rule
-- All surviving viral (`4,695` IMG/VR + `25` MOSAiC) and bacterial proteins were searched against full `Pfam-A.hmm` (53,275 HMMs) under official gathering thresholds (`--cut_ga`).
-- Domain envelopes overlapping by `>= 30 aa` were clustered into connected components (`resolve_focal_priority`), **preserving genuine non-overlapping multi-domain fusions** (e.g., `PF00912:Transgly` + `PF00905:Transpeptidase`, phage tail/CBM fusions + `PF00144`) while isolating non-`CL0013` false hits (`drop_no_pfam_ga: 82`, `drop_non_CL0013_only: 46` on IMG/VR).
-- **Focal-Family Priority within Clan `CL0013` clusters**: Any `CL0013`-winning cluster containing at least one `--cut_ga`-passing hit to the three focal SBL families (`PF00144.31` GA=27.0, `PF00905.29` GA=22.1, `PF13354.14` GA=22.0) was retained in its focal family (`focal_{acc}`), recording dual-threshold hits to `PF00768.26:Peptidase_S11` (GA=27.6) in **`dual_PF13354_PF00768_GA`**.
-  - Result on `4,695` IMG/VR viral survivors: `focal_PF00144 = 2,083`, `focal_PF00905 = 1,330`, `focal_PF13354 = 1,017` (of which **`764 / 1,017 = 75.12%`** pass BOTH `PF13354` and `PF00768` `--cut_ga`), `aux_PF00768 = 137` (passing `PF00768` GA only, routed to `CL0013` auxiliary group).
-  - Result on `25` MOSAiC survivors: `focal_PF00144 = 22`, `focal_PF00905 = 1`, `aux_PF00768 = 2`.
-- Catalytic domain cores (`*_dom.faa`) and codon-frame nucleotide slices (`*_dom_cds.fna`) were extracted uniformly using **`[max(1, env_from - 10) .. min(seq_len, env_to + 10)]`**.
+### 2.3 Strict Clan Bitscore Assignment, Own-Seed FIMO, Coverage Filter & Tagged Prophages
+1. **Strict Clan Highest-Bitscore Assignment (`resolve_strict_cl0013`)**:
+   - Within overlapping `Pfam-A --cut_ga` domain clusters (`ov >= 30 aa`), sequences are assigned **strictly to the `CL0013` family with highest domain bitscore**, resolving the artificial `PF13354`/`PF00768` boundary conflict (`dual_PF13354_PF00768_GA` remains logged).
+   - Previously, `764` viral `PF00768`-highest-scoring proteins (incl. `294 / 295` FIMO-rejected candidates carrying `SXXK` with median length `237 aa`) were misassigned to `PF13354`; under strict Clan bitscore, viral GA survivors cleanly split into **`PF00144 = 2,105`**, **`PF00905 = 1,331`**, **`PF13354 = 261`**, and sister PBP **`PF00768 = 895`**.
+2. **Symmetric Own-Family Official-Seed `FIMO 5.5.9 (p <= 1e-5)`**:
+   - Every sequence is filtered exclusively against its **own assigned family's** official Pfam seed MEME model across domain slices (`env_from..env_to ± 10 aa`), completely eliminating the prior `71% vs 88%` asymmetry:
+     - `PF00144`: Viral `2,086 / 2,105 (99.10%)` | Bacterial `13,225 / 13,312 (99.35%)`
+     - `PF00905`: Viral `1,323 / 1,331 (99.40%)` | Bacterial `16,080 / 16,203 (99.24%)`
+     - `PF13354`: Viral **`260 / 261 (99.62%)`** | Bacterial `3,386 / 3,456 (97.97%)`
+     - `PF00768`: Viral **`895 / 895 (100.00%)`** | Bacterial `3,889 / 3,896 (99.82%)`
+     - `PF02113`: Bacterial `1,990 / 2,014 (98.81%)` (Viral `0`)
+3. **HMM Coverage Filter (`hmm_cov >= 0.65` Primary; `>=0.60` / `>=0.70` Tracked)**:
+   - Excludes short domain fragments before phylogenetic reconstruction (`PF00144` viral: `1,867`; `PF00905`: `1,239`; `PF13354`: `245`; `PF00768`: `721`).
+4. **Triple-Source Bacterial Pool with Tagged Prophages (`in_bacterial_prophage`)**:
+   - Combines `3,000` phylogenetically balanced GTDB/RefSeq representatives (`46` phyla, `837` families; `99.80%` 1:1 native CDS), `259` dereplicated Marine MAGs (`100%` 1:1 CDS), and `1,219` `CARD/SARG` clinical gold standards.
+   - Loci inside geNomad provirus intervals are **retained with `in_bacterial_prophage = True` (`replicon = prophage`)** for paired `with_prophage` (Primary) vs. `without_prophage` (Sensitivity) testing.
+   - Whole contigs called viral by geNomad inside a GTDB assembly or Marine MAG (most likely free phage genomes binned with the host, not integrated prophages) are tagged **`replicon = viral_contig` / `is_viral_contig_in_genome = True`**, kept in the catalog, and **excluded from every bacterial tree, HyPhy and outgroup set**.
 
----
+### 2.4 Independent Domain-Slice `nr85` Clustering & SBL vs. PBP/PRE Functional Stratification
+- **Independent `MMseqs2` (`--min-seq-id 0.85 -c 0.80 --cov-mode 0`)**:
+  - Viral and bacterial domain slices are clustered **separately** (never mixed) to preserve recent `>=85%` cross-domain HGT pairs while removing clonal viral inflation; viral `nr85` rep selection prioritizes Phase 2 Strict `Tier 1 > MOSAiC > Tier 2 > Tier 3` and logs `viral_cluster_size` strictly for reporting (never leaf-weighted).
+- **Functional Stratification (`CARD + hmmalign` Catalytic Triad)**:
+  - Searches domain slices via `DIAMOND` against **CARD β-lactamases after removing PBP-type entries** (mecA/mecC PBP2a, PBP1a/2b/2x/3 resistance variants; removed headers listed in `work/card_excluded_PBP_entries.txt`) (`pident >= 40% & cov >= 70%`), alongside calibrated `hmmalign` match-state positions for **`SXXK`**, **`SDN` (Class A) / `YAN` (Class C) / `YGN` (Class D) / `SXN` (PBP)**, **`[KH][TS]G`**, and the **Class A Ω-loop signature `E166-x-x-[LIVM]-N`** within the calibrated window ± 3 match states.
+  - Alignments are read in **A2M** format; each sequence must yield exactly `LENG` match states of its family HMM, otherwise the run stops (guards against mis-placed motif windows).
+  - Separates **`Putative_Hydrolytic_BetaLactamase`** (`100%` recall on CARD/SARG Class A `PF13354` `632/632` and Class C `PF00144` `199/199`, while flagging `126` `SARG PBP2/MecA` non-SBLs as `PBP_or_PRE_Homolog`!) from **`PBP_or_PRE_Homolog`**:
 
-## 3. Phase 1B: Triple-Source Phylogenetically Balanced Bacterial Reference Library (Completed)
+| Family Group (`cov>=0.65 & FIMO<=1e-5`) | Viral Total (`SBL`) | Viral `nr85` (`SBL`, `MOSAiC`) | Bacterial Total | Bacterial `nr85` (`SBL`) | Tree Balanced `rep1` (`prophage`) |
+|---|---:|---:|---:|---:|---:|
+| **`PF00144`** | `1,867` (`44`) | **`412`** (`27`, `4`) | `12,824` | `12,124` (`1,044`) | `1,500` (`3`) |
+| **`PF00905`** | `1,239` (`12`) | **`215`** (`6`, `1`) | `15,520` | `14,069` (`377`) | `1,500` (`3`) |
+| **`PF13354`** | `245` (`153`) | **`62`** (`28`, `0`) | `2,533` | `1,867` (`930`) | `1,500` (`0`) |
+| **`PF00768` (Sister PBP)** | `721` (`0`) | **`155`** (`0`, `1`) | `3,858` | `3,667` (`0`) | `1,500` (`4`) |
+| **Joint `PF13354+PF00768`** | `966` (`153`) | **`217`** (`28`, `1`) | `6,391` | `5,533` (`930`) | `1,500` (`4`) |
 
-To simultaneously resolve Comment #10 (exact prophage removal), Comment #7 (phylum-balanced bacterial host spectrum), Comment #8 (100% symmetric HMM+FIMO curation), and verified bacterial CDS availability for Phase 5 HyPhy, legacy `NCBI nr` bacterial fragments were replaced by a **Triple-Source Bacterial Reference Pool**:
-
-### 3.1 Source 1 — GTDB × RefSeq `3,000` Species-Representative Bacterial Genomes
-1. **Selection (`select_gtdb_genomes.py`)**: From GTDB latest `bac120_metadata.tsv.gz` joined to NCBI RefSeq `assembly_summary.txt` (`39,085` `RS_GCF_` bacterial species representatives -> `32,861` passing `completeness >= 95%` and `contamination <= 2%`), two-stage balanced sampling selected **`3,000` distinct bacterial genera** spanning **`46` phyla, `115` classes, `333` orders, and `837` families** (`1,830 Complete Genome + 71 Chromosome + 741 Scaffold + 358 Contig`).
-   - Top phyla: `Pseudomonadota` (637), `Bacillota` (633 + `Bacillota_I` 77), `Bacteroidota` (474), `Actinomycetota` (472), `Cyanobacteriota` (177), `Desulfobacterota` (108), `Planctomycetota` (53), `Verrucomicrobiota` (52), `Campylobacterota` (46), `Spirochaetota` (34), `Chloroflexota` (23), `Acidobacteriota` (22), `Fusobacteriota` (21).
-2. **Proteome & CDS Verification (`scan_gtdb_sbls.py`, Job `5113993`)**:
-   - Scanned **`10,280,376` proteins across `3,000 / 3,000` proteomes** (`CL0013_official.hmm --cut_ga` -> `37,241` hits -> full `Pfam-A --cut_ga` across `2,959` positive genomes);
-   - **1:1 translation-verified CDS match**: **`37,163 / 37,239 (99.80%)`** directly matched native `_cds_from_genomic.fna.gz`.
-3. **8-Shard Parallel `geNomad 1.8.1` Prophage Excision (`Job 5117565_0..7`)**:
-   - Downloaded `2,959 / 2,959` `_genomic.fna.gz` assemblies; extracted all **`10,082 / 10,082` SBL-bearing contigs (`9.61 Gb`)** into 8 length-balanced shards (`1,201.58 Mb` each).
-   - `geNomad 1.8.1` identified `1,430` provirus-bearing contigs, `2` full-viral contigs, and `147` plasmid contigs; coordinate intersection **physically excised `13` bacterial loci inside viral/prophage regions**.
-   - Focal-priority surviving counts: `focal_PF00144 = 11,689`, `focal_PF00905 = 14,829`, `focal_PF13354 = 6,359`, `aux_PF00768 = 638`, `aux_PF02113 = 1,639`, biological outgroups (`PF04960 = 1,191`, `PF06089 = 843`, `PF27310 = 38`).
-
-### 3.2 Source 2 — `259` Dereplicated High-Quality Marine Bacterial MAGs (`Job 5113811`)
-- From `$SBL_HPC_MARINE_MAGS_DIR/` (`CheckM2` completeness `>=90%`, contamination `<5%`, 99% ANI dereplicated), `2,692` raw candidates were audited under full `Pfam-A --cut_ga`, yielding **`2,659 / 2,659 (100.00%)`** native contig 1:1 CDS verification.
-- Excising `2` full-viral `geNomad` contigs and `162` edge/incomplete partial ORFs retained **`2,495` clean marine bacterial SBLs** (`PF00144 = 1,422`, `PF00905 = 995`, `PF13354 = 78`, with `chromosome`/`plasmid` tags).
-
-### 3.3 Source 3 — `CARD/SARG` Clinical Gold Standards (`n = 1,219`)
-- Retained `1,219` non-`NCBI_nr` `CleanCore` clinical references (`PF00144 = 199`, `PF00905 = 388`, `PF13354 = 632`) with explicit `plasmid_or_MGE` / clinical β-lactamase tags (so genuine plasmid-borne clinical β-lactamases such as `TEM/SHV/CTX-M/OXA/CMY/FOX/DHA` remain represented).
+- **Additional Sensitivity & Outgroup Exports**: `rep2..rep5` (4 taxonomy-stratified random seeds), `phylo_rep` (`MMseqs2 65%` deep-homology balance `<=1,500`), `rep1_no_prophage`, `cov60` & `cov70` sets, Sister-PRE outgroups, `PF02113` (`100` 60%-reps), and **all 3 non-PRE `CL0013` outgroups (`PF04960: 24`, `PF06089: 24`, `PF27310: 24`)**.
 
 ---
 
-## 4. Motif Filtering Design & Final Deduplicated Counts (`build_final_phase1_datasets.py`, Job `5118649`)
+## 3. Stage 1 Phase 2 (Completed): Strict Structural Hallmark Genomic Context & Revised `Tier 1`
 
-### 4.1 Why One Round vs. Two Rounds of `MEME/FIMO`? (Empirical Methodological Note)
-- **Original rationale & empirical diagnosis**: Previously, Round 1 ran MEME (`-protein -nmotifs 5 -minw 6 -maxw 20 -mod zoops -maxsize 1000000`) on official Pfam seed sequences (`PF00144_seed.faa`: 127; `PF00905_seed.faa`: 40; `PF13354_seed.faa`: 76), and Round 2 re-trained MEME on selected viral + bacterial Round-1 hits (`p <= 1e-5`) to expand motifs onto divergent environmental homologs.
-- **Empirical test on our decontaminated dataset revealed**:
-  1. For **`PF00144`** and **`PF00905`**, **a single round (`Round 1` official-seed `FIMO p <= 1e-5`) is already completely sufficient and avoids Round-2 overfitting** (`PF00144`: `99.10%` viral / `99.35%` bacterial pass R1, whereas naive top-bitscore Round-2 selection overfit a narrow sub-clade down to `82` viral hits).
-  2. For **`PF13354`**, `722 / 1,017 (70.99%)` viral and `6,201 / 7,069 (87.72%)` bacterial hits pass Round 1 at `p <= 1e-5`; the remaining **`295` viral `PF13354` `--cut_ga` hits** cluster just above the cutoff (`median p = 1.49e-5`, IQR `1.16e-5–3.44e-5`), because `294/295` belong to the **`dual_PF13354_PF00768_GA`** PBP-bridging clade (not covered by Pfam's 76 classical bacterial seeds) despite `293/295 (99.3%)` carrying canonical `SXXK`.
-- **Uniform Policy Applied in `01_final_curated/`**: Both viral and Triple-Source bacterial focal pools were filtered identically by **single-round official-Pfam-seed `FIMO (p <= 1e-5)`** (no hard-coded `SXXK` regex pre-filter), while logging `p <= 1e-10` and `PF13354` `dual_PF00768` borderline candidates for optional sensitivity checks.
-
-### 4.2 Final Exported Phase 1 Counts & Bacterial `MMseqs2` Deduplication
-Bacterial FIMO passers were clustered with `MMseqs2 18.8cc5c` (`mmseqs easy-cluster --min-seq-id 0.85 -c 0.80 --cov-mode 0`) selecting 1 representative per 85% cluster (`CARD/SARG` > `GTDB` complete/CDS-verified > `MarineMAG` CDS-verified, also exporting dedicated 100%-CDS-verified `*_hyphy_dom_cds.fna` cluster reps + `tree_balanced` sets capped at `1,500` preserving all `CARD/SARG` reps and all bacterial families/phyla):
-
-| Family | Viral Clean (IMG/VR + MOSAiC) | Verified Viral CDS | Bacterial Raw FIMO `<=1e-5` | Bacterial `nr85` Clusters | Tree-Balanced Bacterial (`phyla`) | HyPhy CDS-Verified in Balanced (`%`) |
-|---|---:|---:|---:|---:|---:|---:|
-| **`PF00144`** | **`2,086`** (`2,065` + `21`) | `2,065 / 2,065` | `13,223` (`99.35%`) | `12,516` | **`1,500`** (`39` phyla) | `1,483` (`98.9%`) |
-| **`PF00905`** | **`1,323`** (`1,322` + `1`) | `1,322 / 1,322` | `16,089` (`99.24%`) | `14,594` | **`1,500`** (`57` `p__` taxa) | `1,454` (`96.9%`) |
-| **`PF13354`** | **`722`** (`722` + `0`; `470` dual `PF00768`) | `721 / 722` | `6,201` (`87.72%`) | `5,337` | **`1,500`** (`36` phyla) | `1,457` (`97.1%`) |
-| **Focal Sum** | **`4,131`** (`4,109` + `22`) | **`4,108 / 4,109`** | **`35,513`** | **`32,447`** | **`4,500`** | **`4,394 / 4,500`** |
-| **`CL0013` Aux (`PF00768`/`PF02113`)** | **`139`** (`137` + `2` `PF00768`) | — | `2,277` (`638+1,639`) | `300` (60%-rep) | `300` | — |
-| **Outgroup (`PF04960:Glutaminase`)** | `0` | — | `1,191` | `24` (50%-rep) | `24` | — |
+Integrates `298,926` Prodigal ORFs, `171,901` full-genome `Pfam-A --cut_ga` hits, `89,824` `eggNOG` annotations, `62,864` `geNomad v1.7` genes, and `CheckV v1.0.3` across `100%` (`4,062` IMG/VR + `10` MOSAiC) of primary curated viral loci (`Phase2_Viral_Genomic_Neighborhoods_Full.tsv`):
+- **Recombinase/Integrase Strictly Separated from Viral Hallmarks**:
+  - **Strict viral structural hallmarks** (capsid, portal, terminase, tail, baseplate, virion coat/sheath/fiber, prohead/scaffolding, `geNomad` non-recomb hallmarks): **`55.42%` (`2,251 / 4,062`)** in viral region; flanked on `>=1` side by strict structural hallmark **`55.34%` (`2,248 / 4,062`)**, on **BOTH sides `21.34%` (`867 / 4,062`)**.
+  - **Viral structural OR replication/lysis (NO integrase/recomb)**: flanked on `>=1` side **`78.63%` (`3,194 / 4,062`)**, on **BOTH sides `45.40%` (`1,844 / 4,062`)**.
+  - **Recombination / integrase / lysogeny (reported separately as MGE background)**: **`46.09%` (`1,872 / 4,062`)** — NEVER counted toward viral origin confidence.
+  - Median min distance to viral/provirus boundary: **`5,339.0 bp`**; median contig ORF annotation coverage: **`46.67%`**.
+- **Revised `Tier1_HighConfidence_Viral`** (all required): SBL ORF `>= 1 kb` inside the viral region (geNomad/CheckV provirus interval, or contig ends for whole-contig viruses; DTR/ITR complete genomes exempt — contig length alone no longer counts) + `checkv_viral_genes >= 1` **and** `>= checkv_host_genes` + `>= 1` strict structural hallmark. geNomad hallmark counts come from the geNomad entry that **contains the SBL ORF** (not the contig's best-scoring provirus). Each locus also reports `viral_origin_tier_2023rule`, and the summary prints a 2023-rule → revised-rule tier shift table.
+- Counts below predate these refinements (see the re-run notice at the top):
+  - `PF00144`: `Tier1 = 1,364`, `Tier2 = 206`, `Tier3 = 289`, `MOSAiC = 8`
+  - `PF00905`: `Tier1 = 404`, `Tier2 = 109`, `Tier3 = 725`, `MOSAiC = 1`
+  - `PF13354`: `Tier1 = 166`, `Tier2 = 17`, `Tier3 = 62`
+  - `PF00768`: `Tier1 = 328`, `Tier2 = 115`, `Tier3 = 277`, `MOSAiC = 1`
 
 ---
 
-## 5. Phase 2: 100%-Coverage Viral Genomic Neighborhoods (Completed, `Job 5118649`)
+## 4. Pre-Locked Analysis Specification & Execution Roadmap (Stages 2–4)
 
-Script `$SBL_HPC_BASE/02_genomic_context/build_phase2_neighborhoods.py` integrates **all five genome-wide evidence layers** across `100%` of final curated IMG/VR viral loci (`n = 4,246` = `4,109` focal + `137` `aux_PF00768`, plus `24` MOSAiC labeled `contig_context_available = False`; outputs `Phase2_Viral_Genomic_Neighborhoods_Full.tsv` & `Phase2_Genomic_Context_Summary.txt`):
-- Mapped `163,012` full-genome `Pfam-A --cut_ga` domain hits, `85,869` `eggNOG` functional annotations, and `57,703` `geNomad` gene hallmarks onto target contig Prodigal ORFs;
-- **Median contig ORF annotation coverage**: **`46.79%`** (`Pfam-A` + `eggNOG`);
-- **Viral hallmark & flanking context**: **`57.49%` (`2,441 / 4,246`)** encode `>=1` viral structural hallmark (capsid, portal, terminase, tail, holin/endolysin) inside the viral region; **`81.28%` (`3,451 / 4,246`)** are flanked on at least one side and **`47.36%` (`2,011 / 4,246`)** on BOTH sides by viral/recombination genes; median minimum distance to the viral/provirus boundary is **`5,042.0 bp`**;
-- **Upgraded Viral Origin Confidence Tiers**:
-  - `PF00144` (`2,065` IMG/VR + `21` MOSAiC): `Tier1 = 1,055`, `Tier2 = 833`, `Tier3 = 177`
-  - `PF00905` (`1,322` IMG/VR + `1` MOSAiC): `Tier1 = 209`, `Tier2 = 669`, `Tier3 = 444`
-  - `PF13354` (`722` IMG/VR): `Tier1 = 245`, `Tier2 = 395`, `Tier3 = 82`
-  - `aux_PF00768` (`137` IMG/VR + `2` MOSAiC): `Tier1 = 17`, `Tier2 = 78`, `Tier3 = 42`
+### 4.1 Pre-Locked Primary HGT Analysis & OAT Robustness Protocol (Anti-Cherry-Picking Standard)
+1. **Primary Analysis Configuration (Pre-Registered)**:
+   - **MSA**: `hmmalign` (official family `.hmm`, lowercase insertions stripped) on independent viral `nr85` + bacterial `nr85` `rep1` (`hmm_cov >= 0.65`, tagged bacterial prophages retained).
+   - **Primary Rooting**: **Sister-PRE biological outgroup** (verified against the **`CL0013` PRE superfamily tree** rooted on non-PRE outgroups `PF04960+PF06089+PF27310` with leave-one-outgroup-family-out checks & structure-informed alignment).
+   - **Tree Support & HGT Inference (`IQ-TREE 2.4.0`, `-m MFP -mset LG,WAG,Q.pfam,VT,JTT -B 1000 --bnni -alrt 1000`)**:
+     - Double-outgroup topological nesting (Irwin et al. 2022) + **concordant two-pass Fitch parsimony AND `PastML` marginal ML ancestral state reconstruction**;
+     - Strict **`Tier-1 HGT`**: `UFBoot >= 95%` AND `SH-aLRT >= 80%` on **`min(P, G)`**;
+     - Any **singleton-tip HGT** (`focal_is_singleton_tip`) **MUST pass Phase 2 Strict `Tier1_HighConfidence_Viral`** (`>=1` strict viral structural hallmark + CheckV viral gene + boundary verified).
+2. **Unbiased Three-Family Rooting Cross-Validation Rule**:
+   - *(1) Sister-PRE Outgroup* (Primary), *(2) MAD* on ingroup-only tree, *(3) Clock-like `MinVar`/`Midpoint` (counted as ONE clock-dependent family)*. **`Youden's J` is EXCLUDED** from primary cross-validation due to circularity (archived in Appendix only as a biased lower-bound comparator). Events corroborated under Sister-PRE + MAD + MinVar are classified `Root_Invariant`.
+3. **One-Factor-at-a-Time (OAT) Robustness & Compute Budget**:
+   - Sensitivity perturbations test: alternative MSA (`MAFFT 7.526 + ClipKIT 2.14.0`), alternative rooting (`MAD`, `MinVar`), alternative bacterial sampling (`rep2..rep5`, `phylo_rep` fixing `-m <best_from_rep1>` + Fast/ultrafast branch supports), `without_prophage`, `cov >= 0.60 / 0.70`, joint `PF13354_PF00768` tree, and **Functional Stratification (`Putative_Hydrolytic_BetaLactamase` vs. `PBP_or_PRE_Homolog`)**.
+   - Each Primary HGT clade is tracked across OAT trees via tip-set Jaccard overlap (`>= 0.70`); events achieving **OAT Recurrence Rate `>= 80%`** are designated **`Robust_Core_HGT`**.
+4. **Prophage-Borne Event Rule (Pre-Registered)**:
+   - A `Viral → Bacterial` event whose bacterial recipient tips are **all** `in_bacterial_prophage = True` is reported as **`Prophage_Borne`** (the gene is carried by a viral genome integrated in a bacterium), **not** as transfer into the bacterial chromosome, and is excluded from the primary V→B count. Events with at least one chromosomal/plasmid recipient are counted normally, with the prophage fraction of recipients reported.
+   - `is_viral_contig_in_genome` sequences never enter the trees (Section 2.3).
+5. **Rooting Constraint for the PF13354/PF00768 Continuum**: PF13354, PF00768 and the joint `PF13354_PF00768` trees use **PF00144 + PF00905** Sister-PRE outgroups only; PF13354 and PF00768 are never used to root each other.
 
----
-
-## 6. Execution Blueprint & Design Rules for Phases 3–6 (Next Steps)
-
-1. **Phase 3 — Alignment Benchmarking & Phylogenetics (`03_alignment_and_trees/`)**:
-   - **Sequence Input**: Catalytic domain cores (`*_dom.faa`, `env_from..env_to ± 10 aa`) for each focal family (`Viral Clean + Bacterial Tree-Balanced`). Exclude extreme incomplete fragments (`<50%` aligned core coverage).
-   - **MSA & Trimming Benchmark**: Compare `hmmalign` (using official family `.hmm`, **stripping lowercase insertion columns**) vs. `MAFFT 7.526 --auto` / `--localpair`, crossed with `ClipKIT 2.14.0 (-m smart-gap)` vs. `trimAl v1.5.rev0 (-gappyout / -gt 0.5)`; verify catalytic `SXXK` / `SXN` / `KTG` column conservation (`>=85%`) before selecting primary MSA.
-   - **Tree Inference (`IQ-TREE 2.4.0`)**: Run BOTH:
-     - *(a) Ingroup-only trees* (for unbiased **MAD** & **Youden's *J*** statistical rooting without LBA from distant outgroups);
-     - *(b) Biological outgroup-rooted family trees* (with `PF00768`/`PF02113` or `PF04960` outgroup) + **`CL0013` superfamily auxiliary tree** (`PF00144 + PF00905 + PF13354 + PF00768 + PF02113`, rooted on `PF04960:Glutaminase`);
-     - Standard model parameters: `-m MFP -mset LG,WAG,Q.pfam,VT,JTT -B 1000 --bnni -alrt 1000 -T 32 --seed 20261120 --safe`, PLUS **PMSF LBA sensitivity check** (`-m Q.pfam+C20+F+G -ft guide.treefile`).
-2. **Phase 4 — Upgraded HGT Inference (`04_hgt_inference/`)**:
-   - Apply the **4 approved upgrades** over baseline `05_phylogenetic_hgt_inference.py`:
-     1. **Dual Support + Dual Bounding Node Strict Tier (`Tier-1 HGT`)**: Require **`UFBoot >= 95%` AND `SH-aLRT >= 80%`** simultaneously on **`min(P, G)`** (`P` and `G` wrapping nodes), alongside moderate (`max >= 70%`) sensitivity;
-     2. **Singleton-Tip × Phase 2 Genomic Flank Linkage**: Automatically cross-validate every `focal_is_singleton_tip` event against `Phase2_Viral_Genomic_Neighborhoods_Full.tsv` (`Tier1/2` hallmarks & boundary distance) and flag unsupported singletons;
-     3. **Multi-Rooting Cross-Validation**: Cross-check Biological Outgroup vs. **MAD (Minimum Ancestor Deviation)** vs. **Youden's *J***;
-     4. **Methods Citation Precision**: Document explicitly as **Irwin et al. (2022) double-outgroup nesting + two-pass Fitch maximum parsimony** aligned with **Dmitrijeva et al. (2024)** independent-event counting logic (without misclaiming RANGER-DTL).
-3. **Phase 5 — Co-Evolution & Selection Pressure (`05_selection_pressure/`)**:
-   - Use **100%-translation-verified CDSs** (`*_viral_dom_cds.fna` + `*_bacterial_nr85_hyphy_dom_cds.fna`), deduplicated via `MMseqs2` (`80%–85%` aa identity, retaining HGT clade reps), mapped 1:1 to `hmmalign` match-state codon alignments (strip lowercase insertions cleanly per codon triplet, benchmark `trimAl`), matching `IQ-TREE` subtrees.
-   - Run `HyPhy 2.5.93(MP)`: `GARD` / `PHI`, `aBSREL` (background-normalized & paired root-to-tip trajectories), `MEME`, formal `FEL`, and the **2×2 orthogonal `PF00144` MEME benchmark** (downsampling `N=155 × 3` replicates × `hmmalign` realignment) to partition statistical branch-power vs. alignment effects without presupposing a single driver.
-4. **Phase 6 — 3D Structural Biophysics & Confounder-Controlled Ecology (`06_structure_and_ecology/`)**:
-   - Re-map newly identified `hmmalign`-anchored `MEME` & `FEL` sites onto `110` PDB structures (RSA, loop/coil fraction, distance to catalytic Ser), recompute stratified Faith's `PD` / 3D dispersion / `CMH` habitat–motif tests, and sync final tables/figures back into this repository.
+### 4.2 Remaining Stages
+- **Stage 2 (`03_alignment_and_trees/` on HPC)**: Run `hmmalign` vs `MAFFT+ClipKIT` benchmarks, `IQ-TREE 2.4.0` primary Sister-PRE + ingroup-only + `rep2..5`/`phylo`/`nopro`/`cov` sensitivity trees across `PF00144`, `PF00905`, `PF13354`, `PF00768`, joint `PF13354_PF00768`, `PMSF (C20)`, and the `CL0013` superfamily tree (with leave-one-outgroup-family-out validation).
+- **Stage 3 (`04_hgt_inference/` on HPC)**: Execute pre-locked Primary Fitch + `PastML` ML HGT pipeline, OAT Robustness Recurrence scoring, singleton strict `Tier 1` gating, and separate reporting of Hydrolytic SBL vs. PBP/PRE HGT counts and expanded `viral_cluster_size`.
+- **Stage 4 (`05_selection_pressure/`, `06_structure_and_ecology/`, & Full Local Repo Migration onto `revision-2026`)**: `PAL2NAL` codon alignments on verified CDS -> formal **`dS` saturation diagnostics** (`dS` distribution & Xia's test) -> `GARD` recombination partitioning & `HyPhy` (`aBSREL`/`MEME`/`FEL`) within low-divergence HGT/monophyletic subclades (`>=70%` nt id) + `PF00144` 2×2 downsampling benchmark -> 3D PDB biophysics & stratified ecology -> migrate all local `scripts/01–09`, `Table_S01–S13`, `Fig_S01–S05`, and `README.md` cleanly to the 2026 cohort.
