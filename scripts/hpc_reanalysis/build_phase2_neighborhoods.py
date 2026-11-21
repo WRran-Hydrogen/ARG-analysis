@@ -13,7 +13,9 @@ Revision 2026 updates:
   virion coat/sheath/fiber/spike, prohead/scaffolding) from viral replication/lysis genes and
   from recombination/integrase/transposase genes.
 - Redefines Tier1_HighConfidence_Viral strictly: SBL >= 1 kb inside the viral region (or DTR/ITR
-  complete genome) + CheckV viral_genes >= 1 and >= host_genes + >=1 strict viral structural
+  complete genome) + CheckV viral_genes >= 1 and >= host_genes, counted on the CheckV viral region
+  containing the SBL (contig-level only for whole-contig viruses; skipped for geNomad-only
+  provirus intervals, whose contig counts include the host flank) + >=1 strict viral structural
   hallmark (never counting integrase/recombinase toward Tier 1). geNomad hallmark counts are taken
   from the geNomad entry (provirus region or whole contig) that contains the SBL ORF.
 - Reports the pre-revision (2023-rule) tier per locus and a 2023 -> revised tier shift table.
@@ -94,6 +96,25 @@ def parse_checkv_viral_intervals(region_types_str, region_coords_str):
     return out
 
 
+def parse_checkv_viral_regions_with_genes(row):
+    """CheckV contamination.tsv viral regions as (start, end, viral_genes, host_genes)."""
+    types = (row.get("region_types") or "").split(",")
+    coords = (row.get("region_coords_bp") or "").split(",")
+    vgs = (row.get("region_viral_genes") or "").split(",")
+    hgs = (row.get("region_host_genes") or "").split(",")
+    out = []
+    for i, rt in enumerate(types):
+        if rt.strip().lower() != "viral" or i >= len(coords):
+            continue
+        m = re.match(r"^(\d+)-(\d+)$", coords[i].strip())
+        if not m:
+            continue
+        vg = int(vgs[i]) if i < len(vgs) and vgs[i].strip().isdigit() else 0
+        hg = int(hgs[i]) if i < len(hgs) and hgs[i].strip().isdigit() else 0
+        out.append((int(m.group(1)), int(m.group(2)), vg, hg))
+    return out
+
+
 def classify_viral_origin_tier(
     is_provirus_boundary_ok,
     n_strict_hm_reg,
@@ -102,17 +123,18 @@ def classify_viral_origin_tier(
     gn_score,
     gn_nhm,
     cv_vg,
-    cv_hg,
+    host_ok,
 ):
     """Strict structural-hallmark-gated Viral Origin Confidence Tier assignment.
 
-    Tier 1 is never weaker than Tier 2: it also requires CheckV viral genes >= host genes.
-    gn_nhm must come from the geNomad entry that contains the SBL locus (see pick_genomad_entry).
+    cv_vg / host_ok are evaluated on the region containing the SBL (see main): the CheckV viral
+    region when the SBL lies in one, otherwise the whole contig. Tier 1 is never weaker than
+    Tier 2 (both require host_ok). gn_nhm comes from the geNomad entry containing the SBL.
     """
     has_struct_hm = (n_strict_hm_reg >= 1) or (gn_nhm >= 1)
-    if is_provirus_boundary_ok and has_struct_hm and cv_vg >= 1 and cv_vg >= cv_hg:
+    if is_provirus_boundary_ok and has_struct_hm and cv_vg >= 1 and host_ok:
         return "Tier1_HighConfidence_Viral"
-    if gn_present and gn_score >= 0.70 and (cv_vg >= cv_hg) and (n_rep_reg >= 1 or cv_vg >= 1 or has_struct_hm):
+    if gn_present and gn_score >= 0.70 and host_ok and (n_rep_reg >= 1 or cv_vg >= 1 or has_struct_hm):
         return "Tier2_Supported_Viral"
     return "Tier3_Fragment_or_Borderline"
 
@@ -311,6 +333,7 @@ def main():
                 cv_qs[r["contig_id"]] = r
 
     cv_v_regions = {}
+    cv_v_regions_genes = {}
     with open(CHECKV_DIR / "contamination.tsv", "r", encoding="utf-8") as f:
         for r in csv.DictReader(f, delimiter="\t"):
             cid = r["contig_id"]
@@ -318,6 +341,7 @@ def main():
                 ivs = parse_checkv_viral_intervals(r.get("region_types", ""), r.get("region_coords_bp", ""))
                 if ivs:
                     cv_v_regions[cid] = ivs
+                    cv_v_regions_genes[cid] = parse_checkv_viral_regions_with_genes(r)
 
     # Classify each ORF strictly across the 3 orthogonal categories
     for uvig, orfs in contig_orfs.items():
@@ -365,6 +389,7 @@ def main():
                 "in_primary_cov65_fimo1e5": in_primary,
                 "contig_context_available": False, "viral_origin_tier": tier,
                 "viral_origin_tier_2023rule": tier, "provirus_interval_used": "NA",
+                "host_gene_check_basis": "NA", "host_gene_check_pass": "NA",
                 "contig_length_bp": "NA", "total_orfs_on_contig": "NA",
                 "sbl_start_bp": "NA", "sbl_end_bp": "NA", "sbl_strand": "NA",
                 "dist_to_5p_viral_bp": "NA", "dist_to_3p_viral_bp": "NA", "min_dist_to_viral_boundary_bp": "NA",
@@ -487,6 +512,20 @@ def main():
         # viruses, the contig ends); contig length alone is no longer accepted as boundary evidence.
         is_boundary_ok = bool(gn) and (gn_topo in ("DTR", "ITR") or min_dist >= BOUNDARY_MIN_BP)
 
+        # Host-vs-viral gene check on the region that actually contains the SBL:
+        #  - inside a CheckV viral region -> that region's own viral/host gene counts;
+        #  - inside a geNomad-only provirus -> contig-level counts include the host flank, so the
+        #    comparison is not informative and is skipped (viral genes >= 1 still required);
+        #  - whole-contig virus -> contig-level CheckV counts.
+        cv_reg = [x for x in cv_v_regions_genes.get(uvig, []) if st > 0 and interval_overlap(st, en, x[0], x[1]) > 0]
+        if cv_reg:
+            _, _, reg_vg, reg_hg = max(cv_reg, key=lambda x: interval_overlap(st, en, x[0], x[1]))
+            vg_eval, host_ok, host_basis = reg_vg, reg_vg >= reg_hg, "checkv_viral_region"
+        elif has_pv_interval:
+            vg_eval, host_ok, host_basis = cv_vg, True, "genomad_provirus_skip"
+        else:
+            vg_eval, host_ok, host_basis = cv_vg, cv_vg >= cv_hg, "whole_contig"
+
         tier = classify_viral_origin_tier(
             is_provirus_boundary_ok=is_boundary_ok,
             n_strict_hm_reg=n_hm_reg,
@@ -494,8 +533,8 @@ def main():
             gn_present=bool(gn),
             gn_score=gn_score,
             gn_nhm=gn_nhm,
-            cv_vg=cv_vg,
-            cv_hg=cv_hg,
+            cv_vg=vg_eval,
+            host_ok=host_ok,
         )
 
         tier_2023 = classify_tier_2023_rule(
@@ -527,6 +566,8 @@ def main():
             "viral_origin_tier": tier,
             "viral_origin_tier_2023rule": tier_2023,
             "provirus_interval_used": has_pv_interval,
+            "host_gene_check_basis": host_basis,
+            "host_gene_check_pass": host_ok,
             "contig_length_bp": clen,
             "total_orfs_on_contig": len(orfs),
             "sbl_start_bp": st,
@@ -585,6 +626,10 @@ def main():
     ]
     for (cat, tr), cnt in sorted(tier_counts.items()):
         lines.append(f"  {cat:16s} | {tr:30s}: {cnt:,}")
+    basis = Counter((x["host_gene_check_basis"], x["host_gene_check_pass"]) for x in img_prim)
+    lines.append("\nHost-vs-viral gene check (basis, pass) on primary IMG/VR loci:")
+    for (bs, ok), cnt in sorted(basis.items(), key=lambda kv: str(kv[0])):
+        lines.append(f"  {bs:24s} pass={ok!s:5s}: {cnt:,}")
     lines.append("\nTier shift, 2023 rule (rows) -> revised strict rule (columns), primary IMG/VR loci:")
     tiers = ["Tier1_HighConfidence_Viral", "Tier2_Supported_Viral", "Tier3_Fragment_or_Borderline"]
     lines.append("  " + " " * 30 + "".join(f"{t.split('_')[0]:>10s}" for t in tiers))
