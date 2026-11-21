@@ -1,0 +1,23 @@
+name: sbl_virome_evolution
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy>=1.26
+  - pandas>=2.2
+  - scipy>=1.12
+  - matplotlib>=3.8
+  - openpyxl>=3.1
+  - biopython>=1.83
+  - ete4>=4.3
+  - hmmer=3.4
+  - muscle=5.3
+  - meme=5.0.5
+  - blast>=2.14
+  - fasttree>=2.1
+  - hyphy=2.5.93
+  - iqtree>=2.2
+  - clipkit>=2.10
+  - seqkit>=2.8

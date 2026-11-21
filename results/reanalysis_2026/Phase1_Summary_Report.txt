@@ -1,0 +1,34 @@
+=== SBL Phase 1 Re-analysis Curation Summary ===
+Total input viral SBL proteins: 5701
+Viral CDS mapping: {'prodigal_exact': 5358, 'arg_cds_verified': 28, 'prodigal_substr': 314, 'unmatched': 1}
+Viral Decontamination (Scheme B):
+  DROP_checkv_host_flank: 494
+  DROP_genomad_host_flank: 126
+  DROP_genomad_plasmid: 8
+  DROP_nonviral_chrom_or_plasmid: 163
+  DROP_nonviral_unverified_fragment: 215
+  KEEP_Tier3_CheckV_Rescued: 4
+  KEEP_VIRAL: 4691
+Total viral proteins surviving Scheme B: 4695
+
+Pfam-A (--cut_ga) Overlapping-Envelope Competition:
+  bacterial  focal_PF00144: 486
+  bacterial  focal_PF00905: 483
+  bacterial  focal_PF13354: 806
+  viral      aux_PF00768: 893
+  viral      drop_no_pfam_ga: 82
+  viral      drop_non_CL0013_only: 46
+  viral      focal_PF00144: 2083
+  viral      focal_PF00905: 1330
+  viral      focal_PF13354: 261
+
+Unified Two-Round MEME/FIMO (p <= 1e-5, no SXXK regex pre-filter) & Final Clean Counts:
+  PF00144 (R2 train: 125V + 125B): Viral 2083 -> both_1e5=82 (either_1e5=2065, both_1e10=1, SXXK=82, CDS=82/82) | Bacterial 486 -> both_1e5=486 (either_1e5=486, both_1e10=474)
+  PF00905 (R2 train: 125V + 125B): Viral 1330 -> both_1e5=1279 (either_1e5=1328, both_1e10=167, SXXK=1102, CDS=1279/1279) | Bacterial 483 -> both_1e5=214 (either_1e5=483, both_1e10=174)
+  PF13354 (R2 train: 110V + 125B): Viral 261 -> both_1e5=260 (either_1e5=261, both_1e10=84, SXXK=251, CDS=259/260) | Bacterial 806 -> both_1e5=806 (either_1e5=806, both_1e10=363)
+
+Auxiliary Clan CL0013 Penicillin-Recognizing Enzyme Exports:
+  PF00768: Viral=893, Bacterial=0
+  PF02113: Viral=0, Bacterial=0
+
+Note: Bacterial CDS nucleotide FASTAs were intentionally deferred from Phase 1 because legacy local PF*_cds.fna files collapsed alleles to 87-170 representative BLAST hits (2.9-5.0% exact translation match). Before Phase 5 HyPhy, exact 1:1 translation-verified bacterial CDSs will be retrieved via NCBI Entrez/IPG for the CleanCore/MMseqs2 representatives.

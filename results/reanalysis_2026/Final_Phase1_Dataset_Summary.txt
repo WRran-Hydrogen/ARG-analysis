@@ -1,0 +1,46 @@
+=== Final Phase 1 + Phase 1B Curated Dataset Assembly Summary ===
+Viral Pfam-A (--cut_ga) Focal-Priority Breakdown:
+  ('IMG_VR', 'aux_PF00768'): 137
+  ('IMG_VR', 'drop_no_pfam_ga'): 82
+  ('IMG_VR', 'drop_non_CL0013_only'): 46
+  ('IMG_VR', 'focal_PF00144'): 2083
+  ('IMG_VR', 'focal_PF00905'): 1330
+  ('IMG_VR', 'focal_PF13354'): 1017
+  ('MOSAiC', 'aux_PF00768'): 2
+  ('MOSAiC', 'focal_PF00144'): 22
+  ('MOSAiC', 'focal_PF00905'): 1
+
+Bacterial Triple-Source Pfam-A (--cut_ga) Breakdown:
+  ('CARD_SARG', 'focal_PF00144'): 199
+  ('CARD_SARG', 'focal_PF00905'): 388
+  ('CARD_SARG', 'focal_PF13354'): 632
+  ('GTDB_3000', 'DROP_prophage'): 13
+  ('GTDB_3000', 'aux_PF00768'): 638
+  ('GTDB_3000', 'aux_PF02113'): 1639
+  ('GTDB_3000', 'focal_PF00144'): 11689
+  ('GTDB_3000', 'focal_PF00905'): 14829
+  ('GTDB_3000', 'focal_PF13354'): 6359
+  ('GTDB_3000', 'outgroup_PF04960'): 1191
+  ('GTDB_3000', 'outgroup_PF06089'): 843
+  ('GTDB_3000', 'outgroup_PF27310'): 38
+  ('MarineMAG_259', 'focal_PF00144'): 1422
+  ('MarineMAG_259', 'focal_PF00905'): 995
+  ('MarineMAG_259', 'focal_PF13354'): 78
+
+Single-Round Official-Seed FIMO (p <= 1e-5) Summary:
+  PF00144 viral    : 2,086 / 2,105 (99.10%) pass p<=1e-5 (p<=1e-10: 883)
+  PF00144 bacterial: 13,223 / 13,310 (99.35%) pass p<=1e-5 (p<=1e-10: 8,958)
+  PF00905 viral    : 1,323 / 1,331 (99.40%) pass p<=1e-5 (p<=1e-10: 183)
+  PF00905 bacterial: 16,089 / 16,212 (99.24%) pass p<=1e-5 (p<=1e-10: 9,669)
+  PF13354 viral    : 722 / 1,017 (70.99%) pass p<=1e-5 (p<=1e-10: 87)
+  PF13354 bacterial: 6,201 / 7,069 (87.72%) pass p<=1e-5 (p<=1e-10: 1,837)
+
+Final Exported Focal Datasets (Viral vs Bacterial nr85 & Tree-Balanced):
+  PF00144: Viral=2,086 ({'IMG_VR': 2065, 'MOSAiC': 21}, CDS=2,065/2065, dual_PF00768=0) | Bacterial raw_fimo=13,223 -> nr85=12,516 ({'GTDB_RefSeq_3000': 11259, 'Marine_MAGs_259': 1242, 'CARD_SARG_Clinical': 15}) -> tree_balanced=1,500 ({'CARD_SARG_Clinical': 15, 'GTDB_RefSeq_3000': 1313, 'Marine_MAGs_259': 172}, phyla=39, cds_verified=1483)
+  PF00905: Viral=1,323 ({'IMG_VR': 1322, 'MOSAiC': 1}, CDS=1,322/1322, dual_PF00768=0) | Bacterial raw_fimo=16,089 -> nr85=14,594 ({'GTDB_RefSeq_3000': 13816, 'CARD_SARG_Clinical': 45, 'Marine_MAGs_259': 733}) -> tree_balanced=1,500 ({'CARD_SARG_Clinical': 45, 'GTDB_RefSeq_3000': 1305, 'Marine_MAGs_259': 150}, phyla=57, cds_verified=1454)
+  PF13354: Viral=722 ({'IMG_VR': 722}, CDS=721/722, dual_PF00768=470) | Bacterial raw_fimo=6,201 -> nr85=5,337 ({'GTDB_RefSeq_3000': 5234, 'CARD_SARG_Clinical': 42, 'Marine_MAGs_259': 61}) -> tree_balanced=1,500 ({'CARD_SARG_Clinical': 42, 'GTDB_RefSeq_3000': 1397, 'Marine_MAGs_259': 61}, phyla=36, cds_verified=1457)
+
+Auxiliary & Biological Outgroup Exports:
+  Viral aux_PF00768: 139 (IMG/VR + MOSAiC)
+  Bacterial aux (PF00768+PF02113) raw=2,277 -> diverse 60%-reps=300
+  Bacterial non-PRE outgroup PF04960:Glutaminase raw=1,191 -> diverse 50%-reps=24

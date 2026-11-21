@@ -1,0 +1,33 @@
+=== GTDB/RefSeq Balanced 3,000 Bacterial Genomes Selection Summary ===
+Total GTDB bacterial species reps in RS_GCF: 39,085
+Passed QC (comp >= 95%, contam <= 2%, valid RefSeq URL): 32,861
+Total selected genomes: 3000 (Pass1 FamilyBackbone=837, Pass2 GenusFill=2163)
+Taxonomic breadth: 46 phyla | 115 classes | 333 orders | 837 families | 3000 genera
+Assembly levels: {'Complete Genome': 1830, 'Chromosome': 71, 'Scaffold': 741, 'Contig': 358}
+
+Top 25 Bacterial Phyla Represented:
+  p__Pseudomonadota             : 637
+  p__Bacillota                  : 633
+  p__Bacteroidota               : 474
+  p__Actinomycetota             : 472
+  p__Cyanobacteriota            : 177
+  p__Desulfobacterota           : 108
+  p__Bacillota_I                : 77
+  p__Planctomycetota            : 53
+  p__Verrucomicrobiota          : 52
+  p__Campylobacterota           : 46
+  p__Spirochaetota              : 34
+  p__Chloroflexota              : 23
+  p__Acidobacteriota            : 22
+  p__Fusobacteriota             : 21
+  p__Thermotogota               : 20
+  p__Aquificota                 : 18
+  p__Synergistota               : 17
+  p__Deinococcota               : 13
+  p__Chrysiogenota              : 12
+  p__Chlamydiota                : 12
+  p__Myxococcota                : 12
+  p__Nitrospirota               : 10
+  p__Bdellovibrionota           : 7
+  p__Patescibacteriota          : 6
+  p__Myxococcota_A              : 6

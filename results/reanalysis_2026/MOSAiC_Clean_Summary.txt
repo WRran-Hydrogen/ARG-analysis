@@ -1,0 +1,23 @@
+=== MOSAiC Eukaryotic Overlap Purge Summary ===
+Input passing CL0013 focal/aux candidates: 31
+Purged (in_euk_info == True): 6
+  DROPPED 3300060837_Ga0589571_037991_114_2726 | focal_PF00144 | vir_bin=vir_unbinned_unknown | euk=bacillariophyta.2.split_1_v1_3300060835
+  DROPPED 3300060869_Ga0589523_0012213_3766_4734 | focal_PF00144 | vir_bin=vir_vae_671_unknown | euk=bacillariophyta.1.split_1_v1_3300060868;bacillariophyta.1.split_1_v1_3300060869
+  DROPPED 3300074338_Ga0614597_0035901_250_717 | focal_PF00144 | vir_bin=vir_vae_155_unknown | euk=chrysophyceae.1.split_1_v1_3300074338
+  DROPPED 3300074341_Ga0614604_010373_1820_2257 | focal_PF00144 | vir_bin=vir_vae_2929_unknown | euk=amoebozoa.1.split_1_v1_3300074340
+  DROPPED 3300074804_Ga0614543_0049407_3_1019 | focal_PF00144 | vir_bin=vir_vae_1002_unknown | euk=euglenozoa.1.split_1_v1_3300074804
+  DROPPED 3300078168_Ga0614631_0125840_225_2573 | focal_PF00144 | vir_bin=vir_metabat_out_v1.79134_unknown | euk=mbat_multi.43_3300078168
+
+Surviving Clean MOSAiC Viral SBLs: 25
+  DROP_euk focal_PF00144: 6
+  KEEP     aux_PF00768: 2
+  KEEP     focal_PF00144: 22
+  KEEP     focal_PF00905: 1
+
+Surviving Clean Breakdown (category, bin_type, vir_tax_suffix):
+  ('aux_PF00768', 'binned_vMAG', 'caudoviricetes'): 1
+  ('aux_PF00768', 'binned_vMAG', 'unknown'): 1
+  ('focal_PF00144', 'binned_vMAG', 'caudoviricetes'): 15
+  ('focal_PF00144', 'binned_vMAG', 'unknown'): 6
+  ('focal_PF00144', 'unbinned', 'unknown'): 1
+  ('focal_PF00905', 'unbinned', 'unknown'): 1

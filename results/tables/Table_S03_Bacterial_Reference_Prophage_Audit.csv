@@ -1,0 +1,5 @@
+family,total_bacterial_ref,ncbi_nr_count,flag_sarg_virus,flag_sarg_artificial,flag_header_phage_or_synth,flag_nr_viral_id90,flag_nr_viral_id95,retained_CleanStrict_TierA,retained_CleanCore_TierB
+PF00144,485,287,0,0,0,0,0,485,485
+PF00905,505,113,0,4,13,6,6,489,484
+PF13354,1230,562,61,149,210,387,346,987,806
+All_Pooled,2220,962,61,153,223,393,352,1961,1775

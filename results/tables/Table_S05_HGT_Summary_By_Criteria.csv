@@ -1,0 +1,5 @@
+family,scenario,total_tips,viral_tips,bacterial_tips,all_fitch_transitions,nested_hgt_events_total,nested_B_to_V_events,nested_V_to_B_events,nested_recipient_tips_total,nested_B_to_V_viral_tips,nested_V_to_B_bac_tips,nested_descendant_branches_total,hgt_events_bounding_UFBoot_ge70,hgt_events_bounding_UFBoot_ge80,hgt_events_bounding_UFBoot_ge90,hgt_events_parent_UFBoot_ge70,tips_in_UFBoot_ge70_events
+PF00144,Baseline_Published_Tree,2986,2501,485,1,1,1,0,2,2,0,3,1,0,0,0,2
+PF00905,Baseline_Published_Tree,2278,1777,501,26,21,11,10,190,13,177,256,18,15,13,8,119
+PF13354,Baseline_Published_Tree,2266,1037,1229,71,54,46,8,154,120,34,203,14,10,7,8,36
+All_Pooled,Baseline_Published_Tree,7530,5315,2215,98,76,58,18,346,135,211,462,33,25,20,16,157

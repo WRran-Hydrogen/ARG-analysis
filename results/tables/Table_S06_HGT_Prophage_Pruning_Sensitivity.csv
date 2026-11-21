@@ -1,0 +1,17 @@
+family,scenario,total_tips,viral_tips,bacterial_tips,all_fitch_transitions,nested_hgt_events_total,nested_B_to_V_events,nested_V_to_B_events,nested_recipient_tips_total,nested_B_to_V_viral_tips,nested_V_to_B_bac_tips,nested_descendant_branches_total,hgt_events_bounding_UFBoot_ge70,hgt_events_bounding_UFBoot_ge80,hgt_events_bounding_UFBoot_ge90,hgt_events_parent_UFBoot_ge70,tips_in_UFBoot_ge70_events
+PF00144,Baseline_Published_Tree,2986,2501,485,1,1,1,0,2,2,0,3,1,0,0,0,2
+PF00144,Sensitivity_A_BacCleanStrict,2986,2501,485,1,1,1,0,2,2,0,3,1,0,0,0,2
+PF00144,Sensitivity_B_BacCleanCore_NoNRProphage,2986,2501,485,1,1,1,0,2,2,0,3,1,0,0,0,2
+PF00144,Sensitivity_C_BacCleanCore_And_ViralTier12,2553,2068,485,1,1,1,0,2,2,0,3,1,0,0,0,2
+PF00905,Baseline_Published_Tree,2278,1777,501,26,21,11,10,190,13,177,256,18,15,13,8,119
+PF00905,Sensitivity_A_BacCleanStrict,2262,1777,485,26,21,11,10,190,13,177,256,18,15,10,8,119
+PF00905,Sensitivity_B_BacCleanCore_NoNRProphage,2257,1777,480,26,21,11,10,190,13,177,256,18,15,10,8,119
+PF00905,Sensitivity_C_BacCleanCore_And_ViralTier12,1708,1228,480,25,20,12,8,192,13,179,267,15,13,7,6,78
+PF13354,Baseline_Published_Tree,2266,1037,1229,71,54,46,8,154,120,34,203,14,10,7,8,36
+PF13354,Sensitivity_A_BacCleanStrict,2023,1037,986,70,40,23,17,138,96,42,185,23,19,16,8,44
+PF13354,Sensitivity_B_BacCleanCore_NoNRProphage,1842,1037,805,70,39,22,17,137,95,42,184,22,19,15,7,43
+PF13354,Sensitivity_C_BacCleanCore_And_ViralTier12,1678,873,805,63,29,21,8,117,84,33,163,14,10,6,7,38
+All_Pooled,Baseline_Published_Tree,7530,5315,2215,98,76,58,18,346,135,211,462,33,25,20,16,157
+All_Pooled,Sensitivity_A_BacCleanStrict,7271,5315,1956,97,62,35,27,330,111,219,444,42,34,26,16,165
+All_Pooled,Sensitivity_B_BacCleanCore_NoNRProphage,7085,5315,1770,97,61,34,27,329,110,219,443,41,34,25,15,164
+All_Pooled,Sensitivity_C_BacCleanCore_And_ViralTier12,5939,4169,1770,89,50,34,16,311,99,212,433,30,23,13,13,118
