@@ -4,7 +4,7 @@
 > *"Global analyses reveal the diversity and functional evolution of viral serine-β-lactamase / penicillin-recognizing enzymes (`CL0013`)"*
 > Last updated: `2026-11-21` (**Stage 1 Completed**: Strict CL0013 bitscore taxonomy, own-seed FIMO, `hmm_cov >= 0.65`, independent domain-slice `nr85`, CARD + catalytic functional stratification, tagged bacterial prophages, strict structural hallmark Phase 2 `Tier 1`, and locked Primary HGT protocol).
 >
-> ✅ **Stage 1 re-run with the review fixes on 2026-11-21** (Slurm jobs `5120440`: curate → Phase 2 → finalize; `5120495`: Phase 2 with region-level CheckV host-gene check → finalize). Tables in Sections 2.4 and 3 show the re-run counts; Section 2.3 FIMO/coverage counts were unchanged by the fixes. Fixes applied: (i) CARD reference set now excludes PBP-type entries (mecA/mecC, PBP1a/2b/2x/3); (ii) Class A Ω-loop requires the `E166-x-x-L-N` signature (previously any glutamate in the window) with A2M match-state verification; (iii) whole viral contigs inside bacterial assemblies/MAGs are tagged `viral_contig` and excluded from bacterial sets (no longer treated as prophages); (iv) PF13354/PF00768 trees are rooted only with PF00144 + PF00905; (v) `cov60` sensitivity applied to bacteria too; (vi) revised Phase 2 `Tier 1` (see Section 3). Reproduce with `scripts/hpc_reanalysis/run_phase1_phase2_rebuild.sh` (`--stage curate` → Phase 2 → `--stage finalize`).
+> ✅ **Stage 1 re-run with the review fixes on 2026-11-21** (Slurm jobs `5120440`, `5120495`; `5120556` adds merged multi-piece HMM coverage; **final run `5120575`** restricts merge candidates, counts unchanged). Sections 2.3–3 show the counts of job `5120575`, which are the Phase 3 inputs. Fixes applied: (i) CARD reference set now excludes PBP-type entries (mecA/mecC, PBP1a/2b/2x/3); (ii) Class A Ω-loop requires the `E166-x-x-L-N` signature (previously any glutamate in the window) with A2M match-state verification; (iii) whole viral contigs inside bacterial assemblies/MAGs are tagged `viral_contig` and excluded from bacterial sets (no longer treated as prophages); (iv) PF13354/PF00768 trees are rooted only with PF00144 + PF00905; (v) `cov60` sensitivity applied to bacteria too; (vi) revised Phase 2 `Tier 1` (see Section 3); (vii) HMM coverage merges co-linear same-family hits (see Section 2.3). Reproduce with `scripts/hpc_reanalysis/run_phase1_phase2_rebuild.sh` (`--stage curate` → Phase 2 → `--stage finalize`).
 
 ---
 
@@ -58,7 +58,9 @@ InterPro REST Pfam Stockholm headers directly verify all 8 official Clan `CL0013
      - `PF00768`: Viral **`895 / 895 (100.00%)`** | Bacterial `3,889 / 3,896 (99.82%)`
      - `PF02113`: Bacterial `1,990 / 2,014 (98.81%)` (Viral `0`)
 3. **HMM Coverage Filter (`hmm_cov >= 0.65` Primary; `>=0.60` / `>=0.70` Tracked)**:
-   - Excludes short domain fragments before phylogenetic reconstruction (`PF00144` viral: `1,867`; `PF00905`: `1,239`; `PF13354`: `245`; `PF00768`: `721`).
+   - `hmm_cov` = number of HMM match states covered by the winning family's domain / HMM `LENG`. hmmsearch can report one domain as several hits of the same family (a divergent, poorly scoring middle region, or a genuine internal insertion), so **co-linear same-family hits are merged** (no ≥30 aa overlap in the protein, same order in protein and HMM, each piece adding ≥50% new match states; candidates only from the winning hit's own envelope cluster or from clusters the same family wins, never from regions won by another family) and coverage is the union of their HMM intervals; the domain slice spans all pieces (insertions become lowercase insert states in hmmalign). A real internal deletion still lowers coverage. `hmm_cov_best_piece` and `n_domain_pieces` are kept per sequence.
+   - Merging rescued `131` viral (`PF00768 116`, `PF00144 9`, `PF00905 3`, `PF13354 3`; median merged coverage `0.84`) and `461` bacterial sequences (`PF00905 279`, `PF13354 141`, `PF00144 27`, `PF00768 14`); multi-piece domains still `< 0.65`: `6` viral, `6` bacterial.
+   - Viral sequences passing FIMO & `hmm_cov >= 0.65`: `PF00144 1,876`; `PF00905 1,242`; `PF13354 248`; `PF00768 837`.
 4. **Triple-Source Bacterial Pool with Tagged Prophages (`in_bacterial_prophage`)**:
    - Combines `3,000` phylogenetically balanced GTDB/RefSeq representatives (`46` phyla, `837` families; `99.80%` 1:1 native CDS), `259` dereplicated Marine MAGs (`100%` 1:1 CDS), and `1,219` `CARD/SARG` clinical gold standards.
    - Loci inside geNomad provirus intervals are **retained with `in_bacterial_prophage = True` (`replicon = prophage`)** for paired `with_prophage` (Primary) vs. `without_prophage` (Sensitivity) testing.
@@ -74,13 +76,13 @@ InterPro REST Pfam Stockholm headers directly verify all 8 official Clan `CL0013
 
 | Family Group (`cov>=0.65 & FIMO<=1e-5`) | Viral Total (`SBL`) | Viral `nr85` (`SBL`, `MOSAiC`) | Bacterial Total | Bacterial `nr85` (`SBL`) | Tree Balanced `rep1` (`prophage`) |
 |---|---:|---:|---:|---:|---:|
-| **`PF00144`** | `1,867` (`44`) | **`412`** (`27`, `4`) | `12,824` | `12,124` (`1,007`) | `1,500` (`3`) |
-| **`PF00905`** | `1,239` (`12`) | **`215`** (`6`, `1`) | `15,518` | `14,067` (`377`) | `1,500` (`1`) |
-| **`PF13354`** | `245` (`146`) | **`62`** (`22`, `0`) | `2,533` | `1,867` (`475`) | `1,500` (`0`) |
-| **`PF00768` (Sister PBP)** | `721` (`0`) | **`155`** (`0`, `1`) | `3,858` | `3,667` (`0`) | `1,500` (`4`) |
-| **Joint `PF13354+PF00768`** | `966` (`146`) | **`217`** (`22`, `1`) | `6,391` | `5,533` (`475`) | `1,500` (`4`) |
+| **`PF00144`** | `1,876` (`44`) | **`416`** (`27`, `4`) | `12,851` | `12,149` (`1,008`) | `1,500` (`3`) |
+| **`PF00905`** | `1,242` (`12`) | **`215`** (`6`, `1`) | `15,797` | `14,339` (`377`) | `1,500` (`1`) |
+| **`PF13354`** | `248` (`146`) | **`63`** (`22`, `0`) | `2,674` | `2,001` (`476`) | `1,500` (`0`) |
+| **`PF00768` (Sister PBP)** | `837` (`0`) | **`195`** (`0`, `1`) | `3,872` | `3,681` (`0`) | `1,500` (`4`) |
+| **Joint `PF13354+PF00768`** | `1,085` (`146`) | **`258`** (`22`, `1`) | `6,546` | `5,681` (`476`) | `1,500` (`4`) |
 
-- **Calibration of the stricter Ω-loop rule**: `E166-x-x-[LIVM]-N` is detected in `577 / 631` (`91.4%`) CARD/SARG Class A (`PF13354`) references; all `631 / 631` remain `Putative_Hydrolytic_BetaLactamase` (CARD match). Among non-CARD bacterial `PF13354`, `741` carry `SXXK + SDN + KTG` without the Ω-loop signature or a CARD match and are now `PBP_or_PRE_Homolog` (bacterial `nr85` SBL `930 → 475`).
+- **Calibration of the stricter Ω-loop rule**: `E166-x-x-[LIVM]-N` is detected in `577 / 631` (`91.4%`) CARD/SARG Class A (`PF13354`) references; all `631 / 631` remain `Putative_Hydrolytic_BetaLactamase` (CARD match). Among non-CARD bacterial `PF13354`, `771` carry `SXXK + SDN + KTG` without the Ω-loop signature or a CARD match and are now `PBP_or_PRE_Homolog` (bacterial `nr85` SBL `930 → 476`).
 - **CARD PBP filter**: `1` PBP-type entry removed from the CARD reference set (`4,895` kept).
 - **Whole viral contigs in bacterial genomes** (`is_viral_contig_in_genome`, excluded from bacterial sets): `3` (`GTDB PF00905`, `GTDB PF13354`, `Marine MAG PF00905`).
 
@@ -90,20 +92,20 @@ InterPro REST Pfam Stockholm headers directly verify all 8 official Clan `CL0013
 
 ## 3. Stage 1 Phase 2 (Completed): Strict Structural Hallmark Genomic Context & Revised `Tier 1`
 
-Integrates `298,926` Prodigal ORFs, `171,901` full-genome `Pfam-A --cut_ga` hits, `89,824` `eggNOG` annotations, `62,864` `geNomad v1.7` genes, and `CheckV v1.0.3` across `100%` (`4,062` IMG/VR + `10` MOSAiC) of primary curated viral loci (`Phase2_Viral_Genomic_Neighborhoods_Full.tsv`):
+Integrates `298,926` Prodigal ORFs, `171,901` full-genome `Pfam-A --cut_ga` hits, `89,824` `eggNOG` annotations, `62,864` `geNomad v1.7` genes, and `CheckV v1.0.3` across `100%` (`4,193` IMG/VR + `10` MOSAiC) of primary curated viral loci (`Phase2_Viral_Genomic_Neighborhoods_Full.tsv`):
 - **Recombinase/Integrase Strictly Separated from Viral Hallmarks**:
-  - **Strict viral structural hallmarks** (capsid, portal, terminase, tail, baseplate, virion coat/sheath/fiber, prohead/scaffolding, `geNomad` non-recomb hallmarks): **`55.42%` (`2,251 / 4,062`)** in viral region; flanked on `>=1` side by strict structural hallmark **`55.34%` (`2,248 / 4,062`)**, on **BOTH sides `21.34%` (`867 / 4,062`)**.
-  - **Viral structural OR replication/lysis (NO integrase/recomb)**: flanked on `>=1` side **`78.63%` (`3,194 / 4,062`)**, on **BOTH sides `45.40%` (`1,844 / 4,062`)**.
-  - **Recombination / integrase / lysogeny (reported separately as MGE background)**: **`46.09%` (`1,872 / 4,062`)** — NEVER counted toward viral origin confidence.
-  - Median min distance to viral/provirus boundary: **`5,339.0 bp`**; median contig ORF annotation coverage: **`46.67%`**.
+  - **Strict viral structural hallmarks** (capsid, portal, terminase, tail, baseplate, virion coat/sheath/fiber, prohead/scaffolding, `geNomad` non-recomb hallmarks): **`54.54%` (`2,287 / 4,193`)** in viral region; flanked on `>=1` side by strict structural hallmark **`54.47%` (`2,284 / 4,193`)**, on **BOTH sides `21.04%` (`882 / 4,193`)**.
+  - **Viral structural OR replication/lysis (NO integrase/recomb)**: flanked on `>=1` side **`77.61%` (`3,254 / 4,193`)**, on **BOTH sides `44.69%` (`1,874 / 4,193`)**.
+  - **Recombination / integrase / lysogeny (reported separately as MGE background)**: **`44.96%` (`1,885 / 4,193`)** — NEVER counted toward viral origin confidence.
+  - Median min distance to viral/provirus boundary: **`5,160.0 bp`**; median contig ORF annotation coverage: **`47.00%`**.
 - **Revised `Tier1_HighConfidence_Viral`** (all required): SBL ORF `>= 1 kb` inside the viral region (geNomad/CheckV provirus interval, or contig ends for whole-contig viruses; DTR/ITR complete genomes exempt — contig length alone no longer counts) + `checkv_viral_genes >= 1` **and** `>= checkv_host_genes` (counted on the region containing the SBL, see basis below; the same host check also gates `Tier 2`) + `>= 1` strict structural hallmark. geNomad hallmark counts come from the geNomad entry that **contains the SBL ORF** (not the contig's best-scoring provirus). Each locus also reports `viral_origin_tier_2023rule`, and the summary prints a 2023-rule → revised-rule tier shift table.
-- **Host-vs-viral gene check basis**: the CheckV viral region containing the SBL when one exists (`96` loci; `90` pass), skipped for geNomad-only provirus intervals whose contig-level counts include the host flank (`239`), and contig-level for whole-contig viruses (`3,727`; **`1,545` fail**, i.e. CheckV finds more host than viral genes on the contig).
+- **Host-vs-viral gene check basis**: the CheckV viral region containing the SBL when one exists (`102` loci; `96` pass), skipped for geNomad-only provirus intervals whose contig-level counts include the host flank (`239`), and contig-level for whole-contig viruses (`3,852`; **`1,634` fail**, i.e. CheckV finds more host than viral genes on the contig).
 - Re-run counts (primary cohort, `cov >= 0.65 & FIMO <= 1e-5`):
-  - `PF00144`: `Tier1 = 1,172`, `Tier2 = 305`, `Tier3 = 382`, `MOSAiC = 8`
-  - `PF00905`: `Tier1 = 151`, `Tier2 = 163`, `Tier3 = 924`, `MOSAiC = 1` ← **75% of viral PF00905 loci have weak viral-origin support** (mostly whole contigs where CheckV host genes > viral genes)
-  - `PF13354`: `Tier1 = 122`, `Tier2 = 48`, `Tier3 = 75`
-  - `PF00768`: `Tier1 = 232`, `Tier2 = 165`, `Tier3 = 323`, `MOSAiC = 1`
-- **2023 rule → revised rule** (primary IMG/VR loci): of `1,518` old `Tier 1`, `1,355` stay `Tier 1`, `4` → `Tier 2`, `159` → `Tier 3`; of `1,938` old `Tier 2`, `322` → `Tier 1`, `677` stay, `939` → `Tier 3`; all `606` old `Tier 3` stay `Tier 3`.
+  - `PF00144`: `Tier1 = 1,172`, `Tier2 = 313`, `Tier3 = 383`, `MOSAiC = 8`
+  - `PF00905`: `Tier1 = 151`, `Tier2 = 163`, `Tier3 = 927`, `MOSAiC = 1` ← **75% of viral PF00905 loci have weak viral-origin support** (mostly whole contigs where CheckV host genes > viral genes)
+  - `PF13354`: `Tier1 = 125`, `Tier2 = 48`, `Tier3 = 75`
+  - `PF00768`: `Tier1 = 250`, `Tier2 = 175`, `Tier3 = 411`, `MOSAiC = 1`
+- **2023 rule → revised rule** (primary IMG/VR loci): of `1,539` old `Tier 1`, `1,373` stay `Tier 1`, `4` → `Tier 2`, `162` → `Tier 3`; of `1,993` old `Tier 2`, `325` → `Tier 1`, `695` stay, `973` → `Tier 3`; all `661` old `Tier 3` stay `Tier 3`.
 
 ---
 
