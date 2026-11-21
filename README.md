@@ -190,7 +190,7 @@ Large supporting datasets are archived in the **SBL-virus Supporting Data** Figs
 
 ## Legacy Code
 
-`legacy/` preserves the analysis and visualisation code released with the first submission (R plotting, motif enrichment, selection-pressure plots, molecular-docking helpers, bubble world map, Sankey graph). It is kept unchanged for provenance and is not called by the pipeline above.
+`legacy/` preserves the analysis and visualisation code released with the first submission (R plotting, motif enrichment, selection-pressure plots, molecular-docking helpers). It is kept for provenance and is not called by the pipeline above. The first submission's Observable/JavaScript visualisations (bubble world map, Sankey graph) were removed in the 2026 revision, which uses Python and R for all figures; they remain available in the git history (branch `master`, commit `925e189`).
 
 ## License
 

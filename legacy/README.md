@@ -11,10 +11,10 @@ Code and analysis scripts for SBL virus research.
 ├── mg94_pairwise_plot_functions.r    # mg94 pairwise plot functions
 ├── motif_enrichment.r                # Motif enrichment analysis
 ├── selection_pressure.r               # Selection pressure analysis
-├── Molecular_docking/                # Molecular docking scripts
-├── buble-world-map/                  # Bubble world map visualization
-└── sankey_graph/                    # Sankey graph visualization
+└── Molecular_docking/                # Molecular docking scripts
 ```
+
+The Observable/JavaScript visualisations of the first submission (`buble-world-map/`, `sankey_graph/`) were removed in the 2026 revision; they remain in the git history (commit `925e189`).
 
 ## Dependencies
 
