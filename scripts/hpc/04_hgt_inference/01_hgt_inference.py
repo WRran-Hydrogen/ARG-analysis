@@ -1033,6 +1033,10 @@ def detect_hgt_events(
     mu_hat, ml_logL = run_f81_marginal_ml_asr(tree, v_meta)
 
     tot_tips = len(list(tree.leaves()))
+    # Terminal branch lengths: a single-tip recipient on a long terminal branch is the pattern
+    # expected from long-branch attraction, contamination or a misassembled locus.
+    term_bl = {lf.name: max(0.0, float(lf.dist or 0.0)) for lf in tree.leaves()}
+    term_sorted = np.sort(np.fromiter(term_bl.values(), dtype=np.float64))
     tot_vir = tree.props["n_vir"]
     tot_bac = tree.props["n_bac"]
 
@@ -1074,11 +1078,13 @@ def detect_hgt_events(
 
         s1_v = s1_b = 0
         s1_vir_tips: set[str] = set()
+        bg_term: list[float] = []
         for sib in p.children:
             if sib is not nd:
                 s1_v += sib.props["n_vir"]
                 s1_b += sib.props["n_bac"]
                 for lf in sib.leaves():
+                    bg_term.append(term_bl[lf.name])
                     if tip_domain(lf.name, v_meta) == "Viral":
                         s1_vir_tips.add(lf.name)
         s1_tot = s1_v + s1_b
@@ -1092,6 +1098,7 @@ def detect_hgt_events(
                     s2_v += aunt.props["n_vir"]
                     s2_b += aunt.props["n_bac"]
                     for lf in aunt.leaves():
+                        bg_term.append(term_bl[lf.name])
                         if tip_domain(lf.name, v_meta) == "Viral":
                             s2_vir_tips.add(lf.name)
         s2_tot = s2_v + s2_b
@@ -1124,6 +1131,15 @@ def detect_hgt_events(
 
         recip_leaves = [lf.name for lf in nd.leaves() if tip_domain(lf.name, v_meta) == to_dom]
         is_singleton = (n_tot == 1) or (n_recip == 1)
+
+        # Long-branch check (reported, not used for classification): longest recipient terminal
+        # branch, its percentile among all terminal branches of the tree and its ratio to the
+        # median terminal branch of the S1 + S2 background.
+        focal_bl = max((term_bl[u] for u in recip_leaves), default=0.0)
+        focal_bl_pct = float(np.searchsorted(term_sorted, focal_bl, side="right")) / max(len(term_sorted), 1)
+        bg_med = float(np.median(bg_term)) if bg_term else float("nan")
+        focal_bl_ratio = focal_bl / bg_med if bg_med and bg_med > 0 else float("nan")
+        long_branch_flag = bool(is_singleton and focal_bl_pct >= LONG_BRANCH_PERCENTILE)
 
         # Singleton Viral Tier-1 gating & Prophage_Borne & Functional Stratification
         n_hydro_sbl = 0
@@ -1266,6 +1282,10 @@ def detect_hgt_events(
             "focal_recipient_purity": round(purity, 4),
             "focal_is_singleton_tip": is_singleton,
             "singleton_viral_tier1_pass": singleton_viral_pass,
+            "focal_terminal_bl": round(focal_bl, 5),
+            "focal_terminal_bl_percentile": round(focal_bl_pct, 4),
+            "focal_terminal_bl_ratio_to_background": round(focal_bl_ratio, 3) if focal_bl_ratio == focal_bl_ratio else float("nan"),
+            "long_branch_flag": long_branch_flag,
             "s1_donor_n": s1_donor,
             "s1_total_n": s1_tot,
             "s2_donor_n": s2_donor,
@@ -1475,6 +1495,30 @@ def validate_cl0013_superfamily() -> list[dict]:
 # ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
+JOINT = "PF13354_PF00768"
+LONG_BRANCH_PERCENTILE = 0.95
+
+
+def sensitivity_track(fam: str) -> str:
+    """Alignment track of the sensitivity trees (resampled sets, PMSF, clean outgroup)."""
+    return "mafft" if fam == JOINT else "hmm"
+
+
+def primary_track(fam: str) -> str:
+    """Alignment track of the primary tree.
+
+    Single families: hmmalign. Joint tree: the structure-guided FoldMason-grid alignment
+    (03_alignment_and_trees/09) once both of its trees are finished, otherwise MAFFT + ClipKIT.
+    """
+    if fam != JOINT:
+        return "hmm"
+    stem = TREES_DIR / fam / f"{fam}.primary.struct"
+    if (Path(f"{stem}_in.treefile").is_file() and Path(f"{stem}_out.treefile").is_file()
+            and Path(f"{stem}_out.iqtree").is_file()):
+        return "struct"
+    return "mafft"
+
+
 def model_from_iqtree(path: Path) -> str:
     """Best-fit model of an IQ-TREE run (ModelFinder BIC line, else the fixed model line)."""
     if not path.is_file():
@@ -1493,7 +1537,7 @@ def write_au_tasks(prim_events: dict[str, list[dict]]) -> int:
     au_dir.mkdir(parents=True, exist_ok=True)
     rows = []
     for fam, evs in prim_events.items():
-        track = "mafft" if fam == "PF13354_PF00768" else "hmm"
+        track = primary_track(fam)
         aln = ALN_DIR / fam / f"primary.{track}_in.fa"
         ml_src = TREES_DIR / fam / f"{fam}.primary.{track}_in.treefile"
         model = model_from_iqtree(TREES_DIR / fam / f"{fam}.primary.{track}_out.iqtree")
@@ -1547,7 +1591,8 @@ def main() -> int:
         return round(max(jaccard(sa, sb), jaccard(sa, shared - sb)), 4)
 
     for fam in FAMILIES:
-        track = "mafft" if fam == "PF13354_PF00768" else "hmm"
+        track = primary_track(fam)
+        s_track = sensitivity_track(fam)
         og_path = ALN_DIR / fam / "outgroup_taxa.txt"
         og_ids = read_outgroup_ids(og_path) if og_path.is_file() else set()
         crown = crown_map.get(fam)
@@ -1582,7 +1627,7 @@ def main() -> int:
         if prim_out_path.is_file() and og_ids:
             tree_jobs.append(("legacy_sarg24_out", "Sister_PRE", "Appendix_Legacy_SARG24_Outgroup", prim_out_path, og_ids))
         clean_og_p = ALN_DIR / fam / "outgroup_clean_gtdb12.txt"
-        clean_tp = TREES_DIR / fam / f"{fam}.clean_prof_out.{track}_out.treefile"
+        clean_tp = TREES_DIR / fam / f"{fam}.clean_prof_out.{s_track}_out.treefile"
         if clean_og_p.is_file() and clean_tp.is_file():
             tree_jobs.append(("clean_prof_out", "Sister_PRE", "OAT_Clean_GTDB12_Outgroup", clean_tp, read_outgroup_ids(clean_og_p)))
         tree_jobs += [
@@ -1591,16 +1636,18 @@ def main() -> int:
             ("primary_in_Midpoint", "Midpoint", "Primary_Ingroup_Midpoint", prim_in_path, set()),
             ("primary_in_YoudenJ", "Youden_J_Appendix", "Appendix_Youden_J", prim_in_path, set()),
         ]
-        # Sensitivity trees: outgroup tips removed, then rooted exactly like the primary tree
-        if fam != "PF13354_PF00768":
+        # Sensitivity trees: outgroup tips removed, then rooted exactly like the primary tree.
+        # The MAFFT + ClipKIT primary-set tree is the alternative-alignment check whenever the
+        # primary tree uses another alignment (hmmalign, or the joint tree's structure-guided one).
+        if track != "mafft":
             tp = TREES_DIR / fam / f"{fam}.primary.mafft_out.treefile"
             if tp.is_file():
                 tree_jobs.append(("mafft_out", "primary_style_ingroup", "OAT_MAFFT_ClipKIT", tp, og_ids))
         for sname in ("rep2", "rep3", "rep4", "rep5", "phylo", "nopro", "cov60", "cov70"):
-            tp = TREES_DIR / fam / f"{fam}.{sname}.{track}_out.treefile"
+            tp = TREES_DIR / fam / f"{fam}.{sname}.{s_track}_out.treefile"
             if tp.is_file():
                 tree_jobs.append((sname, "primary_style_ingroup", f"OAT_{sname}", tp, og_ids))
-        tp = TREES_DIR / fam / f"{fam}.pmsf_c20.{track}_out.treefile"
+        tp = TREES_DIR / fam / f"{fam}.pmsf_c20.{s_track}_out.treefile"
         if tp.is_file():
             tree_jobs.append(("pmsf_c20", "primary_style_ingroup", "OAT_PMSF_C20", tp, og_ids))
 
@@ -1651,11 +1698,13 @@ def main() -> int:
             t1_v2b = [e for e in t1_all if e["direction"] == "Viral_to_Bacterial"]
             tree_matrix_rows.append({
                 "family": fam, "oat_key": key, "tree_label": label, "rooting_method": rmethod,
+                "primary_alignment_track": track,
                 **stats, **rmeta,
                 "nested_fitch_ml_events": len(nested_all),
                 "tier1_hgt_events": len(t1_all),
                 "tier1_prereg_events": sum(1 for e in nested_all if e["is_tier1_hgt_prereg"]),
                 "tier1_single_tip_events": sum(1 for e in t1_all if e["focal_is_singleton_tip"]),
+                "tier1_long_branch_flag_events": sum(1 for e in t1_all if e["long_branch_flag"]),
                 "tier1_B_to_V_events": len(t1_b2v),
                 "tier1_V_to_B_events": len(t1_v2b),
                 "tier1_hydrolytic_sbl_events": sum(1 for e in t1_all if e["functional_category"] == "Putative_Hydrolytic_BetaLactamase"),
@@ -1669,7 +1718,7 @@ def main() -> int:
                   f"Tier1={len(t1_all):2d} Tier2={len(t2_all):2d}", flush=True)
 
         # Root-position agreement of the primary root with every other rooting of the same taxa
-        rrow = {"family": fam, "primary_rooting": primary_method}
+        rrow = {"family": fam, "primary_rooting": primary_method, "primary_alignment_track": track}
         if crown:
             for k in ("crown_clade_f1", "crown_monophyly_ufboot", "crown_monophyly_shalrt", "crown_root_split_ufboot",
                       "crown_n_family_outside_clade", "crown_s1_n", "crown_s2_n", "crown_reliable"):
@@ -1802,13 +1851,14 @@ def main() -> int:
                     t1 = s[s["is_tier1_hgt"]]
                     sum_rows.append({
                         "family": fam,
-                        "tree_role": "joint_sensitivity" if fam == "PF13354_PF00768" else "single_family",
+                        "tree_role": "joint_sensitivity" if fam == JOINT else "single_family",
                         "direction": d, "functional_category": fc,
                         "all_nested_concordant": len(s),
                         "tier1_events": len(t1),
                         "tier1_prereg_events": int(s["is_tier1_hgt_prereg"].sum()),
                         "tier1_single_tip": int(t1["focal_is_singleton_tip"].sum()),
                         "tier1_multi_tip": int((~t1["focal_is_singleton_tip"].astype(bool)).sum()),
+                        "tier1_long_branch_flag": int(t1["long_branch_flag"].astype(bool).sum()),
                         "tier1_root_invariant": int(t1["root_Invariant"].sum()),
                         "tier1_robust_core": int(t1["robust_core_hgt"].sum()),
                         "tier1_duplicates_single_family": int((t1["duplicate_of_single_family_event"] != "").sum()),
@@ -1843,6 +1893,10 @@ def main() -> int:
         f"Single-family trees (PF00144, PF00905, PF13354, PF00768): Tier-1 = {n_t1(single)} "
         f"(single-tip {int(single[single['is_tier1_hgt']]['focal_is_singleton_tip'].sum()) if len(single) else 0}), "
         f"pre-registered Tier-1 without the viral-evidence gate = {int(single['is_tier1_hgt_prereg'].sum()) if len(single) else 0}",
+        f"Single-tip Tier-1 events on a long terminal branch (>= {LONG_BRANCH_PERCENTILE:.0%} percentile of the tree's "
+        f"terminal branches; reported, not filtered): "
+        f"{int(single[single['is_tier1_hgt']]['long_branch_flag'].astype(bool).sum()) if len(single) else 0}",
+        f"Joint tree alignment track: {primary_track(JOINT)}",
         f"Joint PF13354_PF00768 tree (sensitivity, not added to totals): Tier-1 = {n_t1(joint)}, "
         f"of which repeat a single-family event = {n_t1(joint) - len(joint_new)}, joint-only = {len(joint_new)}",
         f"AU-test tasks written: {n_au} (au_test_tasks.tsv)",

@@ -24,6 +24,11 @@ Two complementary rooting checks that do not require re-running the 50 sensitivi
     2. Align each 12-sequence sister outgroup with its own family HMM and merge onto
        `alignments/{fam}/primary.{track}_in.fa` via `mafft --localpair --maxiterate 1000
        --addprofile` (`primary.clean_prof_out.fa`), preserving ingroup HMM columns.
+
+  Part C (structure-guided joint PF13354_PF00768 alignment, `--step partC`):
+    Each joint-tree sequence is aligned with its own family HMM and projected onto the Part A
+    FoldMason grid (`alignments/PF13354_PF00768/primary.struct_{out,in}.fa`); replaces MAFFT
+    --auto as the joint tree's primary alignment. Requires the Part A FoldMason seed MSA.
 """
 
 from __future__ import annotations
@@ -595,16 +600,90 @@ def build_cl0013_struct_alignments(v_meta: dict[str, dict], b_meta: dict[str, di
             w.writerow({k: item[k] for k in ("uid", "cl0013_family", "origin", "role", "functional_tier")})
 
     # 3. Per-family hmmalign projected onto FoldMason 3D master coordinate grid
+    sorted_slots, assembled = project_onto_fm_grid(ALL_SEVEN, seqs_by_fam, anchor_seqs, fm_recs, CL_ALN_DIR)
+    raw_master_fa = CL_ALN_DIR / "struct_c20.no_PF27310.raw.fa"
+    out_master_fa = CL_ALN_DIR / "struct_c20.no_PF27310.fa"
+
+    write_fasta(raw_master_fa, assembled)
+    run(f"{hpc.CLIPKIT_BIN} {raw_master_fa} -m gappy -g {CLIPKIT_GAP_THRESHOLD} -o {out_master_fa}")
+    trimmed = read_fasta(out_master_fa)
+    pre_trimmed = [(u, s) for u, s in trimmed if selected_seqs[u]["cl0013_family"] not in OUTGROUP_TWO]
+    n_cols = len(trimmed[0][1])
+    occ = sum(sum(c not in "-." for c in s) for _, s in trimmed) / max(len(trimmed) * n_cols, 1)
+    sxxk_rate = motif_lock_rate(pre_trimmed, r"S..K")
+    print(
+        f"[Part A.3] CL0013 FoldMason+hmmalign MSA: raw_cols={len(sorted_slots)} -> ClipKIT_cols={n_cols}, "
+        f"occ={occ:.4f}, PRE_SXXK_lock={sxxk_rate:.4f}"
+    )
+
+    # Derive outgroup files & LOO alignments
+    og_no27 = sorted(u for f in OUTGROUP_TWO for u in outgroup_by_fam[f])
+    (CL_ALN_DIR / "outgroup_struct_no_PF27310.txt").write_text("\n".join(og_no27) + "\n", encoding="utf-8")
+
+    tasks = [
+        {"wave": 1, "name": "CL0013.struct_c20.no_PF27310", "alignment": str(out_master_fa), "model_from": "LG+C20+F+G"},
+    ]
+    for keep_og in OUTGROUP_TWO:
+        drop_og = [f for f in OUTGROUP_TWO if f != keep_og][0]
+        drop_set = set(outgroup_by_fam[drop_og])
+        kept_og = sorted(outgroup_by_fam[keep_og])
+        loo_fa = CL_ALN_DIR / f"struct_c20.only_{keep_og}.fa"
+        loo_recs = drop_rows_and_empty_columns(trimmed, drop_set)
+        write_fasta(loo_fa, loo_recs)
+        (CL_ALN_DIR / f"outgroup_struct_only_{keep_og}.txt").write_text("\n".join(kept_og) + "\n", encoding="utf-8")
+        tasks.append({
+            "wave": 1, "name": f"CL0013.struct_c20.only_{keep_og}",
+            "alignment": str(loo_fa), "model_from": "LG+C20+F+G",
+        })
+        print(f"  [LOO only_{keep_og}] rows={len(loo_recs)}, cols={len(loo_recs[0][1])}, og={len(kept_og)}")
+
+    tasks_path = OUT_DIR / "tree_tasks_cl0013_struct.tsv"
+    with open(tasks_path, "w", newline="\n", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=["wave", "name", "alignment", "model_from"], delimiter="\t", lineterminator="\n")
+        w.writeheader()
+        w.writerows(tasks)
+    print(f"[Part A Done] Wrote {tasks_path} ({len(tasks)} trees)")
+
+
+def load_foldmason_seed() -> tuple[dict[str, str], dict[str, str]]:
+    """Re-slice the crystal anchors (sequence only) and read the FoldMason seed MSA written by Part A."""
+    anchor_seqs: dict[str, str] = {}
+    for fam in ALL_SEVEN:
+        for stem, chain in CRYSTAL_ANCHORS[fam]:
+            anchor_seqs[stem] = extract_and_slice_crystal(fam, stem, chain)[1]
+    cands = sorted(CL_ALN_DIR.glob("cl0013_foldmason_seed*aa*.fa*"))
+    if not cands:
+        raise FileNotFoundError(f"FoldMason seed MSA not found in {CL_ALN_DIR}; run --step partA first")
+    fm_recs = {re.sub(r"_A_dom(\.pdb)?$", "", h): s for h, s in read_fasta(cands[0])}
+    return anchor_seqs, fm_recs
+
+
+def project_onto_fm_grid(
+    fams: tuple[str, ...] | list[str],
+    seqs_by_fam: dict[str, list[tuple[str, str]]],
+    anchor_seqs: dict[str, str],
+    fm_recs: dict[str, str],
+    work_dir: Path,
+) -> tuple[list[tuple[int, int, str, int]], list[tuple[str, str]]]:
+    """hmmalign each family against its own Pfam HMM and place its match columns on the FoldMason grid.
+
+    A family's match column is mapped through the family's primary crystal anchor to the FoldMason
+    column of the aligned anchor residue; match columns the anchor does not cover become
+    family-specific slots right after the last mapped column. Returns the ordered slots and the
+    assembled rows (families in the given order).
+    """
     all_slots: set[tuple[int, int, str, int]] = set()
     # fam -> {uid: {slot_tuple: aa_char}}
     fam_slot_rows: dict[str, dict[str, dict[tuple[int, int, str, int], str]]] = {}
 
-    for fam in ALL_SEVEN:
+    for fam in fams:
+        if not seqs_by_fam.get(fam):
+            continue
         primary_stem = CRYSTAL_ANCHORS[fam][0][0]
         anchor_seq = anchor_seqs[primary_stem]
         res_to_fm = map_anchor_seq_to_fm_cols(anchor_seq, fm_recs[primary_stem])
         f_recs = [(primary_stem, anchor_seq)] + seqs_by_fam[fam]
-        leng, a2m_map = run_hmmalign_raw(fam, f_recs, CL_ALN_DIR)
+        leng, a2m_map = run_hmmalign_raw(fam, f_recs, work_dir)
 
         # Build monotonic mapping HMM match column m (0..LENG-1) -> master slot tuple
         anchor_a2m = a2m_map[primary_stem]
@@ -651,53 +730,85 @@ def build_cl0013_struct_alignments(v_meta: dict[str, dict], b_meta: dict[str, di
         fam_slot_rows[fam] = fam_rows
 
     sorted_slots = sorted(all_slots)
-    raw_master_fa = CL_ALN_DIR / "struct_c20.no_PF27310.raw.fa"
-    out_master_fa = CL_ALN_DIR / "struct_c20.no_PF27310.fa"
     assembled: list[tuple[str, str]] = []
-    for fam in ALL_SEVEN:
-        for uid, _ in seqs_by_fam[fam]:
+    for fam in fams:
+        for uid, _ in seqs_by_fam.get(fam, []):
             smap = fam_slot_rows[fam][uid]
             assembled.append((uid, "".join(smap.get(sl, "-") for sl in sorted_slots)))
+    return sorted_slots, assembled
 
-    write_fasta(raw_master_fa, assembled)
-    run(f"{hpc.CLIPKIT_BIN} {raw_master_fa} -m gappy -g {CLIPKIT_GAP_THRESHOLD} -o {out_master_fa}")
-    trimmed = read_fasta(out_master_fa)
-    pre_trimmed = [(u, s) for u, s in trimmed if selected_seqs[u]["cl0013_family"] not in OUTGROUP_TWO]
-    n_cols = len(trimmed[0][1])
-    occ = sum(sum(c not in "-." for c in s) for _, s in trimmed) / max(len(trimmed) * n_cols, 1)
-    sxxk_rate = motif_lock_rate(pre_trimmed, r"S..K")
-    print(
-        f"[Part A.3] CL0013 FoldMason+hmmalign MSA: raw_cols={len(sorted_slots)} -> ClipKIT_cols={n_cols}, "
-        f"occ={occ:.4f}, PRE_SXXK_lock={sxxk_rate:.4f}"
-    )
 
-    # Derive outgroup files & LOO alignments
-    og_no27 = sorted(u for f in OUTGROUP_TWO for u in outgroup_by_fam[f])
-    (CL_ALN_DIR / "outgroup_struct_no_PF27310.txt").write_text("\n".join(og_no27) + "\n", encoding="utf-8")
+# ---------------------------------------------------------------------------
+# Part C: structure-guided alignment for the joint PF13354_PF00768 tree
+# ---------------------------------------------------------------------------
+JOINT = "PF13354_PF00768"
 
-    tasks = [
-        {"wave": 1, "name": "CL0013.struct_c20.no_PF27310", "alignment": str(out_master_fa), "model_from": "LG+C20+F+G"},
-    ]
-    for keep_og in OUTGROUP_TWO:
-        drop_og = [f for f in OUTGROUP_TWO if f != keep_og][0]
-        drop_set = set(outgroup_by_fam[drop_og])
-        kept_og = sorted(outgroup_by_fam[keep_og])
-        loo_fa = CL_ALN_DIR / f"struct_c20.only_{keep_og}.fa"
-        loo_recs = drop_rows_and_empty_columns(trimmed, drop_set)
-        write_fasta(loo_fa, loo_recs)
-        (CL_ALN_DIR / f"outgroup_struct_only_{keep_og}.txt").write_text("\n".join(kept_og) + "\n", encoding="utf-8")
-        tasks.append({
-            "wave": 1, "name": f"CL0013.struct_c20.only_{keep_og}",
-            "alignment": str(loo_fa), "model_from": "LG+C20+F+G",
-        })
-        print(f"  [LOO only_{keep_og}] rows={len(loo_recs)}, cols={len(loo_recs[0][1])}, og={len(kept_og)}")
 
-    tasks_path = OUT_DIR / "tree_tasks_cl0013_struct.tsv"
-    with open(tasks_path, "w", newline="\n", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=["wave", "name", "alignment", "model_from"], delimiter="\t", lineterminator="\n")
+def build_joint_struct_alignment(v_meta: dict[str, dict], b_meta: dict[str, dict]) -> None:
+    """Joint PF13354 + PF00768 tree on the FoldMason grid instead of MAFFT --auto.
+
+    The joint tree combines two Pfam families, so no single HMM covers it and the MAFFT --auto
+    alignment (a fast progressive mode at this size) is weakest in the variable regions. Here each
+    sequence is aligned with its own family HMM (PF13354 or PF00768; the Sister-PRE outgroup with
+    PF00144 or PF00905) and projected onto the FoldMason 3D grid of Part A, then gap-trimmed with
+    ClipKIT (-m gappy -g 0.5). The ingroup-only alignment drops the outgroup rows and all-gap
+    columns without re-alignment, as for the other primary alignments.
+    """
+    anchor_seqs, fm_recs = load_foldmason_seed()
+    fdir = ALN_DIR / JOINT
+    fdir.mkdir(parents=True, exist_ok=True)
+    ingroup = read_fasta(IN_DIR / f"{JOINT}_combined_tree_dom.faa")
+    outgroup = read_fasta(IN_DIR / f"{JOINT}_sister_pre_outgroup_dom.faa")
+    og_ids = {u for u, _ in outgroup}
+
+    seqs_by_fam: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for recs, allowed in ((ingroup, ("PF13354", "PF00768")), (outgroup, ("PF00144", "PF00905"))):
+        for uid, seq in recs:
+            fam = (v_meta.get(uid) or b_meta.get(uid) or {}).get("winning_acc", "")
+            if fam not in allowed:
+                raise RuntimeError(f"{JOINT}: {uid} has family '{fam}', expected one of {allowed}")
+            seqs_by_fam[fam].append((uid, seq))
+    fams = ("PF13354", "PF00768", "PF00144", "PF00905")
+    print(f"[Part C] {JOINT}: {len(ingroup)} ingroup + {len(outgroup)} outgroup; "
+          f"{ {f: len(seqs_by_fam[f]) for f in fams} }", flush=True)
+
+    sorted_slots, assembled = project_onto_fm_grid(fams, seqs_by_fam, anchor_seqs, fm_recs, fdir)
+    raw_fa = fdir / "primary.struct_out.raw.fa"
+    out_fa = fdir / "primary.struct_out.fa"
+    in_fa = fdir / "primary.struct_in.fa"
+    write_fasta(raw_fa, assembled)
+    run(f"{hpc.CLIPKIT_BIN} {raw_fa} -m gappy -g {CLIPKIT_GAP_THRESHOLD} -o {out_fa}")
+    out_recs = read_fasta(out_fa)
+    in_recs = drop_rows_and_empty_columns(out_recs, og_ids)
+    write_fasta(in_fa, in_recs)
+
+    qc = []
+    for track, recs in (("struct_out", out_recs), ("struct_in", in_recs)):
+        n_cols = len(recs[0][1])
+        occ = sum(sum(c not in "-." for c in s) for _, s in recs) / max(len(recs) * n_cols, 1)
+        ing = [(u, s) for u, s in recs if u not in og_ids]
+        qc.append({"tag": JOINT, "set": "primary", "track": track, "n_rows": len(recs),
+                   "n_outgroup": len(recs) - len(ing), "n_columns": n_cols, "mean_occupancy": round(occ, 4),
+                   "SXXK_lock_in_rate": motif_lock_rate(ing, r"S..K"),
+                   "KTG_lock_in_rate": motif_lock_rate(ing, r"[KH][TS]G")})
+        print(f"  [{track}] rows={len(recs)} raw_cols={len(sorted_slots)} cols={n_cols} occ={occ:.4f} "
+              f"SXXK={qc[-1]['SXXK_lock_in_rate']} KTG={qc[-1]['KTG_lock_in_rate']}", flush=True)
+    with open(OUT_DIR / "alignment_qc_joint_struct.tsv", "w", newline="\n", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(qc[0]), delimiter="\t", lineterminator="\n")
         w.writeheader()
-        w.writerows(tasks)
-    print(f"[Part A Done] Wrote {tasks_path} ({len(tasks)} trees)")
+        w.writerows(qc)
+
+    # Same two-wave scheme as the primary trees (02_run_iqtree.sh): ModelFinder on the "_out"
+    # alignment, then the ingroup-only tree with that model.
+    for wave, name, aln, model_from in (
+        (1, f"{JOINT}.primary.struct_out", out_fa, ""),
+        (2, f"{JOINT}.primary.struct_in", in_fa, f"{JOINT}.primary.struct_out"),
+    ):
+        with open(OUT_DIR / f"tree_tasks_joint_struct_wave{wave}.tsv", "w", newline="\n", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=["wave", "name", "alignment", "model_from"], delimiter="\t", lineterminator="\n")
+            w.writeheader()
+            w.writerow({"wave": wave, "name": name, "alignment": str(aln), "model_from": model_from})
+    print(f"[Part C Done] {out_fa.name}, {in_fa.name}, tree_tasks_joint_struct_wave1/2.tsv", flush=True)
 
 
 # ---------------------------------------------------------------------------
@@ -878,13 +989,15 @@ def build_clean_gtdb_profile_outgroups(b_meta: dict[str, dict]) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--step", choices=("all", "partA", "partB"), default="all")
+    ap.add_argument("--step", choices=("all", "partA", "partB", "partC"), default="all")
     args = ap.parse_args()
     v_meta, b_meta = load_catalogs()
     if args.step in ("all", "partA"):
         build_cl0013_struct_alignments(v_meta, b_meta)
     if args.step in ("all", "partB"):
         build_clean_gtdb_profile_outgroups(b_meta)
+    if args.step in ("all", "partC"):
+        build_joint_struct_alignment(v_meta, b_meta)
     return 0
 
 
