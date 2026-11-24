@@ -6,8 +6,8 @@ from pathlib import Path
 import pandas as pd
 import xml.etree.ElementTree as ET
 
-# PLIP XML 中常见的相互作用条目标签（element tag）
-# 你的示例XML里：hydrophobic_interaction / hydrogen_bond / salt_bridge 都存在且字段齐全。
+# Interaction element tags commonly found in PLIP XML reports
+# hydrophobic_interaction / hydrogen_bond / salt_bridge entries carry complete fields.
 PLIP_TAG_TO_FEATURETYPE = {
     "hydrogen_bond": "HBOND",
     "hydrophobic_interaction": "HYDROPHOBIC",
@@ -19,17 +19,17 @@ PLIP_TAG_TO_FEATURETYPE = {
     "metal_complex": "METAL_COMPLEX",
 }
 
-# 给 Jalview features 文件写颜色定义（FeatureType -> color）
-# Jalview 允许每个 FeatureType 在文件开头用 “type<TAB>color” 定义显示风格。
+# Colour definitions for the Jalview features file (FeatureType -> color)
+# Jalview lets each FeatureType define its display style at the top of the file as "type<TAB>color".
 DEFAULT_COLORS = {
-    "HBOND": "128,128,128",           # 灰
-    "HYDROPHOBIC": "255,200,0",       # 黄
-    "SALT_BRIDGE": "255,0,0",         # 红
-    "WATER_BRIDGE": "0,180,255",      # 蓝
-    "PI_STACK": "160,0,255",          # 紫
-    "PI_CATION": "255,0,160",         # 粉
-    "HALOGEN_BOND": "0,200,0",        # 绿
-    "METAL_COMPLEX": "120,80,40",     # 棕
+    "HBOND": "128,128,128",           # grey
+    "HYDROPHOBIC": "255,200,0",       # yellow
+    "SALT_BRIDGE": "255,0,0",         # red
+    "WATER_BRIDGE": "0,180,255",      # blue
+    "PI_STACK": "160,0,255",          # purple
+    "PI_CATION": "255,0,160",         # pink
+    "HALOGEN_BOND": "0,200,0",        # green
+    "METAL_COMPLEX": "120,80,40",     # brown
 }
 
 def iter_files(items):
@@ -48,7 +48,7 @@ def iter_files(items):
 def load_seqmap(path: Path):
     """
     seqmap.tsv: seq_pos, chain, resnr, icode, resname3 ...
-    返回: (chain,resnr) -> seq_pos（重复则保留第一个）
+    Returns: (chain,resnr) -> seq_pos (first occurrence kept on duplicates)
     """
     df=pd.read_csv(path, sep="\t")
     mp={}
@@ -59,9 +59,9 @@ def load_seqmap(path: Path):
 
 def parse_plip_xml_all(xml_path: Path, enabled_featuretypes: set):
     """
-    解析 PLIP XML，提取所有相互作用残基信息：
-      返回: list of dicts [{feature_type, chain, resnr, restype, extra_desc}, ...]
-    PLIP 每条相互作用记录一般含 <resnr>, <reschain>, <restype> 等字段（你的XML氢键/疏水/盐桥均如此）。
+    Parse a PLIP XML report and extract all interacting residues:
+      Returns: list of dicts [{feature_type, chain, resnr, restype, extra_desc}, ...]
+    Each PLIP interaction record usually has <resnr>, <reschain>, <restype> fields (hydrogen bonds, hydrophobic contacts and salt bridges alike).
     """
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -75,11 +75,11 @@ def parse_plip_xml_all(xml_path: Path, enabled_featuretypes: set):
         if enabled_featuretypes and ftype not in enabled_featuretypes:
             continue
 
-        # 提取子节点字段
+        # read child-node fields
         sub = {c.tag.lower().strip(): (c.text.strip() if c.text else "") for c in list(elem)}
         chain = sub.get("reschain")
         resnr = sub.get("resnr")
-        restype = sub.get("restype")  # 可用于desc
+        restype = sub.get("restype")  # can be used in the description
 
         if not chain or not resnr:
             continue
@@ -88,8 +88,8 @@ def parse_plip_xml_all(xml_path: Path, enabled_featuretypes: set):
         except:
             continue
 
-        # 额外信息放入description（可选）
-        # 比如 hbond 有 dist_h-a / don_angle 等；疏水/盐桥也有 dist 等。
+        # extra information goes into the description (optional)
+        # e.g. hbond has dist_h-a / don_angle; hydrophobic contacts and salt bridges have dist.
         extra = []
         for k in ("dist", "dist_h-a", "dist_d-a", "don_angle", "protisdon"):
             if k in sub and sub[k]:
@@ -108,16 +108,16 @@ def parse_plip_xml_all(xml_path: Path, enabled_featuretypes: set):
 
 def choose_enabled_types(types_arg: str):
     """
-    --types 支持：
+    --types accepts:
       all
       HBOND,HYDROPHOBIC,SALT_BRIDGE,...
-      或 tag名：hbond,hydrophobic,salt_bridge...
+      or tag names: hbond,hydrophobic,salt_bridge...
     """
     if not types_arg or types_arg.lower() == "all":
-        return set(DEFAULT_COLORS.keys())  # 全部
+        return set(DEFAULT_COLORS.keys())  # all
     parts = [x.strip() for x in types_arg.split(",") if x.strip()]
     enabled=set()
-    # 允许用户写小写简称
+    # accept lower-case short names
     alias = {
         "hbond":"HBOND",
         "hydrogen":"HBOND",
@@ -142,19 +142,19 @@ def choose_enabled_types(types_arg: str):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="从 PLIP XML 提取所有(或指定)非共价相互作用残基，并映射到序列坐标(seq_pos)，输出 Jalview features 文件。"
+        description="Extract all (or selected) non-covalent interaction residues from PLIP XML, map them to sequence positions (seq_pos) and write a Jalview features file."
     )
-    ap.add_argument("--seqmaps", nargs="+", required=True, help="seqmap.tsv 列表（来自 pdb_to_fasta_seqmap.py）")
-    ap.add_argument("--plip", nargs="+", required=True, help="PLIP XML 报告列表（可通配符），建议用 *_report.xml")
-    ap.add_argument("-o","--out", default="plip_noncovalent.features", help="输出 Jalview features 文件名")
+    ap.add_argument("--seqmaps", nargs="+", required=True, help="seqmap.tsv files (from pdb_to_fasta_seqmap.py)")
+    ap.add_argument("--plip", nargs="+", required=True, help="PLIP XML reports (wildcards allowed), e.g. *_report.xml")
+    ap.add_argument("-o","--out", default="plip_noncovalent.features", help="Output Jalview features file")
     ap.add_argument("--match_by_prefix", action="store_true",
-                    help="按文件名前缀自动配对：seqmap stem 与 plip stem 互相包含则匹配")
+                    help="Pair files by name: a seqmap stem and a PLIP stem match when one contains the other")
     ap.add_argument("--types", default="all",
-                    help="要输出的相互作用类型：all 或逗号分隔，如 HBOND,HYDROPHOBIC,SALT_BRIDGE")
+                    help="Interaction types to write: all, or comma-separated, e.g. HBOND,HYDROPHOBIC,SALT_BRIDGE")
     ap.add_argument("--merge_same_residue", action="store_true",
-                    help="同一残基若有多种相互作用，合并成一个 NONCOV feature（description里列出类型）")
-    ap.add_argument("--merged_type_name", default="NONCOV", help="合并模式下的FeatureType名称")
-    ap.add_argument("--merged_color", default="0,0,0", help="合并模式下的颜色（默认黑）")
+                    help="Merge several interactions of one residue into a single NONCOV feature (types listed in the description)")
+    ap.add_argument("--merged_type_name", default="NONCOV", help="FeatureType name in merged mode")
+    ap.add_argument("--merged_color", default="0,0,0", help="Colour in merged mode (default black)")
     args = ap.parse_args()
 
     enabled = choose_enabled_types(args.types)
@@ -173,16 +173,16 @@ def main():
                 pairs.append((sm, pp))
     else:
         if len(seqmap_files) != len(plip_files):
-            raise SystemExit("未启用 --match_by_prefix 时，--seqmaps 与 --plip 数量必须相同以便一一对应。")
+            raise SystemExit("Without --match_by_prefix, --seqmaps and --plip must have the same number of files (paired in order).")
         pairs=list(zip(seqmap_files, plip_files))
 
     if not pairs:
-        raise SystemExit("没有匹配到任何 seqmap ↔ plip 对，请检查文件命名或使用 --match_by_prefix。")
+        raise SystemExit("No seqmap/PLIP pairs matched; check the file names or use --match_by_prefix.")
 
     out_path=Path(args.out)
     lines=[]
 
-    # 1) 写颜色定义块（Jalview features 文件允许先定义每个FeatureType的显示风格）。
+    # 1) colour definition block (a Jalview features file may define each FeatureType style first).
     if args.merge_same_residue:
         lines.append(f"{args.merged_type_name}\t{args.merged_color}")
     else:
@@ -190,14 +190,14 @@ def main():
             color = DEFAULT_COLORS.get(ft, "128,128,128")
             lines.append(f"{ft}\t{color}")
 
-    # 2) 写 feature 行
+    # 2) feature lines
     for sm_path, plip_path in pairs:
-        # seq_id 必须与对齐FASTA header（第一个token）一致，否则 Jalview 不会显示。
+        # seq_id must match the first token of the alignment FASTA header, otherwise Jalview does not show it.
         seq_id = sm_path.stem.replace(".seqmap","")
         mp = load_seqmap(sm_path)
 
         if plip_path.suffix.lower() != ".xml":
-            raise SystemExit(f"当前脚本仅推荐解析 XML：{plip_path}（TXT全类型解析不稳定）")
+            raise SystemExit(f"Only XML reports are supported: {plip_path} (TXT parsing of all types is unreliable)")
 
         hits = parse_plip_xml_all(plip_path, enabled_featuretypes=(set() if args.merge_same_residue else enabled))
 
@@ -217,10 +217,10 @@ def main():
                 desc = f"PLIP_NONCOV;chain={chain};resnr={resnr};types={','.join(sorted(typeset))}"
                 if extra_info.get((chain,resnr)):
                     desc += f";info={'|'.join(sorted(extra_info[(chain,resnr)]))}"
-                # Jalview feature行：description sequenceId sequenceIndex start end featureType [score]
+                # Jalview feature line:description sequenceId sequenceIndex start end featureType [score]
                 lines.append(f"{desc}\t{seq_id}\t-1\t{pos}\t{pos}\t{args.merged_type_name}")
         else:
-            # 多类型分别输出
+            # one line per interaction type
             for h in hits:
                 chain,resnr,ftype = h["chain"], h["resnr"], h["feature_type"]
                 if ftype not in enabled:

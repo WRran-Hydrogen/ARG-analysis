@@ -1,19 +1,19 @@
 import pandas as pd
 
-# 读取表格数据
+# Read the input table
 df = pd.read_csv('Distance_noHGT.csv')
 
-# 创建结果表格
+# Create the result table
 result_df = pd.DataFrame(columns=['Gene_id', 'Feat_id', 'Name', 'Other pfam feat_id', 'Other pfam name'])
-# 对每一个gene_id进行处理
+# Process each gene_id
 for gene_id in df['gene_id'].unique():
     gene_df = df[df['gene_id'] == gene_id]
     
-    # 筛选出PF00905或PF13354
+    # Select PF00905 or PF13354
     pfam_filter = gene_df['pfam'].isin(['PF00905', 'PF13354', 'PF00144'])
     pfam_df = gene_df[pfam_filter]
 
-    # 计算其他pfam到PF00905或PF13354的距离
+    # Distance from every other Pfam domain to PF00905 or PF13354
     def calculate_distance(row):
         distances = []
         for index, pfam_row in pfam_df.iterrows():
@@ -25,7 +25,7 @@ for gene_id in df['gene_id'].unique():
 
     gene_df['distance'] = gene_df.apply(calculate_distance, axis=1)
 
-    # 添加结果到结果表格中
+    # Append to the result table
     for index, row in pfam_df.iterrows():
         temp_df = gene_df[~pfam_filter].copy()
         temp_df['Gene_id'] = gene_id
@@ -34,6 +34,6 @@ for gene_id in df['gene_id'].unique():
         temp_df.rename(columns={'feat_id': 'Other pfam feat_id', 'name': 'Other pfam name'}, inplace=True)
         result_df = pd.concat([result_df, temp_df[['Gene_id', 'Feat_id', 'Name', 'Other pfam feat_id', 'Other pfam name', 'distance']]], ignore_index=True)
 
-# 显示结果
+# Show the result
 result_df.to_csv('Distance_noHGT_result.csv',index=False)
 

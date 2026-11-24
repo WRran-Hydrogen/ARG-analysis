@@ -7,14 +7,14 @@ df <- read_xlsx("Abu_Transcriptome.xlsx",sheet = 3) |> as.data.frame()
 
 rownames(df) <- df[,1]
 df <- df[,-1]
-# 创建一个因子并设置其水平
+# Create a factor and set its levels
 
 row_order <- c("Bioreactor", "Solid", 
                "Wastewater", "Other engineered", "Freshwater", "Marine", 
                "Thermal", "Soil", "Other enviroment", "Digestive", 
                "Plants", "Microbial", "Other Host-associated", "Unclassfied")
 habitat_factor <- factor(df$habitat, levels = row_order)
-# 对数据框进行排序
+# Sort the data frame
 df_sorted <- df[order(habitat_factor), ]
 
 annotation_row <- select(df_sorted,c(1:2))

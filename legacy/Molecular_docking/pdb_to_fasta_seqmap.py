@@ -30,11 +30,11 @@ def iter_files(items):
     return out
 
 def main():
-    ap = argparse.ArgumentParser(description="从PDB提取蛋白链序列FASTA，并输出序列位置到PDB残基号映射(seqmap.tsv)。")
-    ap.add_argument("-i","--inputs",nargs="+",required=True,help="输入PDB文件（可通配符）")
-    ap.add_argument("-c","--chain",default=None,help="指定链ID（如 A/B）。不填则对所有链分别输出")
-    ap.add_argument("-o","--outdir",default="seqmaps",help="输出目录")
-    ap.add_argument("--keep_x",action="store_true",help="是否保留未知残基X（默认丢弃X）")
+    ap = argparse.ArgumentParser(description="Extract protein chain sequences from PDB files to FASTA and write a sequence-position to PDB residue-number map (seqmap.tsv).")
+    ap.add_argument("-i","--inputs",nargs="+",required=True,help="Input PDB files (wildcards allowed)")
+    ap.add_argument("-c","--chain",default=None,help="Chain ID (e.g. A/B). If omitted, every chain is written separately")
+    ap.add_argument("-o","--outdir",default="seqmaps",help="Output directory")
+    ap.add_argument("--keep_x",action="store_true",help="Keep unknown residues as X (default: drop X)")
     args = ap.parse_args()
 
     outdir=Path(args.outdir); outdir.mkdir(parents=True, exist_ok=True)
@@ -55,7 +55,7 @@ def main():
 
             for res in ch.get_residues():
                 hetflag, resseq, icode = res.id
-                if hetflag.strip():  # 跳过异源/水
+                if hetflag.strip():  # skip hetero residues / water
                     continue
                 aa1=aa3_to_aa1(res.get_resname())
                 if aa1=="X" and not args.keep_x:
@@ -73,7 +73,7 @@ def main():
             if not seq:
                 continue
 
-            # 建议ID不要有空格，Jalview 的 sequenceId 通常取header第一个词
+            # keep IDs free of spaces; Jalview uses the first header word as sequenceId
             seq_id = f"{pdbp.stem}_chain{chain_id}"
             fasta_path = outdir / f"{seq_id}.fasta"
             map_path   = outdir / f"{seq_id}.seqmap.tsv"

@@ -31,7 +31,7 @@ def parse_pockets(pocket_str: str):
             continue
         parts.append(int(chunk))
     if not parts:
-        raise argparse.ArgumentTypeError("未提供有效 pocket，如 -p 1,2")
+        raise argparse.ArgumentTypeError("No valid pocket given, e.g. -p 1,2")
     return sorted(set(parts))
 
 def iter_files(items):
@@ -43,7 +43,7 @@ def iter_files(items):
             files.extend(m)
         elif os.path.exists(it):
             files.append(it)
-    # 去重保序
+    # de-duplicate, keep order
     seen, uniq = set(), []
     for f in files:
         if f not in seen:
@@ -51,11 +51,11 @@ def iter_files(items):
     return uniq
 
 def normalize_pocket_csv(df: pd.DataFrame) -> pd.DataFrame:
-    # 你的 CSV 列名前可能有前导空格，strip 后再统一小写
+    # CSV column names may have leading spaces: strip, then lower-case
     df.columns = [c.strip() for c in df.columns]
     df = df.rename(columns={c: c.strip().lower() for c in df.columns})
 
-    # 必需列（适配你提供的口袋预测 CSV）
+    # required columns of the pocket-prediction CSV
     need = {
         "chain": ["chain"],
         "residue_label": ["residue_label", "residue_number", "resid", "resnum", "resi"],
@@ -69,7 +69,7 @@ def normalize_pocket_csv(df: pd.DataFrame) -> pd.DataFrame:
                 found[std] = c
                 break
         if std not in found:
-            raise ValueError(f"缺少必需列 {std}，实际列={list(df.columns)}")
+            raise ValueError(f"Missing required column {std}; columns = {list(df.columns)}")
 
     opt = {
         "score": ["score"],
@@ -87,7 +87,7 @@ def normalize_pocket_csv(df: pd.DataFrame) -> pd.DataFrame:
     inv = {v: k for k, v in found.items()}
     df2 = df2.rename(columns=inv)
 
-    # 类型处理
+    # type conversion
     df2["pocket"] = pd.to_numeric(df2["pocket"], errors="coerce")
     df2["residue_label"] = pd.to_numeric(df2["residue_label"], errors="coerce")
     df2 = df2.dropna(subset=["pocket", "residue_label", "chain", "residue_name"])
@@ -101,14 +101,14 @@ def normalize_pocket_csv(df: pd.DataFrame) -> pd.DataFrame:
 
 def _collect_from_json(obj, hits):
     """
-    在 JSON 中递归搜索 hydrogen_bonds 字段，收集 protein residue: (chain, resnr)
-    尽量鲁棒：识别常见键名 resnr/reschain 或 residue_number/chain。
+    Recursively search a JSON report for hydrogen_bonds and collect protein residues as (chain, resnr).
+    Accepts the common key names resnr/reschain or residue_number/chain.
     """
     if isinstance(obj, dict):
         for k, v in obj.items():
             lk = str(k).lower()
             if "hydrogen" in lk and "bond" in lk:
-                # 这一层可能就是列表/字典
+                # this level may itself be a list or dict
                 _collect_from_json(v, hits)
             else:
                 _collect_from_json(v, hits)
@@ -121,10 +121,10 @@ def _collect_from_json(obj, hits):
 def parse_plip_json(path: Path):
     data = json.loads(path.read_text(encoding="utf-8", errors="ignore"))
     hits = []
-    # 先递归找所有可能 interaction dict
+    # first collect every candidate interaction dict
     def walk(o):
         if isinstance(o, dict):
-            # 如果这个 dict 看起来就是一个 hbond 记录，尝试取 residue 信息
+            # if this dict looks like an hbond record, read its residue
             keys = {str(x).lower() for x in o.keys()}
             if ("resnr" in keys and "reschain" in keys) or ("residue_number" in keys and "chain" in keys):
                 chain = o.get("reschain", o.get("chain", None))
@@ -147,14 +147,14 @@ def parse_plip_xml(path: Path):
     root = tree.getroot()
     hits = []
 
-    # 找所有 tag/name 含 hydrogen_bond 的节点
+    # find every node whose tag/name contains hydrogen_bond
     for elem in root.iter():
         tag = elem.tag.lower()
         if "hydrogen" in tag and "bond" in tag:
-            # elem 可能是 <hydrogen_bond> 记录，也可能是容器
-            # 尝试从子节点取 reschain/resnr
+            # elem may be a <hydrogen_bond> record or a container
+            # read reschain/resnr from child nodes
             sub = {child.tag.lower(): (child.text.strip() if child.text else "") for child in list(elem)}
-            # 常见字段名（PLIP XML 常见风格）
+            # common PLIP XML field names
             chain = sub.get("reschain") or sub.get("chain") or sub.get("protchain") or sub.get("protein_chain")
             resnr = sub.get("resnr") or sub.get("resnum") or sub.get("residue_number") or sub.get("protein_resnr")
             if chain and resnr:
@@ -166,7 +166,7 @@ def parse_plip_xml(path: Path):
     return hits
 
 HB_TEXT_PATTERNS = [
-    # 尝试从文本里抓类似 "C:ARG2325" 或 "Chain C Res 2325 ARG" 等片段
+    # pick fragments such as "C:ARG2325" or "Chain C Res 2325 ARG" from text
     re.compile(r"\b([A-Za-z0-9])\s*[:]\s*([A-Z]{3})\s*(\d+)\b"),
     re.compile(r"\bchain\s*([A-Za-z0-9])\b.*?\b(\d+)\b.*?\b([A-Z]{3})\b", re.IGNORECASE),
     re.compile(r"\bres(?:idue)?\s*(\d+)\b.*?\bchain\s*([A-Za-z0-9])\b", re.IGNORECASE),
@@ -176,8 +176,8 @@ def parse_plip_txt(path: Path):
     txt = path.read_text(encoding="utf-8", errors="ignore")
     hits = []
 
-    # 只截取“氢键”相关区域（尽量）
-    # 如果找不到标题，就全文件扫描
+    # restrict to the hydrogen-bond section where possible
+    # scan the whole file if no section header is found
     chunk = txt
     m = re.search(r"hydrogen\s*bonds?.*?\n(-+|\=+)", txt, flags=re.IGNORECASE)
     if m:
@@ -186,7 +186,7 @@ def parse_plip_txt(path: Path):
     for pat in HB_TEXT_PATTERNS:
         for mm in pat.finditer(chunk):
             groups = mm.groups()
-            # 处理不同 pattern 的 group 顺序
+            # group order differs between patterns
             if len(groups) == 3 and groups[0] and groups[2]:
                 # pattern1: chain, aa3, resnr
                 chain = groups[0]
@@ -214,21 +214,21 @@ def parse_plip_file(path: Path):
         return parse_plip_json(path)
     if suf in [".xml"]:
         return parse_plip_xml(path)
-    # 兜底：文本
+    # fallback: text
     return parse_plip_txt(path)
 
 # ------------------------ matching / output ------------------------
 
 def find_plip_for_csv(csv_path: Path, plip_dir: Path, exts=(".xml", ".json", ".txt")):
     """
-    在 plip_dir 下寻找与 csv 基名匹配的 PLIP 文件
-    规则：stem 前缀匹配（csv_stem 开头），优先 xml > json > txt
+    Find the PLIP file in plip_dir matching the CSV base name.
+    Rule: stem prefix match (starting with csv_stem), preferring xml > json > txt.
     """
     base = csv_path.stem
     cand = []
     for ext in exts:
         cand.extend(sorted(plip_dir.glob(f"{base}*{ext}")))
-    # 优先 XML/JSON
+    # prefer XML/JSON
     cand = sorted(cand, key=lambda p: {".xml":0, ".json":1, ".txt":2}.get(p.suffix.lower(), 9))
     return cand[0] if cand else None
 
@@ -246,7 +246,7 @@ def write_outputs(df, out_tsv: Path, out_fasta: Path, star=False):
     if out_fasta is not None:
         lines = []
         for chain, g in df.groupby("chain", sort=False):
-            # 口袋序列：氢键位点可选打星号/小写
+            # pocket sequence: hydrogen-bond sites marked with * or lower case
             seq = []
             for _, r in g.iterrows():
                 aa = r["aa1"]
@@ -263,28 +263,28 @@ def write_outputs(df, out_tsv: Path, out_fasta: Path, star=False):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="从口袋预测CSV提取指定 pocket 残基，并根据 PLIP 氢键结果打标输出。"
+        description="Extract residues of selected pockets from pocket-prediction CSVs and mark PLIP hydrogen-bond residues."
     )
     ap.add_argument("-i", "--inputs", nargs="+", required=True,
-                    help="口袋预测CSV，可多个/通配符，如 pockets/*.csv")
+                    help="Pocket-prediction CSVs (several or wildcards), e.g. pockets/*.csv")
     ap.add_argument("-p", "--pockets", type=parse_pockets, required=True,
-                    help="选择 pocket，如 1,2")
+                    help="Pockets to keep, e.g. 1,2")
     ap.add_argument("--plip", nargs="*", default=None,
-                    help="PLIP 输出文件（xml/json/txt）。若提供1个则应用到全部；若数量等于CSV则一一对应。")
+                    help="PLIP output files (xml/json/txt). One file applies to all CSVs; otherwise give one per CSV.")
     ap.add_argument("--plip_dir", default=None,
-                    help="PLIP 输出目录：自动按文件名前缀匹配（推荐批量）。")
+                    help="PLIP output directory; files are matched by name prefix (recommended for batches).")
     ap.add_argument("-o", "--outdir", default="pocket_hb_out",
-                    help="输出目录")
+                    help="Output directory")
     ap.add_argument("--format", choices=["tsv", "both"], default="both",
-                    help="输出 tsv 或 tsv+fasta（默认 both）")
+                    help="Write tsv or tsv+fasta (default: both)")
     ap.add_argument("--star", action="store_true",
-                    help="FASTA 中氢键残基用 AA* 表示；不加则用小写 aa 表示")
+                    help="Mark hydrogen-bond residues as AA* in FASTA; otherwise as lower-case aa")
     ap.add_argument("--dedup", action="store_true",
-                    help="对 (chain,residue_label) 去重")
+                    help="De-duplicate (chain, residue_label)")
     ap.add_argument("--min_prob", type=float, default=None,
-                    help="可选：过滤 probability >= min_prob")
+                    help="Optional: keep probability >= min_prob")
     ap.add_argument("--min_score", type=float, default=None,
-                    help="可选：过滤 score >= min_score")
+                    help="Optional: keep score >= min_score")
     args = ap.parse_args()
 
     outdir = Path(args.outdir)
@@ -292,16 +292,16 @@ def main():
 
     csv_files = iter_files(args.inputs)
     if not csv_files:
-        raise SystemExit("未找到任何 CSV 输入。")
+        raise SystemExit("No CSV input found.")
 
     plip_files = iter_files(args.plip) if args.plip else []
     plip_dir = Path(args.plip_dir) if args.plip_dir else None
 
-    # 配对策略：
-    # 1) plip_dir: 自动匹配
-    # 2) --plip 只给1个：全部共用
-    # 3) --plip 数量==csv数量：一一对应
-    # 否则报错
+    # pairing:
+    # 1) plip_dir: automatic matching
+    # 2) a single --plip: shared by all CSVs
+    # 3) as many --plip as CSVs: paired in order
+    # otherwise: error
     pair_mode = None
     if plip_dir is not None:
         pair_mode = "dir"
@@ -312,7 +312,7 @@ def main():
     elif len(plip_files) == 0:
         pair_mode = "none"
     else:
-        raise SystemExit("PLIP 文件数量不匹配：请用 --plip_dir 或只提供1个 --plip 或提供与CSV等量的 --plip。")
+        raise SystemExit("PLIP file count mismatch: use --plip_dir, a single --plip, or one --plip per CSV.")
 
     for idx, csvf in enumerate(csv_files):
         csv_path = Path(csvf)
@@ -321,10 +321,10 @@ def main():
 
         df = normalize_pocket_csv(pd.read_csv(csv_path))
 
-        # pocket 过滤
+        # pocket filter
         df = df[df["pocket"].isin(args.pockets)].copy()
 
-        # 阈值过滤
+        # threshold filter
         if args.min_prob is not None and "probability" in df.columns:
             df["probability"] = pd.to_numeric(df["probability"], errors="coerce")
             df = df[df["probability"] >= args.min_prob].copy()
@@ -336,10 +336,10 @@ def main():
             df = df.drop_duplicates(subset=["chain", "residue_label"])
 
         if df.empty:
-            sys.stderr.write(f"[WARN] {csv_path.name}: pocket={args.pockets} 后无残基\n")
+            sys.stderr.write(f"[WARN] {csv_path.name}: pocket={args.pockets} leaves no residues\n")
             continue
 
-        # 取对应 PLIP
+        # matching PLIP file
         plip_path = None
         if pair_mode == "dir":
             plip_path = find_plip_for_csv(csv_path, plip_dir)
@@ -348,7 +348,7 @@ def main():
         elif pair_mode == "pairwise":
             plip_path = Path(plip_files[idx])
 
-        # 解析 PLIP 氢键残基集合
+        # parse the set of PLIP hydrogen-bond residues
         hb_set = set()
         hb_count = {}  # (chain,resnr) -> count
         hb_sources = {}  # (chain,resnr) -> set(paths)
@@ -361,10 +361,10 @@ def main():
                 hb_count[key] = hb_count.get(key, 0) + 1
                 hb_sources.setdefault(key, set()).add(plip_path.name)
 
-        # 打标
+        # mark residues
         df["hb"] = df.apply(lambda r: (r["chain"], r["residue_label"]) in hb_set, axis=1)
 
-        # 附加统计列（如果有 plip）
+        # extra summary columns (when a PLIP file exists)
         if hb_set:
             df["hb_count"] = df.apply(lambda r: hb_count.get((r["chain"], r["residue_label"]), 0), axis=1)
             df["hb_sources"] = df.apply(

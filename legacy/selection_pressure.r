@@ -10,20 +10,20 @@ library(aplot)
 df <- read_tsv("pf13354_info.tsv")
 df2 <- read_tsv("pf00905_info.tsv")
 df3 <- read_tsv("pf00144_info.tsv")
-# 3. 数据清洗与节点分类打标签
+# 3. Clean the data and label node classes
 df_13354 <- df %>%
   filter(LRT >= 0) %>%
   mutate(
-    # 计算 -log10(p)
+    # Compute -log10(p)
     neg_log_p = -log10(p_used + 1e-15),
-    # 标记显著性 (控制颜色)
+    # Flag significance (controls colour)
     Significance = case_when(
       p_used < 0.05 ~ internal_type,
       TRUE ~ "Not Significant"
     ),
   )
 
-# 4. 绘制形状映射火山图
+# 4. Volcano plot with shape mapping
 pf13354 <- ggplot(df_13354, aes(x = prop_omega_gt1, y = neg_log_p, 
                           color = Significance, shape = group)) +
   geom_point(size = 4, alpha = 0.8) +
@@ -31,7 +31,7 @@ pf13354 <- ggplot(df_13354, aes(x = prop_omega_gt1, y = neg_log_p,
                                 "virus" = "#3498db", 
                                 "bacteria" = "#e74c3c", 
                                 "Nested" = "#4daf4a")) +
-  # 自定义形状 (16=实心圆/病毒, 15=实心方块/细菌, 17=实心三角/内部节点)
+  # Custom shapes (16 = filled circle / viral, 15 = filled square / bacterial, 17 = filled triangle / internal node)
   scale_shape_manual(values = c("virus" = 16, 
                                 "bacteria" = 15, 
                                 "internal_node" = 17)) +
@@ -61,16 +61,16 @@ pf13354 <- ggplot(df_13354, aes(x = prop_omega_gt1, y = neg_log_p,
 df_00905 <- df2 %>%
   filter(LRT >= 0) %>%
   mutate(
-    # 计算 -log10(p)
+    # Compute -log10(p)
     neg_log_p = -log10(p_used + 1e-15),
-    # 标记显著性 (控制颜色)
+    # Flag significance (controls colour)
     Significance = case_when(
       p_used < 0.05 ~ internal_type,
       TRUE ~ "Not Significant"
     ),
   )
 
-# 4. 绘制形状映射火山图
+# 4. Volcano plot with shape mapping
 pf00905 <- ggplot(df_00905, aes(x = prop_omega_gt1, y = neg_log_p, 
                           color = Significance, shape = group)) +
   geom_point(size = 4, alpha = 0.8) +
@@ -78,7 +78,7 @@ pf00905 <- ggplot(df_00905, aes(x = prop_omega_gt1, y = neg_log_p,
                                 "virus" = "#3498db", 
                                 "bacteria" = "#e74c3c", 
                                 "Nested" = "#4daf4a")) +
-  # 自定义形状 (16=实心圆/病毒, 15=实心方块/细菌, 17=实心三角/内部节点)
+  # Custom shapes (16 = filled circle / viral, 15 = filled square / bacterial, 17 = filled triangle / internal node)
   scale_shape_manual(values = c("virus" = 16, 
                                 "bacteria" = 15, 
                                 "internal_node" = 17)) +
@@ -105,16 +105,16 @@ pf00905 <- ggplot(df_00905, aes(x = prop_omega_gt1, y = neg_log_p,
 df_00144 <- df3 %>%
   filter(LRT >= 0) %>%
   mutate(
-    # 计算 -log10(p)
+    # Compute -log10(p)
     neg_log_p = -log10(p_used + 1e-15),
-    # 标记显著性 (控制颜色)
+    # Flag significance (controls colour)
     Significance = case_when(
       p_used < 0.05 ~ internal_type,
       TRUE ~ "Not Significant"
     ),
   )
 
-# 4. 绘制形状映射火山图
+# 4. Volcano plot with shape mapping
 pf00144 <- ggplot(df_00144, aes(x = prop_omega_gt1, y = neg_log_p, 
                           color = Significance, shape = group)) +
   geom_point(size = 4, alpha = 0.8) +
@@ -122,7 +122,7 @@ pf00144 <- ggplot(df_00144, aes(x = prop_omega_gt1, y = neg_log_p,
                                 "virus" = "#3498db", 
                                 "bacteria" = "#e74c3c", 
                                 "Nested" = "#4daf4a")) +
-  # 自定义形状 (16=实心圆/病毒, 15=实心方块/细菌, 17=实心三角/内部节点)
+  # Custom shapes (16 = filled circle / viral, 15 = filled square / bacterial, 17 = filled triangle / internal node)
   scale_shape_manual(values = c("virus" = 16, 
                                 "bacteria" = 15, 
                                 "internal_node" = 17)) +

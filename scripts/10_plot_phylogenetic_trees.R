@@ -1,24 +1,23 @@
 #!/usr/bin/env Rscript
 # ==============================================================================
 # Circular phylogenetic tree figures for the primary IQ-TREE trees (PDF + LZW-TIFF + PNG)
-# 主树环形系统发育树作图（PDF + LZW-TIFF + PNG 输出）
 #
-# Usage / 运行方式:
-#   1) 命令行: Rscript scripts/10_plot_phylogenetic_trees.R
-#   2) RStudio: 直接打开本脚本并 Source / Ctrl+Alt+R 运行（自动识别仓库根目录）
+# Usage:
+#   1) Command line: Rscript scripts/10_plot_phylogenetic_trees.R
+#   2) RStudio: open this script and Source it (the repository root is detected automatically)
 #
-# Rooting / 定根: Sister-PRE outgroup (pre-registered primary rooting); the outgroup tips are
+# Rooting: Sister-PRE outgroup (pre-registered primary rooting); the outgroup tips are
 #   removed after rooting. Set ROOTING <- "midpoint" for the midpoint sensitivity view.
 # Branch lengths beyond the CAP_DEPTH_QUANTILE tip depth are shortened for display only; the
 #   subtitle states when this is applied.
 #
-# Inputs / 输入文件:
+# Inputs:
 #   - results/reanalysis_2026/primary_trees/*.treefile, *.iqtree & *_outgroup.txt
 #   - results/reanalysis_2026/Final_Viral_SBL_Catalog.tsv
 #   - results/reanalysis_2026/Final_Bacterial_TripleSource_Catalog.tsv
 #   - results/reanalysis_2026/Phase2_Viral_Genomic_Neighborhoods_Full.tsv
 #
-# Outputs / 输出文件:
+# Outputs:
 #   - results/reanalysis_2026/primary_trees/Tree_Tip_Annotations_Merged.tsv
 #   - figures/phylogenetic_trees/{PF00144,PF00905,PF13354,PF00768,PF13354_PF00768,Overview_4Panel}.{pdf,tiff,png}
 # ==============================================================================
@@ -38,10 +37,10 @@ suppressPackageStartupMessages({
 })
 
 # ==============================================================================
-# SECTION 1: 可自定义参数与配色区（后续微调出刊图时只需修改这里）
+# SECTION 1: Adjustable parameters and colour palettes (tune the figures here only)
 # ==============================================================================
 
-# 1.1 自动识别项目根目录
+# 1.1 Locate the repository root
 locate_repo_root <- function() {
   cmd_args <- commandArgs(trailingOnly = FALSE)
   file_arg <- grep("^--file=", cmd_args, value = TRUE)
@@ -53,7 +52,7 @@ locate_repo_root <- function() {
   for (cand in c(getwd(), normalizePath(file.path(getwd(), ".."), winslash = "/", mustWork = FALSE))) {
     if (dir.exists(file.path(cand, "results", "reanalysis_2026"))) return(normalizePath(cand, winslash = "/"))
   }
-  stop("无法定位 SBL_research 根目录，请在仓库根目录或 scripts/ 目录下运行。")
+  stop("Cannot locate the SBL_research root; run from the repository root or from scripts/.")
 }
 
 REPO_ROOT <- locate_repo_root()
@@ -62,20 +61,20 @@ META_DIR  <- file.path(REPO_ROOT, "results", "reanalysis_2026")
 OUT_DIR   <- file.path(REPO_ROOT, "figures", "phylogenetic_trees")
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-# 1.2 图形版式与分辨率控制
-ROOTING            <- "outgroup"  # "outgroup"（Sister-PRE 外群定根，主分析）或 "midpoint"（敏感性）
-OPEN_ANGLE         <- 16      # 环形缺口角度（度），用于放置 R1/R2/R3 环标签
-CAP_DEPTH_QUANTILE <- 0.985   # 截断前 1.5% 极端长枝以展开内群拓扑（设为 1.0 则不截断）
-SHOW_BOOT_NODES    <- TRUE    # 是否标出高支持度节点（UFBoot >= 95 & SH-aLRT >= 80）
-SHOW_SBL_LABELS    <- TRUE    # 是否在最外圈标注代表性病毒临床同源 SBL 基因名
-LABEL_ENV_SBL      <- FALSE   # 是否重复标出 "Motif-SBL" 文字（默认仅用紫色菱形 ◆ 表示）
-MIN_LABEL_TIP_GAP  <- 18      # 防止外圈基因标签重叠的最小叶节点间隔数
-FIG_WIDTH          <- 13.0    # 单树图宽（英寸）
-FIG_HEIGHT         <- 10.2    # 单树图高（英寸）
-TIFF_DPI           <- 300     # 出刊定稿可改为 600（当前 300 dpi 兼顾清晰度与文件体积）
-EXPORT_PNG_PREVIEW <- TRUE    # 同时输出 PNG 方便快速浏览
+# 1.2 Layout and resolution
+ROOTING            <- "outgroup"  # "outgroup" (Sister-PRE outgroup, primary) or "midpoint" (sensitivity)
+OPEN_ANGLE         <- 16      # fan opening angle (degrees); leaves room for the R1/R2/R3 ring labels
+CAP_DEPTH_QUANTILE <- 0.985   # shorten the longest 1.5% of tips for display (1.0 = no capping)
+SHOW_BOOT_NODES    <- TRUE    # mark well-supported nodes (UFBoot >= 95 & SH-aLRT >= 80)
+SHOW_SBL_LABELS    <- TRUE    # label representative viral CARD-homolog SBLs on the outer ring
+LABEL_ENV_SBL      <- FALSE   # also print "Motif-SBL" labels (default: purple diamond marker only)
+MIN_LABEL_TIP_GAP  <- 18      # minimum number of tips between outer-ring labels (avoids overlap)
+FIG_WIDTH          <- 13.0    # single-tree figure width (inches)
+FIG_HEIGHT         <- 10.2    # single-tree figure height (inches)
+TIFF_DPI           <- 300     # 600 for final production files; 300 dpi balances sharpness and file size
+EXPORT_PNG_PREVIEW <- TRUE    # also write a PNG preview
 
-# 1.3 分支配色（Branches）
+# 1.3 Branch colours
 PAL_BRANCH <- c(
   "Viral clade (>=80% V)"         = "#D62728",
   "Hydrolytic SBL clade (>=80%)"  = "#0D9488",
@@ -87,7 +86,7 @@ LW_BRANCH <- c(
   "Bacterial / PBP backbone"      = 0.18
 )
 
-# 1.4 外圈 Ring 1：来源与病毒可信度分层（Origin & Viral Tier）
+# 1.4 Ring 1: origin and viral-origin tier
 PAL_RING1 <- c(
   "Viral Tier 1 (High-conf.)"      = "#DC2626",
   "Viral Tier 2 (Supported)"       = "#F97316",
@@ -97,7 +96,7 @@ PAL_RING1 <- c(
   "Bacterial Reference"            = "#E2E8F0"
 )
 
-# 1.5 外圈 Ring 2：催化功能分层（CARD 同源 SBL vs 仅基序定义 SBL vs PBP/PRE）
+# 1.5 Ring 2: catalytic function (CARD-homolog SBL vs motif-defined SBL vs PBP/PRE)
 # CARD homolog = DIAMOND vs CARD (PBP entries removed) >= 40 % identity & >= 70 % coverage;
 # motif-defined = class A (SXXK + SDN + E166xxLN + KTG) or class C (SXXK + YAN + KTG) without a
 # CARD hit (class D always requires a CARD hit, see 09_build_curated_datasets.py).
@@ -111,7 +110,7 @@ PAL_RING2 <- c(
   "PBP / PRE Homolog"                       = "#F1F5F9"
 )
 
-# 1.6 外圈 Ring 3：家族特征结构域架构（单家族树）与家族归属（联立树）
+# 1.6 Ring 3: domain architecture (single-family trees) or Pfam family (joint tree)
 PAL_RING3_ARCH <- c(
   "Viral Phage_spike/tail_CBM"       = "#2563EB",
   "Viral SLH+PF00144"                = "#7C3AED",
@@ -130,7 +129,7 @@ PAL_RING3_JOINT <- c(
 )
 
 # ==============================================================================
-# SECTION 2: 读取并构建统一规范化注释元数据表（R 中可直接复用）
+# SECTION 2: Read and merge the tip annotation tables
 # ==============================================================================
 
 clean_card_family <- function(card_family, card_pident, card_cov, func_tier) {
@@ -270,7 +269,7 @@ build_merged_metadata <- function() {
     "domain_architecture", "hmm_cov", "motif1_SXXK_hmm", "motif2_class", "motif3_KTG_hmm", "has_omega_E166"
   )
   merged <- bind_rows(select(v_df, all_of(keep_cols)), select(b_df, all_of(keep_cols)))
-  # 防止重复 uid（若某些条目同时存在于单家族目录）
+  # guard against duplicated uids
   merged <- distinct(merged, uid, .keep_all = TRUE)
 
   out_tsv <- file.path(TREE_DIR, "Tree_Tip_Annotations_Merged.tsv")
@@ -280,7 +279,7 @@ build_merged_metadata <- function() {
 }
 
 # ==============================================================================
-# SECTION 3: 定根、极端长枝截断与枝状态注释
+# SECTION 3: Rooting, display-only branch capping and clade annotation
 # ==============================================================================
 
 prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df) {
@@ -303,7 +302,7 @@ prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df) {
   }
   tr <- ape::ladderize(tr, right = FALSE)
 
-  # 截断极端前 1.5% 离群长枝（仅用于显示；保持父节点深度 <= 子节点深度，保证非负枝长）
+  # Shorten the longest 1.5% of tips (display only; parent depth <= child depth keeps branch lengths non-negative)
   n_capped <- 0L
   if (CAP_DEPTH_QUANTILE < 1.0 && !is.null(tr$edge.length)) {
     depths <- ape::node.depth.edgelength(tr)
@@ -316,7 +315,7 @@ prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df) {
     }
   }
 
-  # 解析 IQ-TREE SH-aLRT / UFBoot 支持度
+  # Parse IQ-TREE SH-aLRT / UFBoot support values
   n_tips <- length(tr$tip.label)
   n_nodes <- tr$Nnode
   tot_nodes <- n_tips + n_nodes
@@ -334,7 +333,7 @@ prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df) {
     }
   }
 
-  # 自底向上快速累计每个分支后代的病毒数与真水解型 SBL 数
+  # Bottom-up count of viral and hydrolytic SBL descendants per node
   tip_meta <- tibble(uid = tr$tip.label) |> left_join(meta_df, by = "uid")
   n_desc <- integer(tot_nodes)
   n_v    <- integer(tot_nodes)
@@ -370,7 +369,7 @@ prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df) {
     branch_group = factor(branch_group, levels = names(PAL_BRANCH))
   )
 
-  # tip_df 仅保留外圈 geom_fruit 与标注所需列，避免与 p$data / node_df 列名冲突
+  # tip_df keeps only the columns used by the outer rings, avoiding clashes with p$data / node_df
   tip_full <- tip_meta |>
     mutate(
       id = uid,
@@ -419,7 +418,7 @@ read_iqtree_model <- function(tree_path, fallback) {
   trimws(sub(".*BIC:", "", hit[1]))
 }
 
-# 选择外圈病毒 SBL 标签（保证按树的叶顺序至少间隔 MIN_LABEL_TIP_GAP，避免重叠）
+# Pick outer-ring viral SBL labels at least MIN_LABEL_TIP_GAP tips apart (avoids overlap)
 select_spaced_sbl_labels <- function(tip_coords_df, min_gap = MIN_LABEL_TIP_GAP) {
   cand <- tip_coords_df |>
     filter(origin == "Viral", functional_tier == "Putative_Hydrolytic_BetaLactamase")
@@ -447,7 +446,7 @@ select_spaced_sbl_labels <- function(tip_coords_df, min_gap = MIN_LABEL_TIP_GAP)
 }
 
 # ==============================================================================
-# SECTION 4: ggtree + ggtreeExtra 绘图核心函数
+# SECTION 4: ggtree + ggtreeExtra plotting
 # ==============================================================================
 
 build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
@@ -514,7 +513,7 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
       guide = guide_legend(order = 3)
     )
 
-  # Ring 3: Domain Architecture (单家族) OR Pfam Family (联立树)
+  # Ring 3: domain architecture (single-family trees) or Pfam family (joint tree)
   is_joint <- identical(spec$tag, "PF13354_PF00768")
   if (is_joint) {
     p <- p +
@@ -554,7 +553,7 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
       )
   }
 
-  # 最外圈叠加：病毒水解型 SBL 外标记点（CARD 同源 vs 仅基序定义）
+  # Outer markers: viral hydrolytic SBLs (CARD homolog vs motif-defined)
   tip_coords <- p$data |>
     filter(isTip == TRUE) |>
     select(id = label, y, angle) |>
@@ -583,17 +582,17 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
       ) +
       scale_shape_manual(
         name = "Outer Markers (Viral SBL)",
-        values = setNames(c(8, 18), c(LBL_V_CARD, LBL_V_MOTIF)),   # 星号 * / 菱形 ◆
+        values = setNames(c(8, 18), c(LBL_V_CARD, LBL_V_MOTIF)),   # asterisk / diamond
         drop = TRUE,
         guide = guide_legend(order = 5)
       )
   }
 
-  # 外圈稀疏基因标签（避免互相重叠）
+  # Sparse outer-ring gene labels (non-overlapping)
   if (SHOW_SBL_LABELS && !compact_mode) {
     lbl_df <- select_spaced_sbl_labels(tip_coords, min_gap = max(14, round(n_tot / 95)))
     if (nrow(lbl_df) > 0) {
-      # 在 ggtree fan 布局中，angle 位于 [0, 360]；左半圆 [90, 270] 自动翻转 180° 以保证正向阅读
+      # In the fan layout angle is in [0, 360]; labels on the left half (90-270) are flipped by 180 degrees to stay readable
       lbl_df <- lbl_df |>
         mutate(
           ang = (angle %% 360),
@@ -614,7 +613,7 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
     }
   }
 
-  # 在环形缺口内标出 R1 / R2 / R3 环序号
+  # R1 / R2 / R3 ring labels inside the fan opening
   ring_centers <- max_x * c(1.04 + 0.034, 1.122 + 0.034, 1.204 + 0.034)
   r_lbl_df <- tibble(
     x = ring_centers,
@@ -631,7 +630,7 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
       inherit.aes = FALSE
     )
 
-  # 扩大径向边界避免最外圈文字被裁剪
+  # Widen the radial limit so outer labels are not clipped
   x_lim_hi <- if (SHOW_SBL_LABELS && !compact_mode) max_x * 1.50 else max_x * 1.35
   sub_txt <- sprintf(
     "Ingroup n=%s (Viral nr85=%s, Bacterial=%s) | Viral SBL: CARD-homolog=%d, motif-defined=%d | Bac SBL=%d | %s",
@@ -669,7 +668,7 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
 }
 
 # ==============================================================================
-# SECTION 5: 批量生成并导出 PDF（矢量）+ LZW-TIFF（投稿位图）+ PNG 预览
+# SECTION 5: Export PDF (vector) + LZW-TIFF (raster) + PNG preview
 # ==============================================================================
 
 save_multi_format <- function(plot_obj, stem, width, height, dpi = TIFF_DPI) {
@@ -677,13 +676,13 @@ save_multi_format <- function(plot_obj, stem, width, height, dpi = TIFF_DPI) {
   tiff_path <- file.path(OUT_DIR, paste0(stem, ".tiff"))
   png_path  <- file.path(OUT_DIR, paste0(stem, ".png"))
 
-  # PDF（优先使用 cairo_pdf，若系统缺少 Cairo 则回退标准 pdf）
+  # PDF (cairo_pdf when available, otherwise the standard pdf device)
   tryCatch(
     ggsave(pdf_path, plot = plot_obj, device = grDevices::cairo_pdf, width = width, height = height, units = "in"),
     error = function(e) ggsave(pdf_path, plot = plot_obj, device = "pdf", width = width, height = height, units = "in")
   )
 
-  # LZW 压缩 TIFF（期刊投稿标准）
+  # LZW-compressed TIFF
   ragg::agg_tiff(tiff_path, width = width, height = height, units = "in", res = dpi, compression = "lzw", background = "white")
   print(plot_obj)
   dev.off()
@@ -713,7 +712,7 @@ main <- function() {
     save_multi_format(p, sp$stem, width = FIG_WIDTH, height = FIG_HEIGHT)
   }
 
-  # 生成 2x2 四图全景对比图（PF00144, PF00905, PF13354, PF13354_PF00768）
+  # 2x2 overview panel (PF00144, PF00905, PF13354, PF13354_PF00768)
   message("[Plotting] Overview_4Panel_trees ...")
   ov_specs <- specs[c(1, 2, 3, 5)]
   ov_plots <- lapply(ov_specs, function(sp) build_ggtree_plot(sp, meta_df, compact_mode = TRUE))
@@ -721,7 +720,7 @@ main <- function() {
     theme(legend.position = "bottom", legend.box = "vertical", legend.direction = "horizontal")
   shared_leg <- cowplot::get_legend(p_for_leg)
 
-  # 额外补充 Panel D 的 Ring 3 (PF13354 vs PF00768) 家族配色图例
+  # Extra legend for Ring 3 of panel D (PF13354 vs PF00768)
   d_leg_df <- tibble(
     x = c(1, 2),
     y = c(1, 1),
