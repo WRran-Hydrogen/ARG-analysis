@@ -10,22 +10,21 @@ This repository reconstructs and extends the complete serine-β-lactamase (SBL) 
 
 ## Five-Layer Credibility Architecture
 
-1. **Layer 1 — Official Pfam `CL0013` Profiling & Unified Motif Filtering (`01`, `02`)**:
-   - Evaluates the 3 focal families (`PF00144.31` GA=27.0, `PF00905.29` GA=22.1, `PF13354.14` GA=22.0) alongside all other Clan `CL0013` members using official Pfam-A `--cut_ga` thresholds and rebuilt seed HMMs (`MUSCLE v5.3` + `HMMER v3.4`).
-   - Relies on strictly uniform two-round `MEME/FIMO` motif filtering ($p \le 10^{-5}$ and $p \le 10^{-10}$) across viral and bacterial sets to eliminate false positives lacking conserved catalytic motifs, without enforcing a hard-coded `SXXK` regex pre-filter (`SXXK` conservation is tracked descriptively).
-   - Auxiliary `CL0013` profiling demonstrates that 100.00% (`1,370/1,370`) of final viral `PF13354` SBLs belong to the penicillin-recognizing enzyme (`PRE`) subset (`88.54%` pass `PF13354` `--cut_ga`; `64.31%` simultaneously pass both `PF13354` and `PF00768:Peptidase_S11` `--cut_ga`), with `0` hits to non-penicillin-recognizing `CL0013` enzymes (`PF04960`, `PF06089`, `PF27310`).
-2. **Layer 2 — Bacterial Reference Decontamination & Viral Genomic Context (`03`, `04`)**:
-   - Audits all `2,220` bacterial reference sequences for mislabeled viral entries (`61` `SARG` `Viruses`), artificial/synthetic vectors (`153`), phage-annotated headers (`223`), and high-identity (`>=90%` aa identity) `NCBI nr` cryptic prophages (`393`), exporting `CleanStrict` (`n=1,961`) and `CleanCore` (`n=1,775`) subsets.
-   - Stratifies all `5,701` viral SBL loci (`5,618` unique contigs) into explicit viral-origin confidence tiers (`Tier 1`: `1,254`; `Tier 2`: `3,238`; `Tier 3`: `1,209`) with prophage boundary distances and full upstream/downstream ORF Pfam neighborhoods (`n=879` mapped loci; `86.35%` carrying viral structural hallmarks on the same contig, `76.45%` flanked on both sides), following Martin et al. (*Nat. Microbiol.* 2025).
-3. **Layer 3 — Deterministic Phylogenetic HGT Inference & Sensitivity Pruning (`05`)**:
-   - Implements reproducible phylogenetic HGT detection modeled on Irwin et al. (*Nat. Microbiol.* 2022) and Dmitrijeva et al. (*Nat. Ecol. Evol.* 2024): empirical Youden-*J* inter-domain backbone rooting, zero-length polytomy collapse, two-pass Fitch parsimony ancestral state reconstruction, double-outgroup topological nesting (`>=80%` recipient purity, `<25%` tree tips, `>=75%` donor outgroup fraction across sister `S1` and cousin `S2`), `UFBoot` support stratification (`>=70/80/90%`), and sensitivity pruning across `CleanStrict`, `CleanCore`, and `Viral Tier 1+2`.
-4. **Layer 4 — Lineage-Resolved Selection, MEME Diagnostics & 3D Structural Biophysics (`06`, `07`, `08`)**:
-   - Normalizes HyPhy `aBSREL` branch selection rates against tested background branches (`Internal` vs. `Terminal`; `Viral` vs. `Bacterial` vs. `Mixed_Nested`) and tests paired root-to-tip $\omega$ transitions along HGT and non-HGT lineages.
-   - Diagnoses `PF00144` MEME positive selection (`41.87%` at $p < 0.10$ vs. `29.76%` at $p < 0.05$ and `15.22%` at BH-FDR $q < 0.05$) across threshold sensitivity, branch power (`1,382` branches), sequence divergence/alignment shifts (`hmmalign` locks `SXXK` at `89.94%` vs. `3.15%` in unanchored `codon_trim.fna`), and intragenic recombination (Bruen's PHI $p > 0.61$).
-   - Tests catalytic motif purifying selection via enrichment-depletion statistics (`Fisher`, `Binomial`, `10,000-permutation`), domain-anchored (`hmmalign` back-translated) Nei–Gojobori $d_N/d_S$, and residue-level 3D mapping (`Shrake–Rupley` RSA, $\phi/\psi$ secondary structure, and $C_\alpha$ distance to catalytic Serine across `110` crystal + ESMFold PDB structures).
-5. **Layer 5 — Confounder-Controlled Structural Diversity & Habitat–Motif Ecology (`09`)**:
-   - Controls structural diversity comparisons for SBL family (`PF00144`, `PF00905`, `PF13354`), viral phylum (`Uroviricota`), equal-sample-size rarefaction (`k=50` / `k=26`), and reliable host assignments (`Isolate + CRISPR`).
-   - Applies Cochran–Mantel–Haenszel (`CMH`) stratified tests controlling for `SBL Family x Viral Phylum` and `Host Phylum` across `43` globally enriched habitat–motif pairs, distinguishing `13` confounder-robust habitat-specific motif signals from `30` taxonomically confounded associations.
+1. **Layer 1 — Official Pfam `CL0013` Profiling, Unified Motif Filtering & Strict Biochemical Stratification (`01_curation_and_context`)**:
+   - Evaluates the three focal families (`PF00144.31`, `PF00905.29`, `PF13354.14`) alongside sister PRE families (`PF00768`, `PF02113`) and non-PRE `CL0013` outgroups (`PF04960`, `PF06089`, `PF27310`) using official Pfam-A `--cut_ga` competition, two-round `MEME/FIMO 5.5.9` ($p \le 10^{-5}$), `hmm_cov >= 0.65`, and independent domain-slice `MMseqs2` `nr85` clustering across `n = 4,203` strictly curated viral `CL0013` loci (`PF00144=1,876`, `PF00905=1,242`, `PF13354=248`, `PF00768=837`; viral `nr85`: `416`, `215`, `63`, `195`) and a triple-source bacterial reference (`GTDB r220 + CARD/SARG + Marine MAGs`).
+   - Applies strict CARD + `hmmalign` A2M catalytic-triad verification (`Viral_Enzymatic_Function_Verification_2026.tsv`) excluding PBP-resistance entries, `BlaR1`/`MecR1` (`PF05569`) sensor receptors, `PF00144` `H[TS]G` R61 DD-peptidases/esterases, and truncated fragments without an intact triad, plus Class A Ω-loop (`E166-x-x-[LIVM]-N`) and Class D `[YF]GN` + `TrpCap` verification: **`155 / 4,203` (`3.69%`)** viral sequences are intact **`Putative_Hydrolytic_BetaLactamase`** (`PF13354=145` [`144` Verified + `1` Candidate], `PF00905=9` Class D `OXA`, `PF00144=1` `YRC-1`, `PF00768=0`), whereas **`4,048 / 4,203` (`96.31%`)** are **`PBP_or_PRE_Homolog`** (`4,042` PBP/esterase/phage-lysin homologs, `3` `BlaR1_Sensor_Receptor`, and `3` `Truncated_SBL_Pseudogene`).
+2. **Layer 2 — Bacterial Reference Decontamination & Viral Genomic Context (`01_curation_and_context`)**:
+   - Filters whole viral contigs embedded in bacterial assemblies/MAGs (`is_viral_contig_in_genome`), tags chromosomal prophage loci for OAT sensitivity exclusion, and stratifies `4,193` IMG/VR + `10` MOSAiC viral loci across `298,926` Prodigal ORFs (`Phase2_Viral_Genomic_Neighborhoods_Full.tsv`), strictly separating recombination/integrase markers (`44.96%`) from structural virion hallmarks (`Tier 1` high-confidence viral origin: `1,649` IMG/VR + `10` MOSAiC).
+3. **Layer 3 — Phylogenetic HGT Inference with Rooting Checks & OAT Robustness (`03_primary_trees`, `04_hgt_inference`)**:
+   - Infers HGT on `5` primary trees (four single families + joint `PF13354+PF00768`, the latter a sensitivity analysis whose events repeating a single-family event are not added to totals) with concordant Fitch parsimony + F81 marginal ML (`PastML`-style) ancestral states, double-outgroup nesting and parent/grandparent support thresholds, and tracks every event across `84` OAT trees (`MAD`, `MinVar`, `Midpoint`, clean `12`-taxon chromosomal GTDB outgroups, legacy 24-taxon outgroups, `LG+C20` PMSF, MAFFT alignments, `rep2..rep5`/`phylo_rep` subsampling, `without_prophage`, `cov60`/`cov70`).
+   - **Rooting**: crown projection from the structure-guided `CL0013.struct_c20.no_PF27310` (`FoldMason + hmmalign`, `LG+C20+F+G`) superfamily tree is used only for a family that is a supported clade with a supported root position (UFBoot `>= 95`); no family met this (root-split UFBoot `34–81`), so the primary root is **MAD** for every tree and all comparators are reported (`Rooting_Decisions_And_Agreement.tsv`). Every tree is exported as `{fam}.primary.rooted.treefile`, so R figures and Python statistics share one root.
+   - **Results** (viral-evidence gate: `>= 1` Tier 1/Tier 2/MOSAiC viral locus on the viral side of each event): single-family trees **Tier 1 = `5`**, all single-tip and all `Root_Invariant` — `PF00144` `3` B→V + `1` V→B (`PBP_or_PRE_Homolog`), `PF13354` `1` B→V hydrolytic SBL (BlaZ-like); `PF00905` and `PF00768` `0`; Tier 2 = `46`; `Prophage_Borne = 0`. Joint tree: Tier 1 = `3` hydrolytic SBL events (BlaZ-like and AER-like repeat single-family events, CfxA-like V→B is joint-only). Pre-registered Tier-1 events are tested with AU tests, and single-tip recipients are checked for long terminal branches. These criteria detect recent transfers only; deep transfers are listed in `All_Trees_HGT_Events_Long.tsv` but cannot reach Tier 1 (see `docs/METHODS_AND_PIPELINE.md`).
+4. **Layer 4 — Codon Saturation Diagnostics, Catalytic Purifying Selection & 3D Structural Biophysics (`05_selection_pressure`, `06_structure_and_ecology`)**:
+   - Documents family-wide synonymous saturation (`dS_Saturation_And_Xia_Test_2026.tsv`; `median dS = 3.0`, `67.6–78.8%` saturated pairs, `pos3_unsaturated_sym = False` on full-family MSAs) while evaluating `21` completed core HyPhy `GARD`/`aBSREL`/`MEME`/`FEL` datasets (`5` `N=90` benchmarks + `16` subclades, including unsaturated viral/HGT subclades such as `PF00144_sub4_Viral_clade` `median dS = 0.7239` and `PF00768_sub1_HGT_clade` `median dS = 0.7608`, `pos3_unsaturated_sym = True`) plus `PF00144_N240` (`hmm`/`mafft`) `MEME`/`FEL` site benchmarks.
+   - Proves catalytic motif purifying constraint across `1,124` HMM columns (`Catalytic_Motif_Purifying_Proof_2026.tsv`: motif core median $\omega_{\text{NG}} = 0.3997$ vs. background $0.8282$, `MW p = 3.20e-14`; `42.22%` vs. `3.61%` constrained columns, `Fisher OR = 19.49`, `p = 1.45e-14`) and 3D proximity in pooled crystal (`n = 809`, `omega_ng <10 Å` vs. surface `0.6088 vs. 0.9162`, `p = 1.76e-15`) and viral ESMFold structures (`n = 1,064`, `0.5929 vs. 0.8930`, `p = 4.74e-20`).
+5. **Layer 5 — Confounder-Controlled Structural Diversity & Habitat–Motif Ecology (`06_structure_and_ecology`)**:
+   - Evaluates `825` curated 2026 viral and `170` bacterial PDB structures (`PDB_3D_Structural_Catalog_2026.tsv` and `Table_Structural_Diversity_Controlled_2026.tsv`). Crucially, once stratified by verified enzymatic tier, true hydrolytic viral and bacterial SBLs exhibit virtually identical normalized radius of gyration (`4_Tier_Putative_Hydrolytic_BetaLactamase`, V/B = `19/137`, median `norm_Rg` `2.6885` vs. `2.6862`, `MW p = 0.192`), and PBP/PRE homologs also match bacterial PBP controls (`4_Tier_PBP_or_PRE_Homolog`, V/B = `806/33`, median `norm_Rg` `2.7638` vs. `2.8009`, `MW p = 0.512`).
+   - Applies Cochran–Mantel–Haenszel (`CMH`) tests controlling for `SBL Family × Viral Phylum`, finding `13 / 38` Cohort A (`n = 3,956`) and `11 / 16` Cohort B (`n = 813`) globally enriched habitat–motif associations remain significant after taxonomic confounding adjustment.
 
 ---
 
@@ -34,131 +33,64 @@ This repository reconstructs and extends the complete serine-β-lactamase (SBL) 
 ```text
 SBL_research/
 ├── README.md
-├── run_pipeline.py              # Verification & execution entrypoint (--verify / --run-fast / --run-all)
-├── environment.yml              # Conda environment (Python + HMMER/MEME/HyPhy/BLAST/IQ-TREE)
+├── environment.yml                         # Conda environment (local tools, R figure packages)
+├── envs/hpc.yml                            # HPC environment specification
 ├── config/
-│   ├── local.env.example        # Template: WSL/Linux tool locations for scripts 01-09 -> copy to local.env
-│   └── hpc.env.example          # Template: cluster paths for scripts/hpc -> copy to hpc.env
+│   ├── local.env.example                   # Template -> copy to config/local.env (git-ignored)
+│   └── hpc.env.example                     # Template -> copy to config/hpc.env (git-ignored)
 ├── docs/
-│   └── METHODS_AND_PIPELINE.md  # Full methods, software versions & HPC Phase 0-6 pipeline description
-├── data/                        # INPUTS (read-only for the pipeline)
-│   ├── sequences/               # Original cohort: seed, initial viral (11,368), FIMO-r1, final viral (5,701), bacterial refs
-│   ├── curated_2026/            # HPC re-analysis curated protein, domain-core, CDS & CL0013 FASTAs
-│   ├── hmm_models/              # Official Pfam-A / Clan CL0013 HMMs (*_official.hmm)
-│   ├── metadata/                # information.xlsx, Pfam-A.clans.tsv, prophage BLAST, contig ORF/Pfam annotations
-│   ├── motifs/                  # Motif graph node/edge tables
-│   ├── phylogeny/               # Family ML trees (PF*.nwk) & structure-guided tree (maxcc.nwk)
-│   ├── selection/               # Codon MSAs, Newick trees, HyPhy aBSREL/MEME/MG94 JSONs, branch metadata
+│   └── METHODS_AND_PIPELINE.md             # Full methods, software versions & pipeline specification
+├── data/                                   # INPUTS (read-only for the pipeline)
+│   ├── curated_2026/                       # Curated protein, domain-slice, CDS & CL0013 FASTAs
+│   ├── sequences/                          # Official Pfam seed alignments (*_seed.faa)
+│   ├── hmm_models/                         # Official Pfam-A / Clan CL0013 HMMs (*_official.hmm)
+│   ├── metadata/                           # information.xlsx, Pfam-A.clans.tsv, Color_Mapping_Guide.txt
+│   ├── motifs/                             # Motif graph node/edge tables
+│   ├── phylogeny/                          # Structure-guided tree (maxcc.nwk)
 │   ├── structures/
-│   │   ├── ref_pdbs/            # Reference crystal structures (1BLS, 1K25, 1BUE)
-│   │   └── ProteinStructure/    # 1,508 predicted SBL structures - NOT in git, download from Figshare (see below)
-│   └── processed/               # Regenerated by the pipeline
-│       ├── hmm_rebuilt/         # Rebuilt seed HMMs + MUSCLE MSAs (script 01)
-│       └── bacterial_clean/     # CleanStrict / CleanCore bacterial reference FASTAs (script 03)
+│   │   ├── ref_pdbs/                       # Reference crystal structures + cl0013_crystal_anchors/ (14 FoldMason seeds)
+│   │   └── ProteinStructure/               # 1,508 predicted SBL structures (Figshare, git-ignored)
+│   └── legacy_2023/                        # Archived 2023 baseline inputs (selection, processed, sequences, phylogeny, metadata)
 ├── scripts/
-│   ├── sbl_config.py            # Single source of truth for repository paths & tool locations
-│   ├── 01_build_and_verify_hmm.py ... 09_confounder_controlled_ecology.py
-│   ├── 10_plot_phylogenetic_trees.R   # Circular figures of the primary HPC trees
-│   ├── run_hmm_motif_pipeline.sh
-│   └── hpc/                     # Slurm pipeline, numbered by stage (see "HPC pipeline" below)
-│       ├── hpc_config.py        # Cluster path configuration (reads config/hpc.env or SBL_HPC_* variables)
-│       ├── run_curation_and_context.sh
-│       ├── 01_curation/         # 01-09: viral decontamination, MOSAiC, GTDB, marine MAGs, curated datasets
-│       ├── 02_genomic_context/  # 01 neighborhoods & viral-origin tiers, 02 CheckV host-gene audit
-│       ├── 03_alignment_and_trees/  # 01-03 primary trees, 04-06 CL0013 & PMSF, 07-08 structure-guided CL0013
-│       ├── 04_hgt_inference/    # 01-02 rooting, ancestral states, HGT events, OAT; 03-05 AU tests
-│       └── 05_selection/        # 01-04 codon alignments, saturation, HyPhy, summaries
+│   ├── sbl_config.py                       # Shared local/WSL path & tool configuration (with legacy_2023 fallback)
+│   ├── hpc/                                # Slurm pipeline, one folder per stage (see "HPC pipeline" below)
+│   │   ├── hpc_config.py                   # Cluster paths (config/hpc.env or SBL_HPC_* variables)
+│   │   ├── run_curation_and_context.sh
+│   │   ├── 01_curation/                    # 01-09: viral decontamination, MOSAiC, GTDB, marine MAGs, curated datasets
+│   │   ├── 02_genomic_context/             # 01 neighborhoods & viral-origin tiers, 02 CheckV host-gene audit
+│   │   ├── 03_alignment_and_trees/         # 01-03 primary trees, 04-06 CL0013 & PMSF, 07-09 structure-guided CL0013 & joint tree
+│   │   ├── 04_hgt_inference/               # 01-02 rooting, ancestral states, HGT events, OAT; 03-05 AU tests
+│   │   └── 05_selection/                   # 01-04 codon alignments, saturation, HyPhy, summaries
+│   ├── local_analysis/                     # Enzymatic re-stratification & structure/ecology analyses (run locally)
+│   └── visualization/                      # R figure scripts (trees, CL0013 superfamily, HGT robustness)
 ├── results/
-│   ├── tables/                  # Table_S01-Table_S13
-│   ├── supplementary_data/      # Per-sequence, per-contig, HGT catalog & per-site TSVs (7 datasets)
-│   └── reanalysis_2026/         # HPC re-analysis catalogs & summaries; primary_trees/ (trees, rooted trees, reports); hgt_inference/
-├── figures/                     # Fig_S01-Fig_S05 (.pdf + .png); phylogenetic_trees/ (script 10)
-└── legacy/                      # Original analysis code (R/Python/visualisation) from the first release
+│   └── reanalysis_2026/                    # Stage-numbered results
+│       ├── 01_curation_and_context/        # Curated catalogs, Viral_Enzymatic_Function_Verification_2026.tsv, Phase 2 tables & upstream_audits/
+│       ├── 03_primary_trees/               # Primary trees, rooted trees, IQ-TREE reports, CL0013 superfamily trees & tip annotations
+│       ├── 04_hgt_inference/               # HGT event catalogs, rooting decisions, OAT matrix & summary report
+│       ├── 05_selection_pressure/          # Codon saturation/Xia tests, motif constraint & HyPhy selection
+│       └── 06_structure_and_ecology/       # 3D crystal/ESMFold biophysics, diversity & CMH ecology tables
+├── figures/
+│   └── trees_2026_R/                       # Phylogenetic, domain-context, CL0013 and HGT robustness figures
+└── archive/
+    ├── v0_original_submission/             # First-release R/Python/docking code (provenance only)
+    └── v1_baseline_5701_audit/             # Baseline 5,701-cohort audit (run_pipeline.py, scripts 01-09, Table_S01-S13, Fig_S01-S05)
 ```
-
-| Script | Reads | Writes |
-|---|---|---|
-| `01` | `data/sequences/`, `data/hmm_models/` | `data/processed/hmm_rebuilt/`, `Table_S01`, `PerSequence_HMM_Scores.tsv` |
-| `02` | `data/sequences/` | `Table_S02`, `PerSequence_FIMO_Sensitivity.tsv` |
-| `03` | `data/sequences/`, `data/metadata/` | `data/processed/bacterial_clean/`, `Table_S03`, `PerSequence_Bacterial_Audit.tsv` |
-| `04` | `data/sequences/`, `data/metadata/` | `Table_S04`, `Supplementary_Data_Viral_Genomic_Neighborhoods.tsv`, `Fig_S01` |
-| `05` | `data/phylogeny/`, outputs of `03`/`04` | `Table_S05`, `Table_S06`, `Supplementary_Data_HGT_Events_Catalog.tsv` |
-| `06` | `data/selection/` | `Table_S07`, `Table_S08`, `Fig_S02` |
-| `07` | `data/selection/`, `data/processed/hmm_rebuilt/` | `Table_S09`, `Table_S10`, `PerSite_Selection_Metrics.tsv`, `Fig_S03` |
-| `08` | `data/structures/`, output of `07` | `Table_S11`, `PerSite_Selection_and_3D_Biophysics.tsv`, `Fig_S04` |
-| `09` | `data/structures/`, `data/motifs/`, `data/phylogeny/maxcc.nwk`, `data/metadata/` | `Table_S12`, `Table_S13`, `Fig_S05` |
-| `10` (R) | `results/reanalysis_2026/primary_trees/`, `results/reanalysis_2026/*Catalog.tsv`, Phase 2 table | `figures/phylogenetic_trees/`, `Tree_Tip_Annotations_Merged.tsv` |
-
----
-
-## Core Cohort & Official Pfam `CL0013` Summary
-
-- **Focal Viral SBL Cohort (`n = 5,701` loci across `5,618` contigs)**:
-  - `PF00144` (`2,524` final from `2,540` initial): **`98.34%` (`2,482`)** pass official `PF00144.31` `--cut_ga`, `98.34%` pass unified Round-2 FIMO $p \le 10^{-5}$.
-  - `PF00905` (`1,807` final from `2,356` initial): **`94.30%` (`1,704`)** pass official `PF00905.29` `--cut_ga` (enriched from `73.13%` pre-FIMO, confirming motif-filtering efficacy), `98.34%` pass Round-2 FIMO $p \le 10^{-5}$.
-  - `PF13354` (`1,370` final from `6,472` initial): **`88.54%` (`1,213`)** pass official `PF13354.14` `--cut_ga`, **`100.00%` (`1,370`)** pass official Clan `CL0013` penicillin-recognizing enzyme (`PRE`) `--cut_ga` (`881` dual-matching both `PF13354` and `PF00768:Peptidase_S11`, `0` matching non-PRE `CL0013` families), and `99.20%` (`1,359`) pass Round-2 FIMO $p \le 10^{-5}$.
-- **Bacterial Reference Cohort (`n = 2,220` sequences)**:
-  - `PF00144` (`485`), `PF00905` (`505`), and `PF13354` (`1,230`) all achieve `100.00%` official self `--cut_ga` validation (`Table_S01`). Auditing yields **`1,961` `CleanStrict` (Tier A)** and **`1,775` `CleanCore` (Tier B)** sensitivity reference sets (`Table_S03`).
 
 ---
 
 ## Reproducibility & Quick Start
 
-### 1. Environment Setup
+### 1. Environment & Tool Setup
 
 ```bash
 conda env create -f environment.yml
 conda activate sbl_virome_evolution
+cp config/local.env.example config/local.env   # Set SBL_WSL_PYTHON on Windows/WSL
+cp config/hpc.env.example config/hpc.env       # Set SBL_HPC_BASE for Slurm runs
 ```
 
-### 2. Configure Tool Locations
-
-Scripts `01`-`09` call HMMER, MUSCLE, MEME/FIMO and a Python interpreter with `ete4` inside WSL (on Windows) or directly (on Linux/macOS). If these tools are not on `PATH`, copy the template and edit it:
-
-```bash
-cp config/local.env.example config/local.env   # SBL_WSL_PYTHON, SBL_MEME_BIN_DIR, SBL_MUSCLE, SBL_USE_WSL
-```
-
-For the cluster scripts in `scripts/hpc/`, copy `config/hpc.env.example` to `config/hpc.env` (or to `scripts/hpc/hpc.env` when copying that folder to the cluster on its own) and set `SBL_HPC_BASE` plus the upstream job folders. Both `*.env` files are git-ignored; any value can also be exported as an environment variable.
-
-Scripts `08` and `09` additionally need the predicted structures: download **Protein Structure Data Parts 1-4** from the Figshare collection below and extract all structure files into `data/structures/ProteinStructure/`.
-
-### 3. Verify Repository Integrity
-
-Confirm all required inputs, official Pfam HMMs, scripts (`01`–`09`), documentation, supplementary tables (`Table_S01–S13`), supplementary TSVs (`7` datasets), and figures (`Fig_S01–S05`) are present, non-empty, and within GitHub's `<100 MB` file limit:
-
-```bash
-python run_pipeline.py --verify
-```
-
-### 4. Re-Run Analyses
-
-```bash
-# Fast re-execution of downstream statistical & structural modules (scripts 03-09)
-python run_pipeline.py --run-fast
-
-# Complete pipeline execution from official Pfam CL0013 / seed HMMs & FIMO sensitivity (scripts 01-09)
-python run_pipeline.py --run-all
-```
-
-Or run individual modules sequentially:
-
-```bash
-python scripts/01_build_and_verify_hmm.py
-python scripts/02_fimo_threshold_sensitivity.py
-python scripts/03_bacterial_prophage_audit.py
-python scripts/04_viral_genomic_context_audit.py
-python scripts/05_phylogenetic_hgt_inference.py
-python scripts/06_selection_absrel_and_lineages.py
-python scripts/07_selection_meme_and_catalytic_motifs.py
-python scripts/08_structural_localization_3d.py
-python scripts/09_confounder_controlled_ecology.py
-Rscript scripts/10_plot_phylogenetic_trees.R   # needs ape, phangorn, ggtree, ggtreeExtra, ggnewscale, cowplot, ragg
-```
-
-> **Note on large HPC intermediates**: Multi-gigabyte raw HPC intermediates (`bac120_metadata.tsv.gz`, full `Pfam-A.domtbl`, raw bacterial genomes, geNomad/CheckV/eggNOG job outputs) remain on the HPC cluster; the curated sequence sets (`data/curated_2026/`), audit catalogs (`results/reanalysis_2026/`) and the scripts that produced them (`scripts/hpc/`) are included here.
-
-### 5. HPC Pipeline (`scripts/hpc/`)
+### 2. HPC Pipeline (`scripts/hpc/`)
 
 Each stage folder matches an output folder under `$SBL_HPC_BASE`; scripts are numbered in run order. Python
 scripts find `hpc_config.py` one level up; shell scripts read `config/hpc.env` or `scripts/hpc/hpc.env`.
@@ -169,9 +101,27 @@ Submit each driver from its own folder (Slurm uses the submit directory to locat
 | `01_curation/` | `01` viral decontamination; `02`-`04` MOSAiC; `05`-`07` GTDB genomes, SBL scan, contig shards for geNomad; `08` marine MAGs | `sbatch 01_viral_decontamination.sh`, then the Python scripts in order |
 | curated datasets + context | `01_curation/09 --stage curate` -> `02_genomic_context/01` -> `01_curation/09 --stage finalize` | `sbatch run_curation_and_context.sh` (from `scripts/hpc/`) |
 | `02_genomic_context/` | `02` CheckV host-gene audit (read-only, writes `Phase2_Host_Gene_Check_Audit*`) | `python 02_audit_host_gene_check.py` |
-| `03_alignment_and_trees/` | `01`-`03` alignments + wave-1/wave-2 IQ-TREE; `04`-`06` CL0013 superfamily + PMSF C20; `07`-`08` structure-guided CL0013 + clean GTDB outgroups | `bash 03_submit_primary_trees.sh`, `bash 06_submit_cl0013_and_pmsf.sh`, `08_run_cl0013_c20.sh` |
+| `03_alignment_and_trees/` | `01`-`03` alignments + wave-1/wave-2 IQ-TREE; `04`-`06` CL0013 superfamily + PMSF C20; `07`-`08` structure-guided CL0013 + clean GTDB outgroups; `09` structure-guided joint tree | `bash 03_submit_primary_trees.sh`, `bash 06_submit_cl0013_and_pmsf.sh`, `08_run_cl0013_c20.sh`, `bash 09_submit_joint_struct_tree.sh` |
 | `04_hgt_inference/` | `01` rooting, ancestral states, HGT events, OAT robustness, AU-test constraints; `03`-`04` AU tests of Tier-1 events | `sbatch 02_run_hgt_inference.sh`, then `bash 05_submit_au_tests.sh` |
 | `05_selection/` | `01` codon alignments & saturation; `02` HyPhy; `03` summaries | `bash 04_submit_selection.sh` |
+
+### 3. Local Analyses & Figures
+
+- **Enzymatic function verification** (local catalogs + `Viral_Enzymatic_Function_Verification_2026.tsv`; the HPC catalogs already carry these tiers):
+  ```bash
+  python scripts/local_analysis/reclassify_enzymatic_function_2026.py
+  ```
+- **Structure, diversity & CMH ecology**: download **Protein Structure Data Parts 1–4** from the Figshare collection below into `data/structures/ProteinStructure/`, then run:
+  ```bash
+  python scripts/local_analysis/phase6_structure_and_ecology_2026.py
+  ```
+- **Tree & HGT figures (R)**:
+  ```bash
+  Rscript scripts/visualization/plot_phylogenetic_trees_2026.R
+  Rscript scripts/visualization/plot_phylogeny_cl0013_and_hgt_2026.R
+  ```
+
+> **Note on large HPC files**: Multi-gigabyte raw HPC intermediates (`bac120_metadata.tsv.gz`, full `Pfam-A.domtbl`, raw bacterial genomes, geNomad/CheckV/eggNOG job outputs) remain on the cluster; earlier first-release and 5,701-baseline code/tables are preserved in `archive/`, and superseded 2023 input datasets in `data/legacy_2023/`.
 
 ---
 
@@ -195,9 +145,11 @@ Large supporting datasets are archived in the **SBL-virus Supporting Data** Figs
 | Protein Structure Data (Part 3) | [10.6084/m9.figshare.31943400](https://doi.org/10.6084/m9.figshare.31943400) |
 | Protein Structure Data (Part 4) | [10.6084/m9.figshare.31943583](https://doi.org/10.6084/m9.figshare.31943583) |
 
-## Legacy Code
+## Legacy & Archived Files
 
-`legacy/` preserves the analysis and visualisation code of the first release (R plotting, motif enrichment, selection-pressure plots, molecular-docking helpers). It is kept for provenance and is not called by the pipeline above. The earlier Observable/JavaScript visualisations (bubble world map, Sankey graph) were removed; all figures are now made with Python and R; they remain available in the git history (branch `master`, commit `925e189`).
+- **`archive/v0_original_submission/`**: Preserves the analysis and visualization code released with the first submission (R plotting, motif enrichment, selection-pressure plots, molecular-docking helpers). The first submission's Observable/JavaScript visualizations remain available in git history (branch `master`, commit `925e189`).
+- **`archive/v1_baseline_5701_audit/`**: Preserves the baseline 5,701-cohort audit (`run_pipeline.py`, scripts `01–09`, `Table_S01–S13`, `Fig_S01–S05`).
+- **`data/legacy_2023/`**: Preserves superseded 2023 baseline input datasets (`selection/`, `processed/`, legacy FASTAs, trees, and BLAST/Pfam metadata), isolated from active 2026 pipeline inputs while `scripts/sbl_config.py` retains a fallback resolver for provenance reproducibility.
 
 ## License
 

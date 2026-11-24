@@ -85,11 +85,22 @@ OUTGROUP = ("PF04960", "PF06089", "PF27310")
 SISTER_CONTINUUM = {"PF13354", "PF00768"}
 
 # CARD references describing penicillin-binding proteins (mecA/mecC PBP2a, PBP1a/2b/2x/3
-# resistance variants) are NOT hydrolytic beta-lactamases and are removed before DIAMOND.
-CARD_PBP_RE = re.compile(r"(penicillin[-_ ]?binding|\bPBP\d*[a-z]?\b|\bpbp\d*[a-z]?\b|\bmec[ACR]\d*\b|\bmecA\b|\bmecC\b|ftsI)", re.I)
-# Class A Omega-loop signature E166-x-x-L169-N170 (TEM numbering; L may be I/V/M in some enzymes)
-OMEGA_E166_RE = re.compile(r"E[A-Z]{2}[LIVM]N")
-OMEGA_WINDOW_PAD = 3   # tolerate +/-3 match states around the calibrated Omega window
+# resistance variants) or beta-lactam sensors/regulators (BlaR1/MecR1) are NOT hydrolytic
+# beta-lactamases and are removed before DIAMOND.
+CARD_PBP_RE = re.compile(
+    r"(penicillin[-_ ]?binding|\bPBP\d*[a-z]?\b|\bpbp\d*[a-z]?\b|"
+    r"\bmec[ACRI]\d*\b|\bbla[RI]\d*\b|\bamp[RDG]\b|\bpenA\b|ftsI|"
+    r"gene[-_ ]modulating[-_ ]beta-lactam[-_ ]resistance)",
+    re.I,
+)
+# Class A Omega-loop Glu166 signatures: canonical E166-x-x-[LIVMFCA]-N170 plus
+# Bacteroidetes/ESBL CfxA/CepA/PER/VEB T165-E166-x-x-[MLIVFA]-[SNHRKAE]
+OMEGA_E166_RE = re.compile(r"E[A-Z]{2}[LIVMFCA]N|TE[A-Z]{2}[MLIVFA][SNHRKAE]")
+CLASSD_TRPCAP_RE = re.compile(r"[FYW]WL|W[A-Z][EDQNG][A-Z]{2}[LIVMF]")
+NON_SBL_SENSOR_RE = re.compile(r"(PF05569|\bblaR\d*\b|\bmecR\d*\b|modulating beta-lactam resistance)", re.I)
+PHAGE_FUSION_DOMS = ("TMP_3", "Endolysin", "SLT", "VanY", "Peptidase_M23", "Amidase", "SH3", "Phage_spike", "Phage_tail", "SLH", "Gly_rich_2", "Choline_bind")
+PBP_SYNTH_DOMS = ("Transgly", "PASTA", "PCB_OB", "PBP_middle", "PBP_1A_C", "PBP_dimer", "BiPBP_C", "PBP5_C")
+OMEGA_WINDOW_PAD = 0   # calibrated HMM match-state windows already include padding
 # Flag own-seed FIMO filters that remove viral sequences much more often than bacterial ones
 FIMO_BIAS_WARN_PP = 10.0
 
@@ -110,9 +121,9 @@ CL0013_HMM_LENS = {
 
 # Calibrated 1-based HMM match-state windows from CARD Class A/C/D prototypes
 MOTIF_WINDOWS = {
-    "PF00144": {"m1": (49, 60), "m2": (139, 150), "omega_e": (175, 186), "m3": (271, 291)},
-    "PF13354": {"m1": (37, 48), "m2": (98, 109), "omega_e": (129, 145), "m3": (199, 211)},
-    "PF00905": {"m1": (39, 50), "m2": (123, 134), "omega_e": None, "m3": (233, 244)},
+    "PF00144": {"m1": (49, 62), "m2": (137, 154), "omega_e": None, "omega_w": None, "m3": (269, 300)},
+    "PF13354": {"m1": (37, 49), "m2": (98, 110), "omega_e": (126, 149), "omega_w": None, "m3": (198, 214)},
+    "PF00905": {"m1": (37, 52), "m2": (119, 140), "omega_e": None, "omega_w": (119, 175), "m3": (229, 252)},
 }
 
 TIER_PRIORITY = {
@@ -590,9 +601,16 @@ def annotate_card_and_motifs(all_records):
         if not hmm_path.exists() or win_cfg is None:
             for r in recs:
                 m1 = bool(re.search(r"S[A-Z]{2}K", r["dom_seq"]))
-                m2 = "SXN_PBP" if re.search(r"S[A-Z]N", r["dom_seq"]) else ("YAN" if re.search(r"Y[AS]N", r["dom_seq"]) else "NONE")
-                m3 = bool(re.search(r"[KH][TS]G", r["dom_seq"]))
-                r.update({"motif1_SXXK_hmm": m1, "motif2_class": m2, "motif3_KTG_hmm": m3, "has_omega_E166": False})
+                m2 = "SXN_PBP" if re.search(r"S[A-Z]N", r["dom_seq"]) else ("YAN_ClassC" if re.search(r"Y[AS]N", r["dom_seq"]) else "NONE")
+                m3 = bool(re.search(r"K[TS]G", r["dom_seq"]))
+                r.update({
+                    "motif1_SXXK_hmm": m1,
+                    "has_m1_clsD": False,
+                    "motif2_class": m2,
+                    "motif3_KTG_hmm": m3,
+                    "has_omega_E166": False,
+                    "has_trp_cap": False,
+                })
             continue
 
         fa_p = WORK / f"{fam}_for_motif_align.faa"
@@ -622,28 +640,53 @@ def annotate_card_and_motifs(all_records):
             s1, e1 = win_cfg["m1"]
             seg1 = mseq[s1 - 1 : e1].replace("-", "")
             has_m1 = bool(re.search(r"S[A-Z]{2}K", seg1))
+            has_m1_clsD = bool(re.search(r"S[TFASV][FYWLIVM]K", seg1)) if fam == "PF00905" else False
+
+            raw_om_w = ""
+            has_trp_cap = False
+            if win_cfg.get("omega_w") is not None:
+                ww_lo, ww_hi = win_cfg["omega_w"]
+                raw_om_w = "".join(
+                    (states[k - 1] if states[k - 1] != "-" else "") + "".join(inserts[k - 1])
+                    for k in range(max(1, ww_lo), min(hmm_len, ww_hi) + 1)
+                )
+                has_trp_cap = bool(CLASSD_TRPCAP_RE.search(raw_om_w))
 
             s2, e2 = win_cfg["m2"]
             seg2 = mseq[s2 - 1 : e2].replace("-", "")
-            if re.search(r"[SY]DN", seg2):
-                m2_cls = "SDN_ClassA"
-            elif re.search(r"Y[AS]N", seg2):
-                m2_cls = "YAN_ClassC"
-            elif re.search(r"YGN", seg2):
-                m2_cls = "YGN_ClassD"
-            elif re.search(r"[SY][A-Z]N", seg2):
-                m2_cls = "SXN_PBP"
+            if fam == "PF00905":
+                if re.search(r"[YF]GN", raw_om_w):
+                    m2_cls = "YGN_ClassD"
+                elif re.search(r"[SY][A-Z]N", seg2):
+                    m2_cls = "SXN_PBP"
+                else:
+                    m2_cls = "NONE"
+            elif fam == "PF13354":
+                if re.search(r"[SY][DN]N", seg2):
+                    m2_cls = "SDN_ClassA"
+                elif re.search(r"[SY][A-Z]N", seg2):
+                    m2_cls = "SXN_PBP"
+                else:
+                    m2_cls = "NONE"
             else:
-                m2_cls = "NONE"
+                if re.search(r"Y[AS]N", seg2):
+                    m2_cls = "YAN_ClassC"
+                elif re.search(r"[SY][A-Z]N", seg2):
+                    m2_cls = "SXN_PBP"
+                else:
+                    m2_cls = "NONE"
 
             s3, e3 = win_cfg["m3"]
             seg3 = mseq[s3 - 1 : e3].replace("-", "")
-            has_m3 = bool(re.search(r"[KH][TS]G", seg3))
+            # Strictly require Lys/Arg in Motif 3; exclude Histidine (HTG/HSG) R61 DD-peptidases & Family VIII esterases
+            if fam == "PF13354":
+                has_m3 = bool(re.search(r"[KR][TS][GA]", seg3))
+            else:
+                has_m3 = bool(re.search(r"K[TS]G", seg3))
 
-            # Omega-loop: require the E166-x-x-L-N signature inside the calibrated window (+/- pad),
-            # not merely any glutamate (which occurs by chance in about half of random windows).
+            # Omega-loop: require Glu166 signature inside the calibrated window
             has_e166 = False
-            if win_cfg["omega_e"] is not None:
+            if win_cfg.get("omega_e") is not None:
                 w_lo = max(1, win_cfg["omega_e"][0] - OMEGA_WINDOW_PAD)
                 w_hi = min(hmm_len, win_cfg["omega_e"][1] + OMEGA_WINDOW_PAD)
                 raw_om = "".join(
@@ -653,32 +696,61 @@ def annotate_card_and_motifs(all_records):
                 has_e166 = bool(OMEGA_E166_RE.search(raw_om))
 
             r["motif1_SXXK_hmm"] = has_m1
+            r["has_m1_clsD"] = has_m1_clsD
             r["motif2_class"] = m2_cls
             r["motif3_KTG_hmm"] = has_m3
             r["has_omega_E166"] = has_e166
+            r["has_trp_cap"] = has_trp_cap
 
     # Assign final functional stratification label
     for r in all_records:
-        card_ok = (r["card_pident"] >= 40.0) and (r["card_cov"] >= 70.0)
         fam = r["winning_acc"]
-        is_cls_a = (fam in ("PF00144", "PF13354")) and r["motif1_SXXK_hmm"] and (r["motif2_class"] == "SDN_ClassA") and r["has_omega_E166"] and r["motif3_KTG_hmm"]
-        is_cls_c = (fam in ("PF00144", "PF13354")) and r["motif1_SXXK_hmm"] and (r["motif2_class"] == "YAN_ClassC") and r["motif3_KTG_hmm"]
-        is_cls_d = (fam == "PF00905") and card_ok and r["motif1_SXXK_hmm"] and (r["motif2_class"] == "YGN_ClassD")
-        if card_ok or is_cls_a or is_cls_c or is_cls_d:
+        arch = str(r.get("domain_architecture", ""))
+        card_text = f"{r['best_card_hit']} {r['card_gene_family']}"
+        is_sensor = bool(NON_SBL_SENSOR_RE.search(f"{arch} {card_text}"))
+        has_phage_fusion = any(d in arch for d in PHAGE_FUSION_DOMS)
+        has_pbp_fusion = any(d in arch for d in PBP_SYNTH_DOMS)
+        card_ok = (
+            (r["card_pident"] >= 40.0)
+            and (r["card_cov"] >= 70.0)
+            and (not is_sensor)
+            and (not bool(CARD_PBP_RE.search(card_text)))
+        )
+
+        if fam == "PF13354":
+            triad_intact = r["motif1_SXXK_hmm"] and (r["motif2_class"] in ("SDN_ClassA", "SXN_PBP")) and r["motif3_KTG_hmm"]
+        elif fam == "PF00144":
+            triad_intact = r["motif1_SXXK_hmm"] and (r["motif2_class"] == "YAN_ClassC") and r["motif3_KTG_hmm"]
+        elif fam == "PF00905":
+            triad_intact = r["motif1_SXXK_hmm"] and r["motif3_KTG_hmm"]
+        else:
+            triad_intact = False
+
+        is_cls_a = (fam == "PF13354") and (not is_sensor) and (not has_phage_fusion) and r["motif1_SXXK_hmm"] and (r["motif2_class"] == "SDN_ClassA") and r["has_omega_E166"] and r["motif3_KTG_hmm"]
+        is_cls_c = (fam == "PF00144") and (not is_sensor) and (not has_phage_fusion) and r["motif1_SXXK_hmm"] and (r["motif2_class"] == "YAN_ClassC") and r["motif3_KTG_hmm"]
+        is_cls_d = (fam == "PF00905") and (not is_sensor) and (not has_phage_fusion) and (not has_pbp_fusion) and r.get("has_m1_clsD", False) and (r["motif2_class"] == "YGN_ClassD") and r.get("has_trp_cap", False) and r["motif3_KTG_hmm"]
+
+        if (card_ok and triad_intact) or is_cls_a or is_cls_c or is_cls_d:
             r["functional_tier"] = "Putative_Hydrolytic_BetaLactamase"
+            r["enzymatic_validation_class"] = "Verified_Hydrolytic_SBL" if card_ok else "Candidate_Divergent_SBL"
             ev = []
             if card_ok:
                 ev.append("CARD_Match")
             if is_cls_a:
                 ev.append("ClassA_SXXK+SDN+E166+KTG")
             if is_cls_c:
-                ev.append("ClassC_SXXK+YAN+KTG")
+                ev.append("ClassC_SXXK+YAN+KTG_Lys315")
             if is_cls_d:
-                ev.append("ClassD_OXA_YGN")
+                ev.append("ClassD_OXA_SXXK+YFGN+TrpCap+KTG")
             r["functional_evidence"] = ";".join(ev)
+        elif card_ok and not triad_intact:
+            r["functional_tier"] = "PBP_or_PRE_Homolog"
+            r["enzymatic_validation_class"] = "Truncated_SBL_Pseudogene"
+            r["functional_evidence"] = "CARD_Homolog_Missing_Catalytic_Motif"
         else:
             r["functional_tier"] = "PBP_or_PRE_Homolog"
-            r["functional_evidence"] = f"PBP_PRE_{fam}"
+            r["enzymatic_validation_class"] = "BlaR1_Sensor_Receptor" if is_sensor else "PBP_Esterase_or_PhageLysin_Homolog"
+            r["functional_evidence"] = "BlaR1_MecR1_Sensor" if is_sensor else f"PBP_PRE_{fam}"
 
 
 def mmseqs_cluster_records(recs, tag, id_thresh=0.85):
@@ -1145,6 +1217,7 @@ def build_viral_and_bacterial_pools():
                 "motif1_SXXK_hmm": False, "motif2_class": "NONE",
                 "motif3_KTG_hmm": False, "has_omega_E166": False,
                 "functional_tier": "CL0013_NonPRE_Outgroup",
+                "enzymatic_validation_class": "CL0013_NonPRE_Outgroup",
                 "functional_evidence": f"Outgroup_{r['winning_acc']}",
             })
 
@@ -1423,7 +1496,7 @@ def finalize_and_export(viral_records, bac_records, fimo_summary, v_cat_counts, 
         "viral_origin_tier", "mmseqs85_cluster_id", "viral_nr85_rep_uid", "viral_cluster_size", "in_viral_nr85_rep",
         "cds_verified", "has_SXXK_in_dom", "motif1_SXXK_hmm", "motif2_class", "motif3_KTG_hmm", "has_omega_E166",
         "best_card_hit", "card_gene_family", "card_pident", "card_cov",
-        "functional_tier", "functional_evidence", "vir_sub_info", "domain_architecture",
+        "functional_tier", "enzymatic_validation_class", "functional_evidence", "vir_sub_info", "domain_architecture",
     ]
     with open(OUT / "Final_Viral_SBL_Catalog.tsv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=v_cols, delimiter="\t", extrasaction="ignore")
@@ -1448,7 +1521,7 @@ def finalize_and_export(viral_records, bac_records, fimo_summary, v_cat_counts, 
         "phylum", "family", "genus", "species",
         "has_SXXK_in_dom", "motif1_SXXK_hmm", "motif2_class", "motif3_KTG_hmm", "has_omega_E166",
         "best_card_hit", "card_gene_family", "card_pident", "card_cov",
-        "functional_tier", "functional_evidence", "domain_architecture",
+        "functional_tier", "enzymatic_validation_class", "functional_evidence", "domain_architecture",
     ]
     with open(OUT / "Final_Bacterial_TripleSource_Catalog.tsv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=b_cols, delimiter="\t", extrasaction="ignore")
@@ -1477,7 +1550,7 @@ def write_prelim_viral_catalog(viral_records):
         "fimo_r1_min_p", "fimo_r1_n_motifs", "pass_fimo_1e5", "pass_fimo_1e10",
         "cds_verified", "has_SXXK_in_dom", "motif1_SXXK_hmm", "motif2_class", "motif3_KTG_hmm", "has_omega_E166",
         "best_card_hit", "card_gene_family", "card_pident", "card_cov",
-        "functional_tier", "functional_evidence", "vir_sub_info", "domain_architecture",
+        "functional_tier", "enzymatic_validation_class", "functional_evidence", "vir_sub_info", "domain_architecture",
     ]
     with open(OUT / "Final_Viral_SBL_Catalog.tsv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=v_cols, delimiter="\t", extrasaction="ignore")
