@@ -6,13 +6,16 @@
 #   1) Command line: Rscript scripts/10_plot_phylogenetic_trees.R
 #   2) RStudio: open this script and Source it (the repository root is detected automatically)
 #
-# Rooting: Sister-PRE outgroup (pre-registered primary rooting); the outgroup tips are
-#   removed after rooting. Set ROOTING <- "midpoint" for the midpoint sensitivity view.
+# Rooting: ROOTING = "hgt" (default) draws the rooted trees written by the HGT analysis
+#   ({fam}.primary.rooted.treefile: crown projection or MAD, see Rooting_Decisions_And_Agreement.tsv),
+#   so figures and HGT tables share one root. "outgroup" roots on the 24-sequence Sister-PRE outgroup
+#   (largest monophyletic subset) and "midpoint" gives the midpoint view.
 # Branch lengths beyond the CAP_DEPTH_QUANTILE tip depth are shortened for display only; the
 #   subtitle states when this is applied.
 #
 # Inputs:
-#   - results/reanalysis_2026/primary_trees/*.treefile, *.iqtree & *_outgroup.txt
+#   - results/reanalysis_2026/primary_trees/*.treefile, *.primary.rooted.treefile, *.iqtree & *_outgroup.txt
+#   - results/reanalysis_2026/hgt_inference/Rooting_Decisions_And_Agreement.tsv
 #   - results/reanalysis_2026/Final_Viral_SBL_Catalog.tsv
 #   - results/reanalysis_2026/Final_Bacterial_TripleSource_Catalog.tsv
 #   - results/reanalysis_2026/Phase2_Viral_Genomic_Neighborhoods_Full.tsv
@@ -62,7 +65,7 @@ OUT_DIR   <- file.path(REPO_ROOT, "figures", "phylogenetic_trees")
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 # 1.2 Layout and resolution
-ROOTING            <- "outgroup"  # "outgroup" (Sister-PRE outgroup, primary) or "midpoint" (sensitivity)
+ROOTING            <- "hgt"       # "hgt" (same root as the HGT analysis), "outgroup" or "midpoint"
 OPEN_ANGLE         <- 16      # fan opening angle (degrees); leaves room for the R1/R2/R3 ring labels
 CAP_DEPTH_QUANTILE <- 0.985   # shorten the longest 1.5% of tips for display (1.0 = no capping)
 SHOW_BOOT_NODES    <- TRUE    # mark well-supported nodes (UFBoot >= 95 & SH-aLRT >= 80)
@@ -282,22 +285,26 @@ build_merged_metadata <- function() {
 # SECTION 3: Rooting, display-only branch capping and clade annotation
 # ==============================================================================
 
-prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df) {
-  tr <- ape::read.tree(tree_path)
+prepare_tree_and_nodes <- function(tree_path, outgroup_path, meta_df, rooted_path = NULL, rooted_note = "") {
+  use_hgt_root <- ROOTING == "hgt" && !is.null(rooted_path) && file.exists(rooted_path)
+  tr <- ape::read.tree(if (use_hgt_root) rooted_path else tree_path)
   og <- read_lines(outgroup_path)
   og <- trimws(og[nzchar(trimws(og))])
 
   drop_ids <- intersect(tr$tip.label, og)
   root_note <- "midpoint-rooted"
-  if (ROOTING == "outgroup" && length(drop_ids) > 0) {
+  if (use_hgt_root) {
+    if (!ape::is.rooted(tr)) stop("Expected a rooted tree: ", rooted_path)
+    root_note <- rooted_note
+  } else if (ROOTING %in% c("outgroup", "hgt") && length(drop_ids) > 0) {
     rooted <- root_on_outgroup(tr, drop_ids)
     tr <- rooted$tree
-    root_note <- rooted$note
+    root_note <- paste0(rooted$note, "; outgroup tips removed")
   }
   if (length(drop_ids) > 0) {
     tr <- ape::drop.tip(tr, drop_ids)
   }
-  if (ROOTING != "outgroup" || length(drop_ids) == 0) {
+  if (!use_hgt_root && (ROOTING == "midpoint" || length(drop_ids) == 0)) {
     tr <- phangorn::midpoint(tr)
   }
   tr <- ape::ladderize(tr, right = FALSE)
@@ -409,6 +416,19 @@ root_on_outgroup <- function(tr, og) {
   )
 }
 
+# Root used by the HGT analysis for one family (Rooting_Decisions_And_Agreement.tsv)
+hgt_root_note <- function(tag) {
+  f <- file.path(META_DIR, "hgt_inference", "Rooting_Decisions_And_Agreement.tsv")
+  if (!file.exists(f)) return("rooted as in the HGT analysis")
+  d <- read_tsv(f, show_col_types = FALSE)
+  r <- d[d$family == tag, ]
+  if (nrow(r) == 0) return("rooted as in the HGT analysis")
+  m <- r$primary_rooting[1]
+  agree <- if ("root_agreement_primary_in_MAD" %in% names(r)) r$root_agreement_primary_in_MAD[1] else NA
+  sprintf("rooted as in the HGT analysis (%s%s)", gsub("_", " ", m),
+          if (!is.na(agree) && m != "MAD") sprintf("; root agreement with MAD = %.2f", agree) else "")
+}
+
 # Best-fit model from the IQ-TREE report next to the tree file (falls back to spec$model)
 read_iqtree_model <- function(tree_path, fallback) {
   rep <- sub("\\.treefile$", ".iqtree", tree_path)
@@ -452,7 +472,8 @@ select_spaced_sbl_labels <- function(tip_coords_df, min_gap = MIN_LABEL_TIP_GAP)
 build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
   tree_path <- file.path(TREE_DIR, spec$treefile)
   og_path   <- file.path(TREE_DIR, spec$outgroup)
-  prep <- prepare_tree_and_nodes(tree_path, og_path, meta_df)
+  rooted_path <- file.path(TREE_DIR, paste0(spec$tag, ".primary.rooted.treefile"))
+  prep <- prepare_tree_and_nodes(tree_path, og_path, meta_df, rooted_path, hgt_root_note(spec$tag))
   tr      <- prep$tree
   node_df <- prep$node_df
   tip_df  <- prep$tip_df
@@ -640,7 +661,7 @@ build_ggtree_plot <- function(spec, meta_df, compact_mode = FALSE) {
   )
   sub_txt <- paste0(
     sub_txt, "
-", prep$root_note, "; outgroup tips removed",
+", prep$root_note,
     if (prep$n_capped > 0) sprintf("; %d longest tips shortened to the %.1fth percentile depth (display only)",
                                    prep$n_capped, 100 * CAP_DEPTH_QUANTILE) else ""
   )

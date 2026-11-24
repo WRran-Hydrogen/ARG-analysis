@@ -25,7 +25,7 @@ if ! "${PY_ETE}" -c "import ete4, numpy, scipy, pandas" 2>/dev/null; then
     exit 1
 fi
 
-mkdir -p "${SBL_HPC_BASE}/04_hgt_inference"
+mkdir -p "${SBL_HPC_HGT_DIR:-${SBL_HPC_BASE}/04_hgt_inference}"
 cd "${SCRIPT_DIR}"
 echo "[$(date -Is)] Running 01_hgt_inference.py with ${PY_ETE}"
 "${PY_ETE}" -u 01_hgt_inference.py

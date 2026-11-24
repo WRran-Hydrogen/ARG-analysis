@@ -66,12 +66,12 @@ SBL_research/
 │       ├── 01_curation/         # 01-09: viral decontamination, MOSAiC, GTDB, marine MAGs, curated datasets
 │       ├── 02_genomic_context/  # 01 neighborhoods & viral-origin tiers, 02 CheckV host-gene audit
 │       ├── 03_alignment_and_trees/  # 01-03 primary trees, 04-06 CL0013 & PMSF, 07-08 structure-guided CL0013
-│       ├── 04_hgt_inference/    # 01-02 rooting, ancestral states, HGT events, OAT robustness
+│       ├── 04_hgt_inference/    # 01-02 rooting, ancestral states, HGT events, OAT; 03-05 AU tests
 │       └── 05_selection/        # 01-04 codon alignments, saturation, HyPhy, summaries
 ├── results/
 │   ├── tables/                  # Table_S01-Table_S13
 │   ├── supplementary_data/      # Per-sequence, per-contig, HGT catalog & per-site TSVs (7 datasets)
-│   └── reanalysis_2026/         # HPC re-analysis catalogs & summaries; primary_trees/ (tree, report, outgroup)
+│   └── reanalysis_2026/         # HPC re-analysis catalogs & summaries; primary_trees/ (trees, rooted trees, reports); hgt_inference/
 ├── figures/                     # Fig_S01-Fig_S05 (.pdf + .png); phylogenetic_trees/ (script 10)
 └── legacy/                      # Original analysis code (R/Python/visualisation) from the first release
 ```
@@ -170,7 +170,7 @@ Submit each driver from its own folder (Slurm uses the submit directory to locat
 | curated datasets + context | `01_curation/09 --stage curate` -> `02_genomic_context/01` -> `01_curation/09 --stage finalize` | `sbatch run_curation_and_context.sh` (from `scripts/hpc/`) |
 | `02_genomic_context/` | `02` CheckV host-gene audit (read-only, writes `Phase2_Host_Gene_Check_Audit*`) | `python 02_audit_host_gene_check.py` |
 | `03_alignment_and_trees/` | `01`-`03` alignments + wave-1/wave-2 IQ-TREE; `04`-`06` CL0013 superfamily + PMSF C20; `07`-`08` structure-guided CL0013 + clean GTDB outgroups | `bash 03_submit_primary_trees.sh`, `bash 06_submit_cl0013_and_pmsf.sh`, `08_run_cl0013_c20.sh` |
-| `04_hgt_inference/` | `01` rooting, ancestral states, HGT events, OAT robustness | `sbatch 02_run_hgt_inference.sh` |
+| `04_hgt_inference/` | `01` rooting, ancestral states, HGT events, OAT robustness, AU-test constraints; `03`-`04` AU tests of Tier-1 events | `sbatch 02_run_hgt_inference.sh`, then `bash 05_submit_au_tests.sh` |
 | `05_selection/` | `01` codon alignments & saturation; `02` HyPhy; `03` summaries | `bash 04_submit_selection.sh` |
 
 ---

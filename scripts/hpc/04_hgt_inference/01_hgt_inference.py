@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
-"""Pre-registered phylogenetic HGT inference & OAT robustness pipeline.
+"""Phylogenetic HGT inference & OAT robustness pipeline.
 
-Implements Section 4.1 of docs/METHODS_AND_PIPELINE.md on HPC Phase 3 IQ-TREE outputs:
-  1. Rooting across three unbiased rooting families:
-       - Primary: Sister-PRE biological outgroup (_out.treefile)
-       - MAD (Minimal Ancestor Deviation; Tria et al. 2017) on ingroup-only (_in.treefile)
-       - MinVar (Minimum Variance; Mai et al. 2017) & Midpoint on ingroup-only (_in.treefile)
-     Plus Youden's J recorded strictly as an appendix comparator (excluded from cross-validation).
+Implements Section 4.1 of docs/METHODS_AND_PIPELINE.md on the IQ-TREE outputs of 03_alignment_and_trees:
+  1. Rooting of the primary ingroup tree (_in.treefile):
+       - Crown projection: the family's crown root bipartition in the structure-guided CL0013
+         superfamily tree is projected onto the ingroup tree, used only when the family is a
+         supported clade there (F1 >= CROWN_MIN_F1 and UFBoot >= CROWN_MIN_UFBOOT)
+         and its crown root position is supported (root-split UFBoot >= CROWN_MIN_ROOT_UFBOOT); otherwise MAD.
+         The pre-registered Sister-PRE outgroup rooting (24-sequence outgroup) is kept as an appendix
+         comparator because that outgroup is not monophyletic in most primary trees.
+       - Cross-validation on the same ingroup tree: MAD (Tria et al. 2017), MinVar (Mai et al. 2017)
+         and Midpoint; Youden's J as an appendix comparator only. Root positions are compared directly
+         (Jaccard of root bipartitions) and through event matching.
+       - Sensitivity trees (_out) have their outgroup tips removed and are rooted like the primary tree;
+         the clean 12-sequence GTDB outgroup trees are rooted on that outgroup.
   2. Unresolved near-zero polytomy collapsing (dist <= 1e-6 & ufboot <= 1.0).
   3. Concordant Ancestral State Reconstruction:
        - Two-pass Fitch maximum parsimony
@@ -15,13 +22,19 @@ Implements Section 4.1 of docs/METHODS_AND_PIPELINE.md on HPC Phase 3 IQ-TREE ou
   4. Irwin et al. (2022) double-outgroup topological nesting + strict Tier-1 gating:
        - Tier-1 HGT: double-outgroup nested + Fitch/ML concordant + min(P, G) UFBoot >= 95 &
          SH-aLRT >= 80 + singleton viral tips must pass Phase 2 Strict Tier1_HighConfidence_Viral
-         + not Prophage_Borne.
+         + not Prophage_Borne (pre-registered: is_tier1_hgt_prereg).
+       - Viral-evidence gate (added to Tier 1 and Tier 2): >= 1 Tier 1/Tier 2/MOSAiC viral locus among
+         the recipients of B->V events or among the viral donor sisters of V->B events.
+       - Single-tip events are flagged (focal_is_singleton_tip); every pre-registered Tier-1 event gets
+         an AU-test constraint (au_test_tasks.tsv, run by 03_run_au_test.sh).
+       - The joint PF13354_PF00768 tree is a sensitivity analysis: its events that repeat a
+         single-family event are marked and not added to the totals.
        - Prophage_Borne: V->B where 100% of bacterial recipients are in_bacterial_prophage=True
          (reported separately, excluded from primary V->B counts).
        - Functional Stratification: Putative_Hydrolytic_BetaLactamase vs. PBP_or_PRE_Homolog,
          plus expanded viral_cluster_size reporting.
   5. OAT Robustness Recurrence across all completed sensitivity trees (Jaccard >= 0.70):
-       - Root_Invariant = Sister_PRE + MAD + (MinVar or Midpoint)
+       - Root_Invariant = primary rooting + MAD + (MinVar or Midpoint)
        - Robust_Core_HGT = OAT recurrence >= 80%
   6. CL0013 Superfamily + LOO outgroup rooting validation (when CL0013 trees exist).
 """
@@ -30,6 +43,7 @@ from __future__ import annotations
 
 import csv
 import math
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -48,7 +62,7 @@ CURATED_DIR = hpc.BASE / "01_final_curated"
 P3_DIR = hpc.PHASE3_DIR
 ALN_DIR = P3_DIR / "alignments"
 TREES_DIR = P3_DIR / "trees"
-OUT_DIR = hpc.BASE / "04_hgt_inference"
+OUT_DIR = hpc.path_setting("SBL_HPC_HGT_DIR", hpc.BASE / "04_hgt_inference")
 
 FAMILIES = ("PF00144", "PF00905", "PF13354", "PF00768", "PF13354_PF00768")
 CL0013_TREES = (
@@ -150,10 +164,16 @@ def _has_valid_iqtree_label(label: str | None) -> bool:
 def verify_tree_bootstrap_complete(tpath: Path, nw_str: str) -> bool:
     """Reject unfinished/unbootstrapped IQ-TREE files instead of inventing support."""
     iq_path = Path(str(tpath)[:-len(".treefile")] + ".iqtree") if str(tpath).endswith(".treefile") else None
+    log_path = Path(str(tpath)[:-len(".treefile")] + ".log") if str(tpath).endswith(".treefile") else None
     if iq_path is not None and iq_path.is_file():
         tail = iq_path.read_text(encoding="utf-8", errors="ignore")[-4096:]
-        if "Analysis results written to" not in tail:
+        if "Total wall-clock time used:" not in tail and "Analysis results written to" not in tail:
             print(f"  [SKIP incomplete .iqtree] {tpath.name}", flush=True)
+            return False
+    elif iq_path is not None and log_path is not None and log_path.is_file():
+        log_tail = log_path.read_text(encoding="utf-8", errors="ignore")[-4096:]
+        if "Analysis results written to" not in log_tail:
+            print(f"  [SKIP mid-run .log] {tpath.name}", flush=True)
             return False
     t = Tree(nw_str, parser=1)
     internal_nonroot = [
@@ -597,105 +617,139 @@ def root_youden_j(nw_str: str, v_meta: dict[str, dict]) -> tuple[Tree, dict]:
     return t, {"youden_j": round(best_j, 4)}
 
 
-def extract_superfamily_crown_splits() -> dict[str, dict]:
-    """Derive basal crown-group bipartition anchors (S1, S2) per family from CL0013 superfamily tree."""
-    meta_files = [
-        ALN_DIR / "CL0013" / "cl0013_taxa_metadata.tsv",
-        ALN_DIR / "CL0013" / "cl0013_struct_taxa_metadata.tsv",
-    ]
+CROWN_PRIMARY_TREE = ("CL0013.struct_c20.no_PF27310", "outgroup_struct_no_PF27310.txt")
+CROWN_LOO_TREES = (
+    ("CL0013.struct_c20.only_PF04960", "outgroup_struct_only_PF04960.txt"),
+    ("CL0013.struct_c20.only_PF06089", "outgroup_struct_only_PF06089.txt"),
+)
+# Crown projection is used as the primary rooting of a family only when the family is recovered as a
+# well-supported clade in the CL0013 superfamily tree AND the root position inside it (the split between
+# the crown's two children) is well supported; otherwise the outgroup-free MAD root is primary.
+CROWN_MIN_F1 = 0.95
+CROWN_MIN_UFBOOT = 95.0
+CROWN_MIN_ROOT_UFBOOT = 95.0
+
+
+def load_cl0013_taxa_families() -> dict[str, str]:
     taxa_fam: dict[str, str] = {}
-    for mp in meta_files:
+    for mp in (ALN_DIR / "CL0013" / "cl0013_taxa_metadata.tsv", ALN_DIR / "CL0013" / "cl0013_struct_taxa_metadata.tsv"):
         if mp.is_file():
             with open(mp, encoding="utf-8") as fh:
                 for r in csv.DictReader(fh, delimiter="\t"):
                     taxa_fam[r["uid"]] = r["cl0013_family"]
-    if not taxa_fam:
-        return {}
+    return taxa_fam
 
-    candidates = [
-        ("CL0013.struct_c20.no_PF27310", "outgroup_struct_no_PF27310.txt"),
-        ("CL0013.loo_no_PF27310.mafft_out", "outgroup_taxa_loo_no_PF27310.txt"),
-    ]
-    chosen = None
-    for tname, og_fn in candidates:
-        tp = TREES_DIR / "CL0013" / f"{tname}.treefile"
-        ogp = ALN_DIR / "CL0013" / og_fn
-        if tp.is_file() and ogp.is_file():
-            nw = tp.read_text(encoding="utf-8")
-            if verify_tree_bootstrap_complete(tp, nw):
-                chosen = (tname, nw, read_outgroup_ids(ogp))
-                break
-    if chosen is None:
-        return {}
 
-    tname, nw, og_ids = chosen
-    t_sup, _ = root_sister_pre(nw, og_ids)
-    fam_tips: dict[str, set[str]] = defaultdict(set)
-    for lf in t_sup.leaves():
-        f = taxa_fam.get(lf.name)
-        if f:
-            fam_tips[f].add(lf.name)
+def _best_family_clade(t_sup: Tree, taxa_fam: dict[str, str], fam: str) -> tuple[Tree | None, float, int]:
+    """Node whose leaf set best matches the family (F1), its F1, and the family size."""
+    n_f = sum(1 for lf in t_sup.leaves() if taxa_fam.get(lf.name) == fam)
+    best_f1, best_nd = -1.0, None
+    for nd in t_sup.traverse("postorder"):
+        if nd.is_leaf:
+            nd.add_prop("_cf", 1 if taxa_fam.get(nd.name) == fam else 0)
+            nd.add_prop("_csz", 1)
+        else:
+            nd.add_prop("_cf", sum(c.props["_cf"] for c in nd.children))
+            nd.add_prop("_csz", sum(c.props["_csz"] for c in nd.children))
+            f1 = 2.0 * nd.props["_cf"] / (nd.props["_csz"] + n_f) if n_f else 0.0
+            if f1 > best_f1:
+                best_f1, best_nd = f1, nd
+    return best_nd, best_f1, n_f
+
+
+def extract_superfamily_crown_splits(tree_spec: tuple[str, str] = CROWN_PRIMARY_TREE) -> dict[str, dict]:
+    """Crown-group root bipartition (S1 | S2) of each family in a CL0013 superfamily tree.
+
+    The superfamily tree is rooted on the non-PRE outgroups. For each family the best-matching clade
+    (F1) is taken as the crown; S1 and S2 are the family members below its two children (no
+    members are skipped). Reported support: crown monophyly (UFBoot/SH of the crown node) and the
+    root position (UFBoot of the two child splits). The joint PF13354_PF00768 root is the split between
+    the two family clades, with the weaker of the two clade F1/UFBoot values.
+    """
+    taxa_fam = load_cl0013_taxa_families()
+    tname, og_fn = tree_spec
+    tp = TREES_DIR / "CL0013" / f"{tname}.treefile"
+    ogp = ALN_DIR / "CL0013" / og_fn
+    if not taxa_fam or not tp.is_file() or not ogp.is_file():
+        return {}
+    nw = tp.read_text(encoding="utf-8")
+    if not verify_tree_bootstrap_complete(tp, nw):
+        return {}
+    t_sup, _ = root_sister_pre(nw, read_outgroup_ids(ogp))
 
     crown_map: dict[str, dict] = {}
+    clade_stats: dict[str, tuple[float, float, float]] = {}
     for fam in ("PF00144", "PF00905", "PF13354", "PF00768"):
-        n_f = len(fam_tips[fam])
-        if n_f < 4:
+        u, f1, n_f = _best_family_clade(t_sup, taxa_fam, fam)
+        if u is None or n_f < 4 or u.is_leaf:
             continue
-        best_f1 = -1.0
-        best_nd = None
-        for nd in t_sup.traverse("postorder"):
-            if nd.is_leaf:
-                nd.add_prop("_cf", 1 if taxa_fam.get(nd.name) == fam else 0)
-                nd.add_prop("_csz", 1)
-            else:
-                nd.add_prop("_cf", sum(c.props["_cf"] for c in nd.children))
-                nd.add_prop("_csz", sum(c.props["_csz"] for c in nd.children))
-                fc = nd.props["_cf"]
-                fsz = nd.props["_csz"]
-                f1 = 2.0 * fc / (fsz + n_f)
-                if f1 > best_f1:
-                    best_f1 = f1
-                    best_nd = nd
-        if best_nd is None:
+        mono_uf = float(u.props.get("ufboot", 0.0))
+        mono_sh = float(u.props.get("sh_alrt", 0.0))
+        clade_stats[fam] = (f1, mono_uf, mono_sh)
+        ch = sorted(u.children, key=lambda c: c.props["_cf"], reverse=True)
+        s1 = {lf.name for lf in ch[0].leaves() if taxa_fam.get(lf.name) == fam}
+        s2 = {lf.name for c in ch[1:] for lf in c.leaves() if taxa_fam.get(lf.name) == fam}
+        if not (s1 and s2):
             continue
-
-        u = best_nd
-        while not u.is_leaf and len(u.children) >= 2:
-            ranked_ch = sorted(u.children, key=lambda c: c.props["_cf"], reverse=True)
-            dom_c = ranked_ch[0]
-            rest_cf = sum(c.props["_cf"] for c in ranked_ch[1:])
-            if rest_cf >= 2 or dom_c.props["_cf"] < max(4, int(0.80 * u.props["_cf"])):
-                break
-            u = dom_c
-
-        ranked_ch = sorted(u.children, key=lambda c: c.props["_cf"], reverse=True)
-        if len(ranked_ch) < 2:
-            continue
-        s1 = {lf.name for lf in ranked_ch[0].leaves() if taxa_fam.get(lf.name) == fam}
-        s2 = {
-            lf.name
-            for ch in ranked_ch[1:]
-            for lf in ch.leaves()
-            if taxa_fam.get(lf.name) == fam
+        child_uf = [float(c.props.get("ufboot", 100.0 if c.is_leaf else 0.0)) for c in ch]
+        crown_map[fam] = {
+            "s1": s1, "s2": s2, "cl0013_source": tname,
+            "crown_clade_f1": round(f1, 4),
+            "crown_monophyly_ufboot": mono_uf, "crown_monophyly_shalrt": mono_sh,
+            "crown_root_split_ufboot": min(child_uf),
+            "crown_n_family_outside_clade": n_f - int(u.props["_cf"]),
+            "crown_s1_n": len(s1), "crown_s2_n": len(s2),
         }
-        if s1 and s2:
-            crown_map[fam] = {
-                "s1": s1,
-                "s2": s2,
-                "cl0013_source": tname,
-                "crown_clade_f1": round(best_f1, 4),
-                "crown_ufboot": float(u.props.get("ufboot", 0.0)),
-            }
 
-    if fam_tips["PF13354"] and fam_tips["PF00768"]:
+    if "PF13354" in clade_stats and "PF00768" in clade_stats:
+        s1 = {lf.name for lf in t_sup.leaves() if taxa_fam.get(lf.name) == "PF13354"}
+        s2 = {lf.name for lf in t_sup.leaves() if taxa_fam.get(lf.name) == "PF00768"}
+        (f_a, uf_a, sh_a), (f_b, uf_b, sh_b) = clade_stats["PF13354"], clade_stats["PF00768"]
         crown_map["PF13354_PF00768"] = {
-            "s1": set(fam_tips["PF13354"]),
-            "s2": set(fam_tips["PF00768"]),
-            "cl0013_source": tname,
-            "crown_clade_f1": 1.0,
-            "crown_ufboot": 100.0,
+            "s1": s1, "s2": s2, "cl0013_source": tname,
+            "crown_clade_f1": round(min(f_a, f_b), 4),
+            "crown_monophyly_ufboot": min(uf_a, uf_b), "crown_monophyly_shalrt": min(sh_a, sh_b),
+            "crown_root_split_ufboot": min(uf_a, uf_b),
+            "crown_n_family_outside_clade": -1,
+            "crown_s1_n": len(s1), "crown_s2_n": len(s2),
         }
+    for info in crown_map.values():
+        info["crown_reliable"] = (info["crown_clade_f1"] >= CROWN_MIN_F1 and info["crown_monophyly_ufboot"] >= CROWN_MIN_UFBOOT
+                                  and info["crown_root_split_ufboot"] >= CROWN_MIN_ROOT_UFBOOT)
     return crown_map
+
+
+def root_split_tips(tree: Tree) -> frozenset[str]:
+    """Smaller side of the root bipartition of a rooted tree."""
+    sides = [frozenset(lf.name for lf in c.leaves()) for c in tree.children]
+    if len(sides) < 2:
+        return frozenset()
+    return min(sides, key=len)
+
+
+
+def root_split_support(tree: Tree) -> tuple[float, float, bool]:
+    """(SH-aLRT, UFBoot, root_on_terminal_branch) of the root bipartition.
+
+    A root on a terminal branch (one tip vs the rest) has no bootstrap value: NaN is returned.
+    """
+    if any(c.is_leaf for c in tree.children):
+        return float("nan"), float("nan"), True
+    c = tree.children[0]
+    return float(c.props.get("sh_alrt", 0.0)), float(c.props.get("ufboot", 0.0)), False
+
+
+def prune_to_ingroup_newick(nw_str: str, og_ids: set[str]) -> str:
+    """Drop outgroup tips from an unrooted IQ-TREE tree and keep SH-aLRT/UFBoot labels on the remaining splits."""
+    t = Tree(nw_str, parser=1)
+    keep = {lf.name for lf in t.leaves()} - og_ids
+    split_sup, bit_map, all_mask = extract_unrooted_split_supports(t, leaf_subset=keep)
+    t.prune(sorted(keep), preserve_branch_length=True)
+    restore_split_supports(t, split_sup, bit_map, all_mask)
+    for nd in t.traverse():
+        if not nd.is_leaf:
+            nd.name = "" if nd.up is None else f"{float(nd.props.get('sh_alrt', 0.0)):.1f}/{float(nd.props.get('ufboot', 0.0)):.1f}"
+    return t.write(parser=1)
 
 
 def root_crown_projection(nw_str: str, crown_info: dict) -> tuple[Tree, dict]:
@@ -1119,10 +1173,24 @@ def detect_hgt_events(
         else:
             singleton_viral_pass = True
 
+        # Viral-evidence gate: the viral side of every event must include at least one locus with
+        # Tier 1/Tier 2 (or MOSAiC proteome) viral-origin support - the recipients of B->V events,
+        # the viral donor sisters (S1 + S2) of V->B events.
+        def _viral_supported(uid: str) -> bool:
+            vt = v_meta.get(uid, {}).get("viral_origin_tier", "")
+            return vt in ("Tier1_HighConfidence_Viral", "Tier2_Supported_Viral") or "MOSAiC" in vt
+
+        donor_viral_tips = s1_vir_tips | s2_vir_tips
+        n_donor_viral_supported = sum(1 for u in donor_viral_tips if _viral_supported(u))
+        if to_dom == "Viral":
+            viral_gate_pass = (n_v_tier1 + n_v_tier2 + n_v_mosaic) >= 1
+        else:
+            viral_gate_pass = n_donor_viral_supported >= 1
+
         prophage_frac = (n_bac_prophage / max(n_recip, 1)) if to_dom == "Bacterial" else 0.0
         is_prophage_borne = (to_dom == "Bacterial") and (n_recip > 0) and (n_bac_prophage == n_recip)
 
-        is_tier1 = (
+        is_tier1_prereg = (
             passes_nesting
             and fitch_ml_concordant
             and (min_pg_uf >= 95.0)
@@ -1130,14 +1198,28 @@ def detect_hgt_events(
             and singleton_viral_pass
             and (not is_prophage_borne)
         )
+        is_tier1 = is_tier1_prereg and viral_gate_pass
         is_tier2 = (
             passes_nesting
             and fitch_ml_concordant
             and (max_pg_uf >= 80.0)
             and singleton_viral_pass
+            and viral_gate_pass
             and (not is_prophage_borne)
             and (not is_tier1)
         )
+
+        # Alternative topology for the AU test: the donor background (all tips below the grandparent
+        # except the focal clade) forms a clade that excludes the focal tips and one tip outside the
+        # grandparent. Undefined when the grandparent is the root (nothing outside it).
+        constraint_donor: list[str] = []
+        constraint_outside = ""
+        if gp is not None and gp.up is not None:
+            focal_set = {lf.name for lf in nd.leaves()}
+            constraint_donor = sorted({lf.name for lf in gp.leaves()} - focal_set)
+            sib = [c for c in gp.up.children if c is not gp]
+            if sib:
+                constraint_outside = next(iter(sib[0].leaves())).name
 
         if is_prophage_borne and passes_nesting and fitch_ml_concordant:
             ev_class = "Prophage_Borne"
@@ -1167,7 +1249,11 @@ def detect_hgt_events(
             "recipient_domain": to_dom,
             "event_class": ev_class,
             "is_tier1_hgt": is_tier1,
+            "is_tier1_hgt_prereg": is_tier1_prereg,
             "is_tier2_hgt": is_tier2,
+            "viral_evidence_gate_pass": viral_gate_pass,
+            "n_donor_viral_tips": len(donor_viral_tips),
+            "n_donor_viral_tier12": n_donor_viral_supported,
             "is_prophage_borne": is_prophage_borne,
             "passes_double_outgroup_nesting": passes_nesting,
             "fitch_transition": fitch_trans,
@@ -1209,6 +1295,9 @@ def detect_hgt_events(
             "all_recipient_tips": ";".join(recip_leaves),
             "_recip_set": set(recip_leaves),
             "_donor_vir_sister_set": s1_vir_tips | s2_vir_tips,
+            "_focal_tips": sorted(lf.name for lf in nd.leaves()),
+            "_constraint_donor": constraint_donor,
+            "_constraint_outside": constraint_outside,
         })
 
     stats = {
@@ -1384,238 +1473,325 @@ def validate_cl0013_superfamily() -> list[dict]:
 # ---------------------------------------------------------------------------
 # Main Pipeline
 # ---------------------------------------------------------------------------
+# Main pipeline
+# ---------------------------------------------------------------------------
+def model_from_iqtree(path: Path) -> str:
+    """Best-fit model of an IQ-TREE run (ModelFinder BIC line, else the fixed model line)."""
+    if not path.is_file():
+        return ""
+    txt = path.read_text(encoding="utf-8", errors="ignore")
+    for key in ("Best-fit model according to BIC:", "Model of substitution:"):
+        m = re.search(re.escape(key) + r"\s*(\S+)", txt)
+        if m:
+            return m.group(1)
+    return ""
+
+
+def write_au_tasks(prim_events: dict[str, list[dict]]) -> int:
+    """Constraint trees + task list for AU tests of every pre-registered Tier-1 event on the primary trees."""
+    au_dir = OUT_DIR / "au_tests"
+    au_dir.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for fam, evs in prim_events.items():
+        track = "mafft" if fam == "PF13354_PF00768" else "hmm"
+        aln = ALN_DIR / fam / f"primary.{track}_in.fa"
+        ml_src = TREES_DIR / fam / f"{fam}.primary.{track}_in.treefile"
+        model = model_from_iqtree(TREES_DIR / fam / f"{fam}.primary.{track}_out.iqtree")
+        if not (aln.is_file() and ml_src.is_file() and model):
+            continue
+        ml_plain = au_dir / f"{fam}.primary_in.ml_plain.nwk"
+        ml_plain.write_text(re.sub(r"\)[0-9.]+/[0-9.]+", ")", ml_src.read_text(encoding="utf-8")), encoding="utf-8")
+        for ev in evs:
+            if not ev["is_tier1_hgt_prereg"]:
+                continue
+            donor, outside = ev["_constraint_donor"], ev["_constraint_outside"]
+            if len(donor) < 2 or not outside:
+                continue
+            cons = au_dir / f"{ev['event_id']}.constraint.nwk"
+            cons.write_text("(" + ",".join(ev["_focal_tips"] + [outside]) + ",(" + ",".join(donor) + "));\n", encoding="utf-8")
+            rows.append({"event_id": ev["event_id"], "family": fam, "alignment": str(aln), "model": model,
+                         "ml_tree": str(ml_plain), "constraint": str(cons)})
+    with open(OUT_DIR / "au_test_tasks.tsv", "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=["event_id", "family", "alignment", "model", "ml_tree", "constraint"],
+                           delimiter="\t", lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
+    return len(rows)
+
+
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     v_meta, b_meta = load_catalog_metadata()
-    crown_map = extract_superfamily_crown_splits()
+    crown_map = extract_superfamily_crown_splits(CROWN_PRIMARY_TREE)
+    crown_loo = {spec[0]: extract_superfamily_crown_splits(spec) for spec in CROWN_LOO_TREES}
     if crown_map:
-        print("[CL0013 Crown Anchors] Projected from superfamily backbone:", flush=True)
-        for cfam, cinfo in crown_map.items():
-            print(
-                f"  {cfam:15s}: S1={len(cinfo['s1'])}, S2={len(cinfo['s2'])} "
-                f"(source={cinfo['cl0013_source']}, F1={cinfo['crown_clade_f1']}, UFBoot={cinfo['crown_ufboot']:.0f})",
-                flush=True,
-            )
+        print("[CL0013 crown anchors]", flush=True)
+        for cfam, ci in crown_map.items():
+            print(f"  {cfam:15s}: S1={ci['crown_s1_n']}, S2={ci['crown_s2_n']}, F1={ci['crown_clade_f1']}, "
+                  f"monophyly UFBoot={ci['crown_monophyly_ufboot']:.0f}, root-split UFBoot={ci['crown_root_split_ufboot']:.0f}, "
+                  f"reliable={ci['crown_reliable']}", flush=True)
 
     all_events_rows: list[dict] = []
     tree_matrix_rows: list[dict] = []
     primary_catalog_rows: list[dict] = []
-
-    # Cache events & leaf sets per (family, comp_label) for OAT matching
+    rooting_rows: list[dict] = []
     events_by_fam: dict[str, dict[str, tuple[list[dict], set[str]]]] = {}
+    root_splits: dict[str, dict[str, tuple[frozenset, set[str]]]] = {}
+    primary_method_by_fam: dict[str, str] = {}
+
+    def agreement(a: tuple[frozenset, set[str]], b: tuple[frozenset, set[str]]) -> float:
+        shared = a[1] & b[1]
+        if not shared:
+            return float("nan")
+        sa, sb = set(a[0]) & shared, set(b[0]) & shared
+        return round(max(jaccard(sa, sb), jaccard(sa, shared - sb)), 4)
 
     for fam in FAMILIES:
-        primary_track = "mafft" if fam == "PF13354_PF00768" else "hmm"
+        track = "mafft" if fam == "PF13354_PF00768" else "hmm"
         og_path = ALN_DIR / fam / "outgroup_taxa.txt"
         og_ids = read_outgroup_ids(og_path) if og_path.is_file() else set()
+        crown = crown_map.get(fam)
+        use_crown = bool(crown and crown["crown_reliable"])
+        primary_method = "Crown_Projected" if use_crown else "MAD"
+        primary_method_by_fam[fam] = primary_method
         events_by_fam[fam] = {}
+        root_splits[fam] = {}
 
-        # Define all candidate trees for this family: (oat_key, rooting_method, tree_label, tree_path, og_id_set)
-        tree_jobs: list[tuple[str, str, str, Path, set[str]]] = []
-        prim_out_path = TREES_DIR / fam / f"{fam}.primary.{primary_track}_out.treefile"
-        prim_in_path = TREES_DIR / fam / f"{fam}.primary.{primary_track}_in.treefile"
-
-        if not prim_in_path.is_file() and not prim_out_path.is_file():
-            print(f"[SKIP] Missing primary trees for {fam}: {prim_in_path} / {prim_out_path}")
+        prim_out_path = TREES_DIR / fam / f"{fam}.primary.{track}_out.treefile"
+        prim_in_path = TREES_DIR / fam / f"{fam}.primary.{track}_in.treefile"
+        if not prim_in_path.is_file():
+            print(f"[SKIP] Missing primary ingroup tree for {fam}: {prim_in_path}")
             continue
 
-        if prim_in_path.is_file() and fam in crown_map:
-            tree_jobs.append(("primary_out", "Crown_Projected", "Primary_Crown_Projected", prim_in_path, set()))
-            if prim_out_path.is_file():
-                tree_jobs.append(("legacy_sarg24_out", "Sister_PRE", "OAT_Legacy_SARG24_Outgroup", prim_out_path, og_ids))
-        elif prim_out_path.is_file():
-            tree_jobs.append(("primary_out", "Sister_PRE", "Primary_Sister_PRE", prim_out_path, og_ids))
+        def root_primary_style(nw_in: str) -> tuple[Tree, dict, str]:
+            if use_crown:
+                try:
+                    t_r, meta = root_crown_projection(nw_in, crown)
+                    return t_r, meta, "Crown_Projected"
+                except RuntimeError:
+                    pass                      # too few crown anchors in this tree -> MAD
+            t_r, meta = root_mad(nw_in)
+            return t_r, meta, "MAD"
 
+        # (oat_key, mode, label, tree_path, outgroup ids); mode "primary_style" roots like the primary tree
+        tree_jobs: list[tuple[str, str, str, Path, set[str]]] = [
+            ("primary_out", "primary_style", f"Primary_{primary_method}", prim_in_path, set()),
+        ]
+        if crown and not use_crown:
+            tree_jobs.append(("primary_in_Crown", "Crown_Projected", "Sensitivity_Crown_Projected", prim_in_path, set()))
+        if prim_out_path.is_file() and og_ids:
+            tree_jobs.append(("legacy_sarg24_out", "Sister_PRE", "Appendix_Legacy_SARG24_Outgroup", prim_out_path, og_ids))
         clean_og_p = ALN_DIR / fam / "outgroup_clean_gtdb12.txt"
-        clean_tp = TREES_DIR / fam / f"{fam}.clean_prof_out.{primary_track}_out.treefile"
+        clean_tp = TREES_DIR / fam / f"{fam}.clean_prof_out.{track}_out.treefile"
         if clean_og_p.is_file() and clean_tp.is_file():
-            tree_jobs.append(("clean_prof_out", "Sister_PRE", "OAT_Clean_GTDB12_Profile", clean_tp, read_outgroup_ids(clean_og_p)))
-
-        if prim_in_path.is_file():
-            tree_jobs.append(("primary_in_MAD", "MAD", "Primary_Ingroup_MAD", prim_in_path, set()))
-            tree_jobs.append(("primary_in_MinVar", "MinVar", "Primary_Ingroup_MinVar", prim_in_path, set()))
-            tree_jobs.append(("primary_in_Midpoint", "Midpoint", "Primary_Ingroup_Midpoint", prim_in_path, set()))
-            tree_jobs.append(("primary_in_YoudenJ", "Youden_J_Appendix", "Appendix_Youden_J", prim_in_path, set()))
-
+            tree_jobs.append(("clean_prof_out", "Sister_PRE", "OAT_Clean_GTDB12_Outgroup", clean_tp, read_outgroup_ids(clean_og_p)))
+        tree_jobs += [
+            ("primary_in_MAD", "MAD", "Primary_Ingroup_MAD", prim_in_path, set()),
+            ("primary_in_MinVar", "MinVar", "Primary_Ingroup_MinVar", prim_in_path, set()),
+            ("primary_in_Midpoint", "Midpoint", "Primary_Ingroup_Midpoint", prim_in_path, set()),
+            ("primary_in_YoudenJ", "Youden_J_Appendix", "Appendix_Youden_J", prim_in_path, set()),
+        ]
+        # Sensitivity trees: outgroup tips removed, then rooted exactly like the primary tree
         if fam != "PF13354_PF00768":
-            mafft_out = TREES_DIR / fam / f"{fam}.primary.mafft_out.treefile"
-            if mafft_out.is_file():
-                tree_jobs.append(("mafft_out", "Sister_PRE", "OAT_MAFFT_ClipKIT", mafft_out, og_ids))
-
-        for sname in ("rep2", "rep3", "rep4", "rep5", "phylo", "nopro", "cov60", "cov70"):
-            tp = TREES_DIR / fam / f"{fam}.{sname}.{primary_track}_out.treefile"
+            tp = TREES_DIR / fam / f"{fam}.primary.mafft_out.treefile"
             if tp.is_file():
-                tree_jobs.append((sname, "Sister_PRE", f"OAT_{sname}", tp, og_ids))
+                tree_jobs.append(("mafft_out", "primary_style_ingroup", "OAT_MAFFT_ClipKIT", tp, og_ids))
+        for sname in ("rep2", "rep3", "rep4", "rep5", "phylo", "nopro", "cov60", "cov70"):
+            tp = TREES_DIR / fam / f"{fam}.{sname}.{track}_out.treefile"
+            if tp.is_file():
+                tree_jobs.append((sname, "primary_style_ingroup", f"OAT_{sname}", tp, og_ids))
+        tp = TREES_DIR / fam / f"{fam}.pmsf_c20.{track}_out.treefile"
+        if tp.is_file():
+            tree_jobs.append(("pmsf_c20", "primary_style_ingroup", "OAT_PMSF_C20", tp, og_ids))
 
-        pmsf_tp = TREES_DIR / fam / f"{fam}.pmsf_c20.{primary_track}_out.treefile"
-        if pmsf_tp.is_file():
-            tree_jobs.append(("pmsf_c20", "Sister_PRE", "OAT_PMSF_C20", pmsf_tp, og_ids))
-
-        for key, rmethod, label, tpath, job_og_ids in tree_jobs:
+        for key, mode, label, tpath, job_og in tree_jobs:
             nw_str = tpath.read_text(encoding="utf-8")
             if not verify_tree_bootstrap_complete(tpath, nw_str):
                 continue
-
-            if rmethod == "Crown_Projected":
-                tr, rmeta = root_crown_projection(nw_str, crown_map[fam])
-            elif rmethod == "Sister_PRE":
-                tr, rmeta = root_sister_pre(nw_str, job_og_ids)
-            elif rmethod == "MAD":
+            if mode == "primary_style":
+                tr, rmeta, rmethod = root_primary_style(nw_str)
+            elif mode == "primary_style_ingroup":
+                tr, rmeta, used = root_primary_style(prune_to_ingroup_newick(nw_str, job_og) if job_og else nw_str)
+                rmethod = f"Ingroup_{used}"
+            elif mode == "Crown_Projected":
+                try:
+                    tr, rmeta = root_crown_projection(nw_str, crown)
+                except RuntimeError as exc:
+                    print(f"  [SKIP crown sensitivity] {fam}: {exc}", flush=True)
+                    continue
+                rmethod = "Crown_Projected"
+            elif mode == "Sister_PRE":
+                tr, rmeta = root_sister_pre(nw_str, job_og)
+                rmethod = "Sister_PRE"
+            elif mode == "MAD":
                 tr, rmeta = root_mad(nw_str)
-            elif rmethod in ("MinVar", "Midpoint"):
-                tr, rmeta = root_minvar_or_midpoint(nw_str, rmethod)
+                rmethod = "MAD"
+            elif mode in ("MinVar", "Midpoint"):
+                tr, rmeta = root_minvar_or_midpoint(nw_str, mode)
+                rmethod = mode
             else:
                 tr, rmeta = root_youden_j(nw_str, v_meta)
-
+                rmethod = "Youden_J_Appendix"
+            rsh, ruf, r_term = root_split_support(tr)
+            rmeta = {**rmeta, "root_split_shalrt": rsh, "root_split_ufboot": ruf, "root_on_terminal_branch": r_term,
+                     "root_split_small_side_n": len(root_split_tips(tr))}
+            root_splits[fam][key] = (root_split_tips(tr), {lf.name for lf in tr.leaves()})
             if key == "primary_out":
                 write_rooted_treefile(tr, TREES_DIR / fam / f"{fam}.primary.rooted.treefile")
 
             ev_list, stats = detect_hgt_events(tr, fam, label, rmethod, v_meta, b_meta)
-            tip_set = {l.name for l in tr.leaves()}
-            events_by_fam[fam][key] = (ev_list, tip_set)
-
+            events_by_fam[fam][key] = (ev_list, {lf.name for lf in tr.leaves()})
             for ev in ev_list:
-                row = {k: v for k, v in ev.items() if not k.startswith("_")}
-                all_events_rows.append(row)
+                all_events_rows.append({k: v for k, v in ev.items() if not k.startswith("_")})
 
-            # Summary row for OAT Sensitivity Matrix
             nested_all = [e for e in ev_list if e["passes_double_outgroup_nesting"] and e["fitch_ml_concordant"]]
             t1_all = [e for e in nested_all if e["is_tier1_hgt"]]
             t2_all = [e for e in nested_all if e["is_tier2_hgt"]]
-            pb_all = [e for e in nested_all if e["is_prophage_borne"]]
             t1_b2v = [e for e in t1_all if e["direction"] == "Bacterial_to_Viral"]
             t1_v2b = [e for e in t1_all if e["direction"] == "Viral_to_Bacterial"]
-            t1_sbl = [e for e in t1_all if e["functional_category"] == "Putative_Hydrolytic_BetaLactamase"]
-
-            mat_row = {
-                "family": fam,
-                "oat_key": key,
-                "tree_label": label,
-                "rooting_method": rmethod,
-                **stats,
-                **rmeta,
+            tree_matrix_rows.append({
+                "family": fam, "oat_key": key, "tree_label": label, "rooting_method": rmethod,
+                **stats, **rmeta,
                 "nested_fitch_ml_events": len(nested_all),
                 "tier1_hgt_events": len(t1_all),
+                "tier1_prereg_events": sum(1 for e in nested_all if e["is_tier1_hgt_prereg"]),
+                "tier1_single_tip_events": sum(1 for e in t1_all if e["focal_is_singleton_tip"]),
                 "tier1_B_to_V_events": len(t1_b2v),
                 "tier1_V_to_B_events": len(t1_v2b),
-                "tier1_hydrolytic_sbl_events": len(t1_sbl),
+                "tier1_hydrolytic_sbl_events": sum(1 for e in t1_all if e["functional_category"] == "Putative_Hydrolytic_BetaLactamase"),
                 "tier2_hgt_events": len(t2_all),
-                "prophage_borne_events": len(pb_all),
+                "prophage_borne_events": sum(1 for e in nested_all if e["is_prophage_borne"]),
                 "tier1_B_to_V_viral_nr85_tips": sum(e["n_focal_recipient_tips"] for e in t1_b2v),
                 "tier1_B_to_V_expanded_seqs": sum(e["expanded_viral_cluster_seqs"] for e in t1_b2v),
                 "tier1_V_to_B_bac_tips": sum(e["n_focal_recipient_tips"] for e in t1_v2b),
-            }
-            tree_matrix_rows.append(mat_row)
-            print(
-                f"  [{fam:15s} | {key:20s}] tips={stats['total_tips']:4d} "
-                f"nested={len(nested_all):3d} Tier1={len(t1_all):2d} "
-                f"(B->V:{len(t1_b2v):2d}, V->B:{len(t1_v2b):2d}, SBL:{len(t1_sbl):2d}) "
-                f"Tier2={len(t2_all):2d} Prophage={len(pb_all):2d}",
-                flush=True,
-            )
+            })
+            print(f"  [{fam:15s} | {key:20s}] {rmethod:24s} tips={stats['total_tips']:4d} nested={len(nested_all):3d} "
+                  f"Tier1={len(t1_all):2d} Tier2={len(t2_all):2d}", flush=True)
 
-    # Cross-tree OAT Robustness Scoring on Primary Nested Concordant Events
-    # Also include Joint PF13354_PF00768 as an OAT comparator for PF13354 & PF00768
-    oat_order = [
-        "primary_in_MAD", "primary_in_MinVar", "primary_in_Midpoint", "clean_prof_out",
-        "mafft_out", "rep2", "rep3", "rep4", "rep5", "phylo", "nopro", "cov60", "cov70", "pmsf_c20",
-    ]
+        # Root-position agreement of the primary root with every other rooting of the same taxa
+        rrow = {"family": fam, "primary_rooting": primary_method}
+        if crown:
+            for k in ("crown_clade_f1", "crown_monophyly_ufboot", "crown_monophyly_shalrt", "crown_root_split_ufboot",
+                      "crown_n_family_outside_clade", "crown_s1_n", "crown_s2_n", "crown_reliable"):
+                rrow[k] = crown[k]
+        prim = root_splits[fam].get("primary_out")
+        prim_row = next((r for r in tree_matrix_rows if r["family"] == fam and r["oat_key"] == "primary_out"), {})
+        for k in ("root_split_ufboot", "root_on_terminal_branch", "root_split_small_side_n"):
+            rrow[f"primary_{k}"] = prim_row.get(k, "")
+        for k in ("primary_in_Crown", "primary_in_MAD", "primary_in_MinVar", "primary_in_Midpoint",
+                  "clean_prof_out", "legacy_sarg24_out"):
+            if prim and k in root_splits[fam]:
+                rrow[f"root_agreement_{k}"] = agreement(prim, root_splits[fam][k])
+        if crown and prim_in_path.is_file():
+            nw_in = prim_in_path.read_text(encoding="utf-8")
+            try:
+                t_main, _ = root_crown_projection(nw_in, crown)
+            except RuntimeError:
+                t_main = None
+        if crown and prim_in_path.is_file() and t_main is not None:
+            main_split = (root_split_tips(t_main), {lf.name for lf in t_main.leaves()})
+            for loo_name, loo_map in crown_loo.items():
+                if fam in loo_map:
+                    try:
+                        t_loo, _ = root_crown_projection(nw_in, loo_map[fam])
+                        rrow[f"crown_root_agreement_{loo_name.split('.')[-1]}"] = agreement(
+                            main_split, (root_split_tips(t_loo), {lf.name for lf in t_loo.leaves()}))
+                    except RuntimeError:
+                        rrow[f"crown_root_agreement_{loo_name.split('.')[-1]}"] = float("nan")
+        rooting_rows.append(rrow)
+
+    # Cross-tree OAT robustness of primary nested concordant events
+    oat_order = ["primary_in_MAD", "primary_in_MinVar", "primary_in_Midpoint", "clean_prof_out",
+                 "mafft_out", "rep2", "rep3", "rep4", "rep5", "phylo", "nopro", "cov60", "cov70", "pmsf_c20"]
     resample_keys = {"rep2", "rep3", "rep4", "rep5", "phylo"}
+    prim_events_for_au: dict[str, list[dict]] = {}
 
     for fam in FAMILIES:
-        if fam not in events_by_fam or "primary_out" not in events_by_fam[fam]:
+        if "primary_out" not in events_by_fam.get(fam, {}):
             continue
         prim_evs, prim_tips = events_by_fam[fam]["primary_out"]
         prim_nested = [e for e in prim_evs if e["passes_double_outgroup_nesting"] and e["fitch_ml_concordant"]]
-
+        prim_events_for_au[fam] = prim_nested
         for pev in prim_nested:
             rec = {k: v for k, v in pev.items() if not k.startswith("_")}
-            # Cross-rooting checks
-            mad_ok, mad_cls = (False, "NA")
-            minvar_ok, minvar_cls = (False, "NA")
-            mid_ok, mid_cls = (False, "NA")
-            youd_ok, youd_cls = (False, "NA")
+            rec["primary_rooting_method"] = primary_method_by_fam[fam]
+            checks = {}
+            for k in ("primary_in_MAD", "primary_in_MinVar", "primary_in_Midpoint", "primary_in_YoudenJ",
+                      "legacy_sarg24_out", "primary_in_Crown"):
+                if k in events_by_fam[fam]:
+                    cevs, ctips = events_by_fam[fam][k]
+                    checks[k], _ = match_event_in_comparator(pev, prim_tips, cevs, ctips)
+                else:
+                    checks[k] = False
+            rec["root_MAD_match"] = checks["primary_in_MAD"]
+            rec["root_MinVar_match"] = checks["primary_in_MinVar"]
+            rec["root_Midpoint_match"] = checks["primary_in_Midpoint"]
+            rec["root_Crown_match"] = checks["primary_in_Crown"] if "primary_in_Crown" in events_by_fam[fam] else "NA"
+            rec["root_Invariant"] = checks["primary_in_MAD"] and (checks["primary_in_MinVar"] or checks["primary_in_Midpoint"])
+            rec["appendix_YoudenJ_match"] = checks["primary_in_YoudenJ"]
+            rec["legacy_sarg24_match"] = checks["legacy_sarg24_out"]
 
-            if "primary_in_MAD" in events_by_fam[fam]:
-                cevs, ctips = events_by_fam[fam]["primary_in_MAD"]
-                mad_ok, mad_cls = match_event_in_comparator(pev, prim_tips, cevs, ctips)
-            if "primary_in_MinVar" in events_by_fam[fam]:
-                cevs, ctips = events_by_fam[fam]["primary_in_MinVar"]
-                minvar_ok, minvar_cls = match_event_in_comparator(pev, prim_tips, cevs, ctips)
-            if "primary_in_Midpoint" in events_by_fam[fam]:
-                cevs, ctips = events_by_fam[fam]["primary_in_Midpoint"]
-                mid_ok, mid_cls = match_event_in_comparator(pev, prim_tips, cevs, ctips)
-            if "primary_in_YoudenJ" in events_by_fam[fam]:
-                cevs, ctips = events_by_fam[fam]["primary_in_YoudenJ"]
-                youd_ok, youd_cls = match_event_in_comparator(pev, prim_tips, cevs, ctips)
-            leg_ok = False
-            if "legacy_sarg24_out" in events_by_fam[fam]:
-                cevs, ctips = events_by_fam[fam]["legacy_sarg24_out"]
-                leg_ok, _ = match_event_in_comparator(pev, prim_tips, cevs, ctips)
-
-            root_invariant = mad_ok and (minvar_ok or mid_ok)
-            rec["root_MAD_match"] = mad_ok
-            rec["root_MinVar_match"] = minvar_ok
-            rec["root_Midpoint_match"] = mid_ok
-            rec["root_Invariant"] = root_invariant
-            rec["appendix_YoudenJ_match"] = youd_ok
-            rec["legacy_sarg24_match"] = leg_ok
-
-            # OAT recurrence across completed comparators (excluding Midpoint to avoid double-counting clock family,
-            # while including MAD + MinVar + MSA + sampling + prophage + cov + PMSF + joint tree)
-            oat_eval_keys = [
-                k for k in oat_order
-                if k != "primary_in_Midpoint" and k in events_by_fam[fam]
-            ]
-            n_avail = 0
-            n_matched = 0
+            n_avail = n_matched = 0
             matched_labels: list[str] = []
-            for k in oat_eval_keys:
-                # Skip nopro for strictly Prophage_Borne events where all recipient tips were deleted
+            for k in oat_order:
+                if k == "primary_in_Midpoint" or k not in events_by_fam[fam]:
+                    continue
                 if k == "nopro" and pev["is_prophage_borne"]:
                     continue
                 cevs, ctips = events_by_fam[fam][k]
-                # Skip cov60/cov70 if recipient tip wasn't included in cov70
-                if k in ("cov60", "cov70") and len(pev["_recip_set"] & ctips) == 0:
+                if k in ("cov60", "cov70") and not (pev["_recip_set"] & ctips):
                     continue
                 n_avail += 1
-                ok, _ = match_event_in_comparator(
-                    pev, prim_tips, cevs, ctips, allow_donor_sister_fallback=(k in resample_keys)
-                )
+                ok, _ = match_event_in_comparator(pev, prim_tips, cevs, ctips, allow_donor_sister_fallback=(k in resample_keys))
                 rec[f"oat_{k}"] = ok
                 if ok:
                     n_matched += 1
                     matched_labels.append(k)
-
-            # Joint PF13354_PF00768 comparator for PF13354 and PF00768
             if fam in ("PF13354", "PF00768") and "primary_out" in events_by_fam.get("PF13354_PF00768", {}):
                 j_evs, j_tips = events_by_fam["PF13354_PF00768"]["primary_out"]
-                if len(pev["_recip_set"] & j_tips) > 0:
+                if pev["_recip_set"] & j_tips:
                     n_avail += 1
                     ok, _ = match_event_in_comparator(pev, prim_tips, j_evs, j_tips, allow_donor_sister_fallback=True)
                     rec["oat_joint_tree"] = ok
                     if ok:
                         n_matched += 1
                         matched_labels.append("joint_tree")
-
             oat_rate = n_matched / max(n_avail, 1)
             rec["oat_n_matched"] = n_matched
             rec["oat_n_evaluated"] = n_avail
             rec["oat_recurrence_rate"] = round(oat_rate, 4)
             rec["robust_core_hgt"] = (oat_rate >= 0.80) and (pev["is_tier1_hgt"] or pev["is_tier2_hgt"])
             rec["matched_oat_trees"] = ";".join(matched_labels)
+
+            # The joint tree re-analyses PF13354 + PF00768 sequences: mark its events that repeat a
+            # single-family event so that totals are not double-counted.
+            rec["duplicate_of_single_family_event"] = ""
+            if fam == "PF13354_PF00768":
+                for sf in ("PF13354", "PF00768"):
+                    if "primary_out" not in events_by_fam.get(sf, {}):
+                        continue
+                    s_evs, s_tips = events_by_fam[sf]["primary_out"]
+                    for sev in s_evs:
+                        if (sev["passes_double_outgroup_nesting"] and sev["fitch_ml_concordant"]
+                                and sev["direction"] == pev["direction"]
+                                and jaccard(sev["_recip_set"] & prim_tips, pev["_recip_set"] & s_tips) >= 0.70):
+                            rec["duplicate_of_single_family_event"] = sev["event_id"]
+                            break
+                    if rec["duplicate_of_single_family_event"]:
+                        break
             primary_catalog_rows.append(rec)
 
-    # Write outputs
+    n_au = write_au_tasks(prim_events_for_au)
+
     df_prim = pd.DataFrame(primary_catalog_rows)
     df_all = pd.DataFrame(all_events_rows)
     df_mat = pd.DataFrame(tree_matrix_rows)
-
+    df_root = pd.DataFrame(rooting_rows)
     df_prim.to_csv(OUT_DIR / "Primary_HGT_Events_Catalog_2026.tsv", sep="\t", index=False)
     df_all.to_csv(OUT_DIR / "All_Trees_HGT_Events_Long.tsv", sep="\t", index=False)
     df_mat.to_csv(OUT_DIR / "OAT_Sensitivity_Summary_Matrix_2026.tsv", sep="\t", index=False)
+    df_root.to_csv(OUT_DIR / "Rooting_Decisions_And_Agreement.tsv", sep="\t", index=False)
 
-    # Family x Functional Tier summary table
     sum_rows = []
     if len(df_prim) > 0:
         for fam in FAMILIES:
@@ -1624,57 +1800,58 @@ def main() -> int:
                 for fc in ("Putative_Hydrolytic_BetaLactamase", "PBP_or_PRE_Homolog"):
                     s = sub_f[(sub_f["direction"] == d) & (sub_f["functional_category"] == fc)]
                     t1 = s[s["is_tier1_hgt"]]
-                    t2 = s[s["is_tier2_hgt"]]
-                    pb = s[s["is_prophage_borne"]]
-                    rc = s[s["robust_core_hgt"]]
-                    ri = t1[t1["root_Invariant"]]
                     sum_rows.append({
                         "family": fam,
-                        "direction": d,
-                        "functional_category": fc,
+                        "tree_role": "joint_sensitivity" if fam == "PF13354_PF00768" else "single_family",
+                        "direction": d, "functional_category": fc,
                         "all_nested_concordant": len(s),
                         "tier1_events": len(t1),
-                        "tier1_root_invariant": len(ri),
-                        "tier1_robust_core": len(t1[t1["robust_core_hgt"]]),
+                        "tier1_prereg_events": int(s["is_tier1_hgt_prereg"].sum()),
+                        "tier1_single_tip": int(t1["focal_is_singleton_tip"].sum()),
+                        "tier1_multi_tip": int((~t1["focal_is_singleton_tip"].astype(bool)).sum()),
+                        "tier1_root_invariant": int(t1["root_Invariant"].sum()),
+                        "tier1_robust_core": int(t1["robust_core_hgt"].sum()),
+                        "tier1_duplicates_single_family": int((t1["duplicate_of_single_family_event"] != "").sum()),
                         "tier1_recip_nr85_tips": int(t1["n_focal_recipient_tips"].sum()),
-                        "tier1_expanded_viral_seqs": int(t1["expanded_viral_cluster_seqs"].sum()),
-                        "tier2_events": len(t2),
-                        "robust_core_total_t1_t2": len(rc),
-                        "prophage_borne_events": len(pb),
+                        "tier2_events": int(s["is_tier2_hgt"].sum()),
+                        "robust_core_total_t1_t2": int(s["robust_core_hgt"].sum()),
+                        "prophage_borne_events": int(s["is_prophage_borne"].sum()),
                     })
     df_sum = pd.DataFrame(sum_rows)
     df_sum.to_csv(OUT_DIR / "HGT_Summary_By_Family_And_Function_2026.tsv", sep="\t", index=False)
 
-    # CL0013 Superfamily Validation
     cl_rows = validate_cl0013_superfamily()
-    if cl_rows:
-        df_cl = pd.DataFrame(cl_rows)
+    df_cl = pd.DataFrame(cl_rows) if cl_rows else pd.DataFrame()
+    if len(df_cl):
         df_cl.to_csv(OUT_DIR / "CL0013_Superfamily_Rooting_Validation.tsv", sep="\t", index=False)
-    else:
-        df_cl = pd.DataFrame()
 
-    # Human-readable report
+    single = df_prim[df_prim["family"] != "PF13354_PF00768"] if len(df_prim) else df_prim
+    joint = df_prim[df_prim["family"] == "PF13354_PF00768"] if len(df_prim) else df_prim
+    def n_t1(df):
+        return int(df["is_tier1_hgt"].sum()) if len(df) else 0
+    joint_new = joint[(joint["is_tier1_hgt"]) & (joint["duplicate_of_single_family_event"] == "")] if len(joint) else joint
     lines = [
-        "=== Stage 3 (Phase 4): Pre-Locked Primary HGT Inference & OAT Robustness Summary ===",
-        f"Trees analyzed across all families/perturbations: {len(df_mat)}",
+        "=== HGT inference: primary events, rooting checks and robustness ===",
+        f"Trees analysed: {len(df_mat)}",
         "",
-        "--- Primary Crown-Projected Nested Concordant HGT Summary (by Family x Direction x Function) ---",
+        "--- Rooting decisions (primary = crown projection only where the family is a supported clade in the",
+        f"    CL0013 superfamily tree (F1 >= {CROWN_MIN_F1}, UFBoot >= {CROWN_MIN_UFBOOT:.0f}) with a supported root",
+        f"    position (root-split UFBoot >= {CROWN_MIN_ROOT_UFBOOT:.0f}); otherwise MAD) ---",
+        df_root.to_string(index=False) if len(df_root) else "(none)",
+        "",
+        "--- Tier-1 totals ---",
+        f"Single-family trees (PF00144, PF00905, PF13354, PF00768): Tier-1 = {n_t1(single)} "
+        f"(single-tip {int(single[single['is_tier1_hgt']]['focal_is_singleton_tip'].sum()) if len(single) else 0}), "
+        f"pre-registered Tier-1 without the viral-evidence gate = {int(single['is_tier1_hgt_prereg'].sum()) if len(single) else 0}",
+        f"Joint PF13354_PF00768 tree (sensitivity, not added to totals): Tier-1 = {n_t1(joint)}, "
+        f"of which repeat a single-family event = {n_t1(joint) - len(joint_new)}, joint-only = {len(joint_new)}",
+        f"AU-test tasks written: {n_au} (au_test_tasks.tsv)",
+        "",
+        "--- Summary by family x direction x function ---",
         df_sum[df_sum["all_nested_concordant"] > 0].to_string(index=False) if len(df_sum) else "(none)",
-        "",
-        "--- Primary Trees Overview ---",
-        df_mat[df_mat["oat_key"] == "primary_out"][[
-            "family", "total_tips", "viral_tips", "bacterial_tips",
-            "nested_fitch_ml_events", "tier1_hgt_events", "tier1_B_to_V_events",
-            "tier1_V_to_B_events", "tier1_hydrolytic_sbl_events",
-            "tier1_B_to_V_viral_nr85_tips", "tier1_B_to_V_expanded_seqs",
-            "tier2_hgt_events", "prophage_borne_events",
-        ]].to_string(index=False),
     ]
-    if len(df_cl) > 0:
-        lines.extend(["", "--- CL0013 Superfamily & LOO Rooting Validation ---", df_cl.to_string(index=False)])
-    else:
-        lines.extend(["", "--- CL0013 Superfamily & LOO Rooting Validation ---", "(pending CL0013 IQ-TREE runs)"])
-
+    if len(df_cl):
+        lines += ["", "--- CL0013 superfamily & leave-one-outgroup-out validation ---", df_cl.to_string(index=False)]
     rep_txt = "\n".join(lines) + "\n"
     (OUT_DIR / "Stage3_HGT_Summary_Report.txt").write_text(rep_txt, encoding="utf-8")
     print("\n" + rep_txt)

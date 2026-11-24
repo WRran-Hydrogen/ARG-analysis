@@ -251,6 +251,10 @@ def parse_absrel(
     return branch_rows, traj_rows, summary
 
 
+def _nonempty_json(p: Path) -> bool:
+    return p.is_file() and p.stat().st_size > 100
+
+
 def main() -> int:
     if not TASKS_TSV.is_file():
         raise FileNotFoundError(f"Missing {TASKS_TSV}")
@@ -271,15 +275,25 @@ def main() -> int:
         sgrp = t["set_group"]
         sdir = Path(t["set_dir"])
         ab_p, me_p, fe_p, ga_p = sdir / "absrel.json", sdir / "meme.json", sdir / "fel.json", sdir / "gard.json"
-        if not (ab_p.is_file() and me_p.is_file() and fe_p.is_file()):
-            print(f"[SKIP incomplete] {sid}")
+        if not (_nonempty_json(me_p) and _nonempty_json(fe_p)):
+            print(f"[SKIP incomplete MEME/FEL] {sid}")
             continue
 
         col_map = pd.read_csv(sdir / "col_map.tsv", sep="\t")
         df_meme, meme_sum = parse_meme(me_p)
         df_fel, fel_sum = parse_fel(fe_p)
-        gard_sum = parse_gard(ga_p) if sgrp == "subclade" else {}
-        br_rows, tr_rows, ab_sum = parse_absrel(ab_p, sdir / "id_map.tsv", fam, sid)
+        gard_sum = parse_gard(ga_p) if (sgrp == "subclade" and _nonempty_json(ga_p)) else {}
+        if _nonempty_json(ab_p):
+            br_rows, tr_rows, ab_sum = parse_absrel(ab_p, sdir / "id_map.tsv", fam, sid)
+        else:
+            print(f"[PARTIAL: MEME+FEL ready, aBSREL pending] {sid}")
+            br_rows, tr_rows = [], []
+            ab_sum = {
+                "absrel_tested_branches": np.nan,
+                "absrel_sig_corr_05": np.nan,
+                "absrel_sig_uncorr_05": np.nan,
+                "absrel_pct_corr_05": np.nan,
+            }
 
         all_branches.extend(br_rows)
         all_trajs.extend(tr_rows)
