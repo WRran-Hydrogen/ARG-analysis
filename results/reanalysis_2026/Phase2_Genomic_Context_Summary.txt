@@ -1,25 +1,41 @@
-=== Phase 2: 100%-Coverage Viral Genomic Neighborhood Summary ===
-Total final curated viral SBL loci: 4,270 (IMG/VR w/ full contig ORFs: 4,246, MOSAiC: 24)
-Focal IMG/VR loci (PF00144+PF00905+PF13354): 4,109
-Median % ORFs annotated per viral contig (Pfam-A + eggNOG): 46.79%
-Contigs with >=1 viral hallmark gene inside viral region: 2,441 / 4,246 (57.49%)
-Flanked on at least one side by viral/recomb gene: 3,451 / 4,246 (81.28%)
-Flanked on BOTH sides by viral/recomb genes: 2,011 / 4,246 (47.36%)
-Median min distance to viral region boundary (IMG/VR): 5042.0 bp
+=== Phase 2: 100%-Coverage Viral Genomic Neighborhood Summary (Strict Structural Hallmarks) ===
+Total primary curated viral loci (cov>=0.65 & FIMO<=1e-5): 4,203 (IMG/VR: 4,193, MOSAiC: 10)
+  Focal IMG/VR (PF00144+PF00905+PF13354): 3,357 | Sister PRE IMG/VR (PF00768): 836
+Median % ORFs annotated per viral contig (Pfam-A + eggNOG): 47.00%
+Strict viral structural hallmark >=1 in viral region (capsid/portal/terminase/tail/geNomad hallmark): 2,287 / 4,193 (54.54%)
+Flanked by STRICT viral structural hallmark on >=1 side: 2,284 / 4,193 (54.47%)
+Flanked by STRICT viral structural hallmark on BOTH sides: 882 / 4,193 (21.04%)
+Flanked by viral structural OR replication/lysis (NO integrase/recomb) on >=1 side: 3,254 / 4,193 (77.61%)
+Flanked by viral structural OR replication/lysis (NO integrase/recomb) on BOTH sides: 1,874 / 4,193 (44.69%)
+Recombination / integrase / lysogeny gene in region (reported separately as MGE background): 1,885 / 4,193 (44.96%)
+Median min distance to viral region boundary (IMG/VR): 5160.0 bp
 
-Breakdown by (Pfam Category, Viral Origin Confidence Tier):
-  aux_PF00768      | MOSAiC_Proteome_Verified_vMAG : 2
-  aux_PF00768      | Tier1_HighConfidence_Viral    : 17
-  aux_PF00768      | Tier2_Supported_Viral         : 78
-  aux_PF00768      | Tier3_Fragment_or_Borderline  : 42
-  focal_PF00144    | MOSAiC_Proteome_Verified_vMAG : 21
-  focal_PF00144    | Tier1_HighConfidence_Viral    : 1,055
-  focal_PF00144    | Tier2_Supported_Viral         : 833
-  focal_PF00144    | Tier3_Fragment_or_Borderline  : 177
+Breakdown by (Pfam Category, Strict Viral Origin Confidence Tier) on Primary Curated Cohort:
+  aux_PF00768      | MOSAiC_Proteome_Verified_vMAG : 1
+  aux_PF00768      | Tier1_HighConfidence_Viral    : 232
+  aux_PF00768      | Tier2_Supported_Viral         : 196
+  aux_PF00768      | Tier3_Fragment_or_Borderline  : 408
+  focal_PF00144    | MOSAiC_Proteome_Verified_vMAG : 8
+  focal_PF00144    | Tier1_HighConfidence_Viral    : 1,164
+  focal_PF00144    | Tier2_Supported_Viral         : 325
+  focal_PF00144    | Tier3_Fragment_or_Borderline  : 379
   focal_PF00905    | MOSAiC_Proteome_Verified_vMAG : 1
-  focal_PF00905    | Tier1_HighConfidence_Viral    : 209
-  focal_PF00905    | Tier2_Supported_Viral         : 669
-  focal_PF00905    | Tier3_Fragment_or_Borderline  : 444
-  focal_PF13354    | Tier1_HighConfidence_Viral    : 245
-  focal_PF13354    | Tier2_Supported_Viral         : 395
-  focal_PF13354    | Tier3_Fragment_or_Borderline  : 82
+  focal_PF00905    | Tier1_HighConfidence_Viral    : 128
+  focal_PF00905    | Tier2_Supported_Viral         : 215
+  focal_PF00905    | Tier3_Fragment_or_Borderline  : 898
+  focal_PF13354    | Tier1_HighConfidence_Viral    : 125
+  focal_PF13354    | Tier2_Supported_Viral         : 50
+  focal_PF13354    | Tier3_Fragment_or_Borderline  : 73
+
+Host-vs-viral gene check (basis, pass) on primary IMG/VR loci:
+  checkv_viral_region      pass=False: 6
+  checkv_viral_region      pass=True : 96
+  genomad_provirus_skip    pass=True : 239
+  whole_contig             pass=False: 1,634
+  whole_contig             pass=True : 2,218
+
+Tier shift, 2023 rule (rows) -> revised strict rule (columns), primary IMG/VR loci:
+                                     Tier1     Tier2     Tier3
+  Tier1_HighConfidence_Viral         1,363        52       124
+  Tier2_Supported_Viral                286       734       973
+  Tier3_Fragment_or_Borderline           0         0       661

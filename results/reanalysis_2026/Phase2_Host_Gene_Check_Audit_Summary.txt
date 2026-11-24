@@ -1,0 +1,44 @@
+=== CheckV host-gene check audit (primary IMG/VR loci) ===
+Loci: 4,193 | re-derived tier differs from stored tier: 0
+
+Focal ORF CheckV category by host-check basis:
+  checkv_viral_region      host     : 77
+  checkv_viral_region      no_hit   : 24
+  checkv_viral_region      viral    : 1
+  genomad_provirus_skip    host     : 224
+  genomad_provirus_skip    no_hit   : 3
+  genomad_provirus_skip    viral    : 12
+  whole_contig             host     : 2,551
+  whole_contig             no_hit   : 428
+  whole_contig             unmapped : 3
+  whole_contig             viral    : 870
+
+Focal ORF CheckV category by family:
+  PF00144  host     : 730
+  PF00144  no_hit   : 253
+  PF00144  unmapped : 3
+  PF00144  viral    : 882
+  PF00768  host     : 810
+  PF00768  no_hit   : 26
+  PF00905  host     : 1,065
+  PF00905  no_hit   : 176
+  PF13354  host     : 247
+  PF13354  viral    : 1
+
+Loci in Tier 1/2 that fail the raw check (flank exemption): 38
+  focal category: host=37, no_hit=1
+  host - viral genes: 1=5, 2=1, 3=1, 4=4, 5=3, 6=2, 8=1, 9=2, 10=19 (10 = >=10)
+
+Current tier (rows) -> tier_focal_corrected (columns):
+                                    Tier1    Tier2    Tier3
+  Tier1_HighConfidence_Viral        1,648        0        1
+  Tier2_Supported_Viral                 0      753       33
+  Tier3_Fragment_or_Borderline         53      253    1,452
+  by family (T1/T2/T3): PF00144 1197/365/306; PF00768 242/267/327; PF00905 136/299/806; PF13354 126/75/47
+
+Current tier (rows) -> tier_focal_corrected_hq (columns):
+                                    Tier1    Tier2    Tier3
+  Tier1_HighConfidence_Viral        1,648        0        1
+  Tier2_Supported_Viral                19      753       14
+  Tier3_Fragment_or_Borderline         97      269    1,392
+  by family (T1/T2/T3): PF00144 1203/365/300; PF00768 242/267/327; PF00905 189/314/738; PF13354 130/76/42
