@@ -1,6 +1,5 @@
-"""Module 03: Deterministic, Reproducible Phylogenetic HGT Detection & Sensitivity Analysis.
+"""Deterministic, reproducible phylogenetic HGT detection & sensitivity analysis.
 
-Addresses Reviewer Comments 1, 2, and 10:
 1. Implements an explicit, deterministic phylogenetic HGT inference framework modeled after
    Irwin et al. (Nature Microbiology 2022) and Dmitrijeva et al. (Nature Ecology & Evolution 2024):
    - Roots each family tree deterministically on the primary inter-domain backbone split
@@ -16,10 +15,10 @@ Addresses Reviewer Comments 1, 2, and 10:
    - Stratifies HGT events by UFBoot support (>=70%, >=80%, >=90%) on the bounding nesting
      nodes (parent P and grandparent G) and focal monophyly node.
    - Explicitly separates Independent HGT Transition Events from Descendant Nested Branches & Tips.
-2. Performs Comment 10 Sensitivity Analyses by pruning:
+2. Performs contamination/prophage sensitivity analyses by pruning:
    - Bacterial Tier A contaminants (61 SARG-misclassified Viruses, 153 artificial/synthetic, header phage),
    - Bacterial Tier B putative cryptic prophages (NCBI nr hits >=90% aa identity to viral SBLs),
-   - Viral Tier 3 borderline fragments (retaining Module 02 Tier 1 + Tier 2 viral loci).
+   - Viral Tier 3 borderline fragments (retaining 04_viral_genomic_context_audit.py Tier 1 + Tier 2 viral loci).
 """
 
 from pathlib import Path
@@ -376,9 +375,9 @@ def run_analysis():
 
     print("=== Baseline Rigorous HGT Detection Summary (Backbone-Rooted, Polytomy-Collapsed) ===")
     print(df_sum.to_string(index=False))
-    print("\n=== Comment 10 Sensitivity (Pooled Across Families) ===")
+    print("\n=== Contamination / Prophage Pruning Sensitivity (Pooled Across Families) ===")
     print(df_sens[df_sens["family"] == "All_Pooled"].to_string(index=False))
-    print("\n=== Comment 10 Sensitivity (By Family) ===")
+    print("\n=== Contamination / Prophage Pruning Sensitivity (By Family) ===")
     print(df_sens[df_sens["family"] != "All_Pooled"][["family", "scenario", "bacterial_tips", "nested_hgt_events_total", "nested_B_to_V_events", "nested_V_to_B_events", "hgt_events_bounding_UFBoot_ge70", "nested_recipient_tips_total"]].to_string(index=False))
 
 run_analysis()

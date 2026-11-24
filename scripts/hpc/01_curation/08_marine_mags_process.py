@@ -9,7 +9,10 @@ import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
-import hpc_config as hpc
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 SFY = hpc.MARINE_MAGS_DIR
 BEST_CSV = SFY / "best_genomes_quals.csv"

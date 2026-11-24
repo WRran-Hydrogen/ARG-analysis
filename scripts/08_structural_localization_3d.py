@@ -1,7 +1,5 @@
-"""Script 08: Quantitative 3D Structural Localization of Positively Selected vs. Purifying Sites (Comment 6).
-
-Addresses Reviewer Comment 6 (structural basis for assigning positively selected residues to
-flexible loops or solvent-accessible surfaces vs. buried catalytic center):
+"""Quantitative 3D structural localization of positively selected vs. purifying sites
+(flexible loops / solvent-accessible surface vs. buried catalytic center):
 1. Computes residue-level 3D biophysical metrics directly from PDB atomic coordinates across
    experimentally determined bacterial reference crystal structures (1BLS for PF00144,
    1K25 for PF00905, 1BUE for PF13354) and 40 representative ESMFold-predicted viral SBL
@@ -422,7 +420,7 @@ def main():
     proc = subprocess.run(linux_cmd(WSL_PY, f"{WSL_STAGE_LIN}/run_m05_rsa.py"), capture_output=True, text=True)
     print(proc.stdout)
     if proc.returncode != 0:
-        raise RuntimeError(f"Script 08 failed:\n{proc.stderr}")
+        raise RuntimeError(f"08_structural_localization_3d.py failed:\n{proc.stderr}")
 
     shutil.copy2(WSL_STAGE_WIN / "Table_S11_Structural_Assessment_Selected_Sites.csv",
                  TABLES_DIR / "Table_S11_Structural_Assessment_Selected_Sites.csv")

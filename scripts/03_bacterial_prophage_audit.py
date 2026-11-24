@@ -1,6 +1,6 @@
-"""Module 01 - Step 3: Bacterial Reference Dataset Prophage & Viral Decontamination Audit (Comment 10).
+"""Bacterial reference dataset prophage & viral decontamination audit.
 
-Addresses Reviewer Comment 10: systematically audits all 2,220 sequences in the bacterial SBL
+Systematically audits all 2,220 sequences in the bacterial SBL
 reference dataset (SARG/CARD + NCBI nr) to identify:
 1. Sequences explicitly classified under realm 'Viruses' (e.g., Punavirus/Hendrixvirinae) in SARG metadata,
 2. Artificial/synthetic/vector sequences ('other entries'),
@@ -8,7 +8,7 @@ reference dataset (SARG/CARD + NCBI nr) to identify:
 4. NCBI nr proteins sharing >= 90% amino acid identity (>= 80% coverage) with IMG/VR viral SBLs
    (potential unannotated cryptic prophages integrated in bacterial reference genomes).
 
-Generates sensitivity-cleaned bacterial FASTAs for downstream phylogenetic and HGT testing (Module 03).
+Generates sensitivity-cleaned bacterial FASTAs for downstream phylogenetic and HGT testing (05_phylogenetic_hgt_inference.py).
 """
 
 from pathlib import Path

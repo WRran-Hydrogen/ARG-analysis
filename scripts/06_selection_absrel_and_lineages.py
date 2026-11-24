@@ -1,12 +1,11 @@
-"""Module 04 - Script 1: aBSREL Background Branch Normalization (Comment 4) and
-Lineage-Resolved Ancestral-to-Descendant Selection Trajectories (Comment 3).
+"""aBSREL background branch normalization and lineage-resolved ancestral-to-descendant
+selection trajectories.
 
-Addresses Reviewer Comments 3 and 4:
-- Comment 4: Normalizes positive selection branch counts by total background branches
+- Background normalization: normalizes positive selection branch counts by total background branches
   tested in each category (Internal vs. Terminal; Viral-monophyletic vs. Bacterial-monophyletic
   vs. Mixed/HGT-associated), reports Fisher's exact tests and Odds Ratios, and explicitly
-  reconciles branch counts vs. branch-site codon event shares (clarifying the reported 56% and 45.5%).
-- Comment 3: Maps selection pressure (baseline omega, weighted omega, and episodic positive
+  reconciles branch counts vs. branch-site codon event shares.
+- Lineage trajectories: maps selection pressure (baseline omega, weighted omega, and episodic positive
   selection frequency) longitudinally along the same root-to-tip evolutionary lineages
   (Ancestral/HGT-Transition -> Intermediate Descendant Internal -> Descendant Terminal),
   comparing HGT-associated lineages directly against non-HGT purely viral and purely bacterial lineages.
@@ -181,7 +180,7 @@ def run_all():
                 "is_hgt_transition": is_hgt_transition,
             })
 
-        # Now trace root-to-tip lineages on this tree for Comment 3!
+        # Trace root-to-tip lineages on this tree
         for tip in tree.leaves():
             t_dom = tip_domain(tip.name)
             # Walk up to root collecting path nodes (excluding root itself)
@@ -307,7 +306,7 @@ def run_all():
                     "terminal_pos_sel_uncorr": tip_p_unc <= 0.05,
                 })
 
-    # === Comment 4 Summary: Both info.tsv (exact Fig 3B dataset) and full absrel.json ===
+    # === Background normalization summary: Both info.tsv (exact Fig 3B dataset) and full absrel.json ===
     df_info_all = pd.concat(all_info_dfs, ignore_index=True)
     df_json_all = pd.DataFrame(all_json_branches)
 
@@ -464,7 +463,7 @@ def run_all():
     df_c4 = pd.DataFrame(info_tsv_rows)
     df_c4.to_csv(f"{STAGE}/Table_S_aBSREL_Background_Normalized_Frequencies.csv", index=False)
 
-    # === Comment 3 Summary: Lineage-Resolved Ancestral-to-Descendant Selection ===
+    # === Lineage trajectory summary: Lineage-Resolved Ancestral-to-Descendant Selection ===
     df_lin = pd.DataFrame(lineage_rows)
     df_pair = pd.DataFrame(paired_lineage_stats)
 
@@ -528,11 +527,11 @@ def run_all():
     df_lin_sum = pd.DataFrame(lin_summary)
     df_lin_sum.to_csv(f"{STAGE}/Table_S_Lineage_Resolved_Selection_Trajectories.csv", index=False)
 
-    print("=== Comment 4: Fig3B_info_tsv_LRTge0 (All_Pooled) ===")
+    print("=== Background normalization: Fig3B_info_tsv_LRTge0 (All_Pooled) ===")
     print(df_c4[(df_c4["source_table"]=="Fig3B_info_tsv_LRTge0") & (df_c4["family"]=="All_Pooled")].to_string(index=False))
-    print("\n=== Comment 4: absrel_JSON_UncorrP05 (All_Pooled) ===")
+    print("\n=== Background normalization: absrel_JSON_UncorrP05 (All_Pooled) ===")
     print(df_c4[(df_c4["source_table"]=="absrel_JSON_UncorrP05") & (df_c4["family"]=="All_Pooled")].to_string(index=False))
-    print("\n=== Comment 3: Lineage-Resolved Selection Trajectories (All_Pooled) ===")
+    print("\n=== Lineage-Resolved Selection Trajectories (All_Pooled) ===")
     print(df_lin_sum[df_lin_sum["family"]=="All_Pooled"].to_string(index=False))
 
     # Plot Figure: Lineage-Resolved Ancestral-to-Descendant Selection Trajectories
@@ -614,7 +613,7 @@ def main():
     proc = subprocess.run(linux_cmd(WSL_PY, f"{WSL_STAGE_LIN}/run_m04_part1.py"), capture_output=True, text=True)
     print(proc.stdout)
     if proc.returncode != 0:
-        raise RuntimeError(f"Module 04 Part 1 failed:\n{proc.stderr}")
+        raise RuntimeError(f"06_selection_absrel_and_lineages.py failed:\n{proc.stderr}")
 
     shutil.copy2(WSL_STAGE_WIN / "Table_S_aBSREL_Background_Normalized_Frequencies.csv",
                  TABLES_DIR / "Table_S07_aBSREL_Background_Normalized_Frequencies.csv")

@@ -1,6 +1,6 @@
-"""Module 01 - Step 2: Official Pfam --cut_ga + Unified MEME/FIMO Threshold Sensitivity (Comment 8).
+"""Official Pfam --cut_ga + unified MEME/FIMO threshold sensitivity.
 
-Addresses Reviewer Comment 8: evaluates viral and bacterial SBL candidates under strictly
+Evaluates viral and bacterial SBL candidates under strictly
 identical MEME/FIMO thresholds (p <= 1e-5 and p <= 1e-10 across Round 1 and Round 2)
 combined with official Pfam --cut_ga gathering thresholds (without imposing an artificial
 hard-coded SXXK regex pre-filter, relying instead on motif-PWM filtering to eliminate

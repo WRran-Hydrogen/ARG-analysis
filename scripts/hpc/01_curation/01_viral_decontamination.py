@@ -27,7 +27,10 @@ from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import hpc_config as hpc
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 BASE_DIR = hpc.BASE
 INPUT_DIR = BASE_DIR / "inputs"

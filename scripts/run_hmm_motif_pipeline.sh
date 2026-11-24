@@ -26,7 +26,7 @@ for FAM in "${FAMILIES[@]}"; do
     hmmbuild -n "${FAM}" "${FAM}.hmm" "${FAM}_seed.aln.faa"
 
     # 3. Screen viral and bacterial protein sets (rebuilt seed HMM, E-value screen)
-    #    Official Pfam gathering thresholds are applied separately with --cut_ga (script 01).
+    #    Official Pfam gathering thresholds are applied separately with --cut_ga (01_build_and_verify_hmm.py).
     hmmsearch --cpu 4 -E 1e-10 --domE 1e-10 --tblout "${FAM}_Viral.tblout" --domtblout "${FAM}_Viral.domtblout" "${FAM}.hmm" "${FAM}_Viral.faa"
     hmmsearch --cpu 4 -E 1e-10 --domE 1e-10 --tblout "${FAM}_Bacterial.tblout" --domtblout "${FAM}_Bacterial.domtblout" "${FAM}.hmm" "${FAM}_Bacterial.faa"
 

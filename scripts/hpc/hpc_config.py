@@ -1,4 +1,4 @@
-"""Path and tool configuration for the 2026 HPC re-analysis scripts (Slurm cluster).
+"""Path and tool configuration for the HPC scripts in scripts/hpc/ (Slurm cluster).
 
 Values are resolved in this order:
 1. environment variables,
@@ -74,15 +74,19 @@ PFAM_CLANS_TSV = DB_DIR / "Pfam-A.clans.tsv"
 # ---------------------------------------------------------------------------
 # Tools (empty bin dir -> found on PATH)
 # ---------------------------------------------------------------------------
+SBL_PYTHON_BIN = setting("SBL_HPC_PYTHON", "python")
 MEME_BIN_DIR = setting("SBL_HPC_MEME_BIN_DIR")
 MEME_BIN = _tool(MEME_BIN_DIR, "meme")
 FIMO_BIN = _tool(MEME_BIN_DIR, "fimo")
 HMMSEARCH_BIN = setting("SBL_HPC_HMMSEARCH", "hmmsearch")
 HMMALIGN_BIN = setting("SBL_HPC_HMMALIGN", str(Path(HMMSEARCH_BIN).with_name("hmmalign")) if "/" in HMMSEARCH_BIN else "hmmalign")
 MMSEQS_BIN = setting("SBL_HPC_MMSEQS", "mmseqs")
+PAL2NAL_BIN = setting("SBL_HPC_PAL2NAL", "pal2nal.pl")
+HYPHY_BIN = setting("SBL_HPC_HYPHY", "hyphy")
 
 # Phase 3 (alignment & trees)
 MAFFT_BIN = setting("SBL_HPC_MAFFT", "mafft")
 CLIPKIT_BIN = setting("SBL_HPC_CLIPKIT", "clipkit")
 IQTREE_BIN = setting("SBL_HPC_IQTREE", "iqtree2")
+FOLDMASON_BIN = setting("SBL_HPC_FOLDMASON", "foldmason")
 PHASE3_DIR = path_setting("SBL_HPC_PHASE3_DIR", BASE / "03_alignment_and_trees")

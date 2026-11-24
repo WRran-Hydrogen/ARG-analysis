@@ -8,19 +8,26 @@ Integrates for all curated IMG/VR viral SBL/PRE loci:
 - geNomad v1.7 summary, hallmarks, and provirus boundaries
 - CheckV v1.0.3 (DB v1.5) quality and viral/host region coordinates
 
-Revision 2026 updates:
+Tier rules:
 - Strictly separates viral structural hallmark genes (capsid, portal, terminase, tail, baseplate,
   virion coat/sheath/fiber/spike, prohead/scaffolding) from viral replication/lysis genes and
   from recombination/integrase/transposase genes.
-- Redefines Tier1_HighConfidence_Viral strictly: SBL >= 1 kb inside the viral region (or DTR/ITR
-  complete genome) + CheckV viral_genes >= 1 and >= host_genes, counted on the CheckV viral region
-  containing the SBL (contig-level only for whole-contig viruses; skipped for geNomad-only
-  provirus intervals, whose contig counts include the host flank) + >=1 strict viral structural
-  hallmark (never counting integrase/recombinase toward Tier 1). geNomad hallmark counts are taken
-  from the geNomad entry (provirus region or whole contig) that contains the SBL ORF.
-- Reports the pre-revision (2023-rule) tier per locus and a 2023 -> revised tier shift table.
+- Tier1_HighConfidence_Viral: SBL >= 1 kb inside the viral region (or DTR/ITR
+  complete genome) + >=1 ORF-verified strict viral structural hallmark inside the viral region
+  (`n_viral_hallmark_in_region >= 1`; raw geNomad `gn_nhm` is restricted to Tier 2 and never
+  counting integrase/recombinase toward Tier 1) + CheckV viral_genes >= 1 and host-gene check:
+  `viral_genes >= host_genes` on the CheckV viral region containing the SBL (or whole contig for
+  non-provirus contigs), or `viral_genes >= host_genes - 1` when flanked on BOTH sides by strict
+  viral structural hallmarks (accounting for CheckV self-counting the focal SBL/PBP as 1 host gene);
+  for `genomad_provirus_skip` intervals, Tier 1 requires double-sided viral structural or
+  replication/lysis flanking (`flanked_viral_structural_or_replic_both`) plus `viral_genes >= 1`.
+  `host_gene_check_pass` preserves the raw `vg_eval >= hg_eval` status for audit transparency.
+- geNomad hallmark counts are taken from the geNomad entry (provirus region or whole contig) that
+  contains the SBL ORF.
+- Also reports, per locus, the tier under a lenient comparison rule (>= 2 hallmarks including
+  holin/endolysin, 2 kb boundary) and a lenient -> strict tier shift table.
 
-Run after build_final_phase1_datasets.py --stage curate and before --stage finalize.
+Run after 01_curation/09_build_curated_datasets.py --stage curate and before --stage finalize.
 """
 
 import argparse
@@ -31,7 +38,10 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 
-import hpc_config as hpc
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 BASE = hpc.BASE
 P1_OUT = BASE / "01_final_curated"
@@ -59,8 +69,8 @@ RE_REPLIC_LYSIS = re.compile(
     r"sigma[- _]?70|anti[- _]?repressor|replication|ssb|recT|recE|erf)",
     re.I,
 )
-# Pre-revision (2023-rule) hallmark regex, kept only to report how tiers move under the new rules
-RE_HALLMARK_2023 = re.compile(
+# Lenient-rule hallmark regex (includes holin/endolysin), used only for the tier comparison
+RE_HALLMARK_lenient = re.compile(
     r"(terminase|portal|capsid|head[- _]protein|tail|baseplate|tape[- _]?measure|virion|"
     r"phage[- _]?(?:coat|sheath|neck|fiber|spike|tube|wedge|hub|lysozyme|structural)|"
     r"prohead|scaffolding|holin|endolysin|muramidase|DTR|MCP|major[- _]?capsid|"
@@ -123,29 +133,46 @@ def classify_viral_origin_tier(
     gn_score,
     gn_nhm,
     cv_vg,
+    cv_hg,
     host_ok,
+    host_basis,
+    flanked_strict_both,
+    flanked_sr_both,
 ):
     """Strict structural-hallmark-gated Viral Origin Confidence Tier assignment.
 
-    cv_vg / host_ok are evaluated on the region containing the SBL (see main): the CheckV viral
-    region when the SBL lies in one, otherwise the whole contig. Tier 1 is never weaker than
-    Tier 2 (both require host_ok). gn_nhm comes from the geNomad entry containing the SBL.
+    1. Tier 1 requires strictly `n_strict_hm_reg >= 1` (ORF-verified non-recombinase viral
+       structural hallmark inside the viral region; raw geNomad `gn_nhm` is NOT sufficient for Tier 1).
+    2. For `genomad_provirus_skip` intervals (where CheckV did not split the provirus and contig
+       host_genes are skipped), Tier 1 requires double-sided viral structural/replication flanking
+       (`flanked_sr_both`) and `cv_vg >= 1` to rule out boundary over-extension into host flanks.
+    3. For loci flanked on BOTH sides by strict viral structural hallmarks (`flanked_strict_both`),
+       CheckV's self-counting of the focal SBL/PBP as 1 host gene is accounted for:
+       `cv_vg >= 1 and cv_vg >= cv_hg - 1` qualifies for Tier 1 (when boundary_ok), and
+       any double-structurally-flanked locus with `gn_score >= 0.70` qualifies for at least Tier 2.
     """
-    has_struct_hm = (n_strict_hm_reg >= 1) or (gn_nhm >= 1)
-    if is_provirus_boundary_ok and has_struct_hm and cv_vg >= 1 and host_ok:
+    if host_basis == "genomad_provirus_skip":
+        t1_host_ok = flanked_sr_both and (cv_vg >= 1)
+        t2_host_ok = True
+    else:
+        t1_host_ok = (cv_vg >= 1) and (host_ok or (flanked_strict_both and cv_vg >= cv_hg - 1))
+        t2_host_ok = host_ok or flanked_strict_both
+
+    if is_provirus_boundary_ok and (n_strict_hm_reg >= 1) and t1_host_ok:
         return "Tier1_HighConfidence_Viral"
-    if gn_present and gn_score >= 0.70 and host_ok and (n_rep_reg >= 1 or cv_vg >= 1 or has_struct_hm):
+    has_any_hm = (n_strict_hm_reg >= 1) or (gn_nhm >= 1)
+    if gn_present and gn_score >= 0.70 and t2_host_ok and (n_rep_reg >= 1 or cv_vg >= 1 or has_any_hm):
         return "Tier2_Supported_Viral"
     return "Tier3_Fragment_or_Borderline"
 
 
-def classify_tier_2023_rule(gn_present, gn_score, gn_topo, cv_qual, n_hm_2023, gn_nhm_best, min_dist, cv_vg, n_rep_reg):
-    """Pre-revision tier rule (>=2 hallmarks incl. holin/endolysin, 2 kb boundary). Comparison only."""
+def classify_tier_lenient_rule(gn_present, gn_score, gn_topo, cv_qual, n_hm_lenient, gn_nhm_best, min_dist, cv_vg, n_rep_reg):
+    """Lenient tier rule (>=2 hallmarks incl. holin/endolysin, 2 kb boundary). Comparison only."""
     is_complete_topo = gn_topo in ("DTR", "ITR") or cv_qual in ("Complete", "High-quality", "Medium-quality")
-    has_strong_hm = (n_hm_2023 >= 2) or (gn_nhm_best >= 2)
+    has_strong_hm = (n_hm_lenient >= 2) or (gn_nhm_best >= 2)
     if (gn_score >= 0.90 or is_complete_topo) and has_strong_hm and (min_dist >= 2000 or gn_topo in ("DTR", "ITR")):
         return "Tier1_HighConfidence_Viral"
-    if gn_present and (n_hm_2023 >= 1 or gn_nhm_best >= 1 or cv_vg >= 1 or n_rep_reg >= 1):
+    if gn_present and (n_hm_lenient >= 1 or gn_nhm_best >= 1 or cv_vg >= 1 or n_rep_reg >= 1):
         return "Tier2_Supported_Viral"
     return "Tier3_Fragment_or_Borderline"
 
@@ -275,7 +302,7 @@ def main():
     print(f"  Loaded {n_egg:,} eggNOG annotations on target contig ORFs.")
 
     print("[5/7] Loading geNomad v1.7 gene hallmarks & summaries...")
-    gn_vs = {}                       # best-scoring entry per contig (2023-rule comparison only)
+    gn_vs = {}                       # best-scoring entry per contig (lenient-rule comparison only)
     gn_entries = defaultdict(list)   # all entries per contig (provirus regions + whole contig)
     with open_text(GENOMAD_DIR / "sbl_contigs_virus_summary.tsv.gz") as f:
         for r in csv.DictReader(f, delimiter="\t"):
@@ -361,14 +388,14 @@ def main():
             # Strict viral structural hallmark: explicit structural annotation OR non-recomb geNomad virus hallmark
             is_strict_txt = bool(RE_STRICT_STRUCTURAL.search(combined_txt))
             o["is_strict_structural_hallmark"] = is_strict_txt or (o["gn_hallmark"] and not o["is_recomb"])
-            o["is_hallmark_2023"] = o["gn_hallmark"] or bool(RE_HALLMARK_2023.search(combined_txt))
+            o["is_hallmark_lenient"] = o["gn_hallmark"] or bool(RE_HALLMARK_lenient.search(combined_txt))
             o["is_structural_or_replic"] = o["is_strict_structural_hallmark"] or o["is_replic"]
             o["has_any_annot"] = bool(combined_txt.strip())
 
     print("[7/7] Computing locus-level neighborhood features & strict confidence tiers...")
     out_rows = []
     tier_counts = Counter()
-    tier_shift = Counter()   # (2023-rule tier, revised tier) on the primary IMG/VR cohort
+    tier_shift = Counter()   # (lenient-rule tier, strict tier) on the primary IMG/VR cohort
 
     for r in viral_rows:
         uid = r["uid"]
@@ -388,7 +415,7 @@ def main():
                 "dual_PF13354_PF00768_GA": r.get("dual_PF13354_PF00768_GA", "NA"),
                 "in_primary_cov65_fimo1e5": in_primary,
                 "contig_context_available": False, "viral_origin_tier": tier,
-                "viral_origin_tier_2023rule": tier, "provirus_interval_used": "NA",
+                "viral_origin_tier_lenient_rule": tier, "provirus_interval_used": "NA",
                 "host_gene_check_basis": "NA", "host_gene_check_pass": "NA",
                 "contig_length_bp": "NA", "total_orfs_on_contig": "NA",
                 "sbl_start_bp": "NA", "sbl_end_bp": "NA", "sbl_strand": "NA",
@@ -416,7 +443,7 @@ def main():
 
         cq = cv_qs.get(uvig, {})
         gn = pick_genomad_entry(gn_entries.get(uvig, []), st, en)   # entry that contains this SBL
-        gn_best = gn_vs.get(uvig, {})                                # 2023-rule comparison only
+        gn_best = gn_vs.get(uvig, {})                                # lenient-rule comparison only
         orfs = contig_orfs.get(uvig, [])
 
         clen = int(cq.get("contig_length", 0) or 0)
@@ -467,7 +494,7 @@ def main():
         n_hm_reg = sum(1 for o in neigh if o["is_strict_structural_hallmark"])
         n_rep_reg = sum(1 for o in neigh if o["is_replic"])
         n_rec_reg = sum(1 for o in neigh if o["is_recomb"])
-        n_hm_reg_2023 = sum(1 for o in neigh if o["is_hallmark_2023"])
+        n_hm_reg_lenient = sum(1 for o in neigh if o["is_hallmark_lenient"])
 
         def orf_dist(o):
             if st == 0:
@@ -520,11 +547,11 @@ def main():
         cv_reg = [x for x in cv_v_regions_genes.get(uvig, []) if st > 0 and interval_overlap(st, en, x[0], x[1]) > 0]
         if cv_reg:
             _, _, reg_vg, reg_hg = max(cv_reg, key=lambda x: interval_overlap(st, en, x[0], x[1]))
-            vg_eval, host_ok, host_basis = reg_vg, reg_vg >= reg_hg, "checkv_viral_region"
+            vg_eval, hg_eval, host_ok, host_basis = reg_vg, reg_hg, reg_vg >= reg_hg, "checkv_viral_region"
         elif has_pv_interval:
-            vg_eval, host_ok, host_basis = cv_vg, True, "genomad_provirus_skip"
+            vg_eval, hg_eval, host_ok, host_basis = cv_vg, cv_hg, True, "genomad_provirus_skip"
         else:
-            vg_eval, host_ok, host_basis = cv_vg, cv_vg >= cv_hg, "whole_contig"
+            vg_eval, hg_eval, host_ok, host_basis = cv_vg, cv_hg, cv_vg >= cv_hg, "whole_contig"
 
         tier = classify_viral_origin_tier(
             is_provirus_boundary_ok=is_boundary_ok,
@@ -534,15 +561,19 @@ def main():
             gn_score=gn_score,
             gn_nhm=gn_nhm,
             cv_vg=vg_eval,
+            cv_hg=hg_eval,
             host_ok=host_ok,
+            host_basis=host_basis,
+            flanked_strict_both=(left_hm and right_hm),
+            flanked_sr_both=(left_sr and right_sr),
         )
 
-        tier_2023 = classify_tier_2023_rule(
+        tier_lenient = classify_tier_lenient_rule(
             gn_present=bool(gn_best),
             gn_score=float(gn_best.get("virus_score") or dec.get("genomad_virus_score") or 0.0),
             gn_topo=gn_best.get("topology", "Not_in_virus_summary"),
             cv_qual=cv_qual,
-            n_hm_2023=n_hm_reg_2023,
+            n_hm_lenient=n_hm_reg_lenient,
             gn_nhm_best=int(gn_best.get("n_hallmarks") or 0),
             min_dist=min_dist,
             cv_vg=cv_vg,
@@ -551,7 +582,7 @@ def main():
 
         if in_primary:
             tier_counts[(cat, tier)] += 1
-            tier_shift[(tier_2023, tier)] += 1
+            tier_shift[(tier_lenient, tier)] += 1
 
         out_rows.append({
             "uid": uid,
@@ -564,7 +595,7 @@ def main():
             "in_primary_cov65_fimo1e5": in_primary,
             "contig_context_available": True,
             "viral_origin_tier": tier,
-            "viral_origin_tier_2023rule": tier_2023,
+            "viral_origin_tier_lenient_rule": tier_lenient,
             "provirus_interval_used": has_pv_interval,
             "host_gene_check_basis": host_basis,
             "host_gene_check_pass": host_ok,
@@ -630,7 +661,7 @@ def main():
     lines.append("\nHost-vs-viral gene check (basis, pass) on primary IMG/VR loci:")
     for (bs, ok), cnt in sorted(basis.items(), key=lambda kv: str(kv[0])):
         lines.append(f"  {bs:24s} pass={ok!s:5s}: {cnt:,}")
-    lines.append("\nTier shift, 2023 rule (rows) -> revised strict rule (columns), primary IMG/VR loci:")
+    lines.append("\nTier shift, lenient rule (rows) -> strict rule (columns), primary IMG/VR loci:")
     tiers = ["Tier1_HighConfidence_Viral", "Tier2_Supported_Viral", "Tier3_Fragment_or_Borderline"]
     lines.append("  " + " " * 30 + "".join(f"{t.split('_')[0]:>10s}" for t in tiers))
     for old in tiers:

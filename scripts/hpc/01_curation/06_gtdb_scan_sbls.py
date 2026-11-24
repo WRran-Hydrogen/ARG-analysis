@@ -11,7 +11,10 @@ import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
-import hpc_config as hpc
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 BDIR = hpc.BASE / "01b_bacterial_ref_db"
 META_TSV = BDIR / "metadata" / "selected_3000_genomes.tsv"

@@ -6,15 +6,15 @@
 #SBATCH --job-name=sbl_p3_tree
 #SBATCH --output=p3_tree_%A_%a.out
 #
-# Phase 3, step 2: one IQ-TREE run per line of a task file (Slurm array; submitted by phase3_submit.sh).
-#   usage: sbatch --array=1-N phase3_run_iqtree.sh <tree_tasks_waveK.tsv>
+# Phase 3, step 2: one IQ-TREE run per line of a task file (Slurm array; submitted by 03_submit_primary_trees.sh).
+#   usage: sbatch --array=1-N 02_run_iqtree.sh <tree_tasks_waveK.tsv>
 # Wave 1 runs ModelFinder (-m MFP -mset LG,WAG,Q.pfam,VT,JTT). Wave 2 reuses the best-fit model
 # of the wave-1 tree named in the task's model_from column (pre-registered compute budget).
-# Support: UFBoot 1000 (+ --bnni) and SH-aLRT 1000. Trees stay unrooted; rooting is done in Phase 4.
+# Support: UFBoot 1000 (+ --bnni) and SH-aLRT 1000. Trees stay unrooted; rooting is done in 04_hgt_inference.
 
 set -euo pipefail
 SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
-for env_file in "${SCRIPT_DIR}/../../config/hpc.env" "${SCRIPT_DIR}/hpc.env"; do
+for env_file in "${SCRIPT_DIR}/../../../config/hpc.env" "${SCRIPT_DIR}/../hpc.env"; do
     if [[ -f "${env_file}" ]]; then set -a; source "${env_file}"; set +a; fi
 done
 : "${SBL_HPC_BASE:?Set SBL_HPC_BASE}"
@@ -23,6 +23,8 @@ P3="${SBL_HPC_PHASE3_DIR:-${SBL_HPC_BASE}/03_alignment_and_trees}"
 IQTREE="${SBL_HPC_IQTREE:-iqtree2}"
 
 line=$(awk -F'\t' -v n="$((SLURM_ARRAY_TASK_ID + 1))" 'NR==n' "${TASKS}")
+line="${line%$'\r'}"   # tolerate CRLF task files
+[[ -n "${line}" ]] || { echo "No task line $((SLURM_ARRAY_TASK_ID + 1)) in ${TASKS}" >&2; exit 1; }
 IFS=$'\t' read -r wave name aln model_from <<< "${line}"
 outdir="${P3}/trees/${name%%.*}"
 mkdir -p "${outdir}"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build Revised Phase 1 + Phase 1B Curated Viral & Triple-Source Bacterial SBL/PRE Datasets.
+"""Build the curated viral & triple-source bacterial SBL/PRE datasets (Phase 1 + Phase 1B).
 
-Revision 2026 Fixes Implemented:
+Rules:
 1. Strict Pfam Clan CL0013 Highest-Bitscore Assignment (top_overall_cl0013_acc):
    No artificial focal-family override inside PF13354/PF00768 dual hits; assigns strictly
    to the CL0013 family with highest domain bitscore while logging dual_PF13354_PF00768_GA.
@@ -13,7 +13,7 @@ Revision 2026 Fixes Implemented:
    replicon=prophage (included in Primary, pruned in the *_nopro sensitivity set). Whole contigs
    called viral inside a GTDB assembly or Marine MAG (likely free phage genomes) are tagged
    replicon=viral_contig / is_viral_contig_in_genome=True, kept in the catalog, and excluded
-   from all bacterial tree/HyPhy sets. Phase 4 must classify V->B events whose bacterial
+   from all bacterial tree/HyPhy sets. HGT inference classifies V->B events whose bacterial
    recipients are all prophage-borne separately (docs/METHODS_AND_PIPELINE.md, Section 4.1).
 4. HMM Coverage Filter (hmm_cov >= 0.65 Primary; >=0.60 and >=0.70 tracked):
    Eliminates fragment sequences likely to distort phylogenetic placement.
@@ -31,8 +31,8 @@ Revision 2026 Fixes Implemented:
 7. Own-seed MEME models for PF00768/PF02113 are built from INPUTS/<fam>_seed.faa when absent,
    and viral-vs-bacterial FIMO pass rates are compared per family (bias check in summary).
 
-Run order (run_phase1_phase2_rebuild.sh):
-   --stage curate  ->  build_phase2_neighborhoods.py  ->  --stage finalize
+Run order (../run_curation_and_context.sh):
+   --stage curate  ->  ../02_genomic_context/01_build_neighborhoods.py  ->  --stage finalize
 """
 
 import argparse
@@ -46,7 +46,10 @@ import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
-import hpc_config as hpc
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 BASE = hpc.BASE
 OUT = BASE / "01_final_curated"
@@ -445,7 +448,7 @@ def run_cmd(cmd):
 def ensure_meme_model(fam):
     """Return the round-1 MEME model for `fam`, building it from the official Pfam seed if absent.
 
-    run_phase1.py only built models for the three focal families; PF00768 and PF02113 are built
+    01_viral_decontamination.py only builds models for the three focal families; PF00768 and PF02113 are built
     here with identical MEME parameters from INPUTS/<fam>_seed.faa (unaligned official seed).
     """
     meme_dir = P1_DIR / "meme_fimo_work" / fam / "r1_meme"
@@ -1149,17 +1152,17 @@ def build_viral_and_bacterial_pools():
 
 
 CKPT_PATH = WORK / "_curated_pools_ckpt.pkl"
-P2_REQUIRED_COLUMN = "flanked_strict_structural_hallmark_any"   # only written by the revised Phase 2
+P2_REQUIRED_COLUMN = "flanked_strict_structural_hallmark_any"   # written by the current Phase 2 only
 
 
 def load_current_phase2_tiers(viral_records):
-    """Load Phase 2 tiers, refusing stale output from the pre-revision Phase 2 run.
+    """Load Phase 2 tiers, refusing stale output from an older Phase 2 run.
 
-    Required order: --stage curate -> build_phase2_neighborhoods.py -> --stage finalize.
+    Required order: --stage curate -> 01_build_neighborhoods.py -> --stage finalize.
     """
-    order = ("Run order: build_final_phase1_datasets.py --stage curate -> "
-             "build_phase2_neighborhoods.py -> build_final_phase1_datasets.py --stage finalize "
-             "(see run_phase1_phase2_rebuild.sh).")
+    order = ("Run order: 09_build_curated_datasets.py --stage curate -> "
+             "02_genomic_context/01_build_neighborhoods.py -> 09_build_curated_datasets.py --stage finalize "
+             "(see run_curation_and_context.sh).")
     if not P2_TSV.exists():
         raise FileNotFoundError(f"Phase 2 table not found: {P2_TSV}\n{order}")
     with open(P2_TSV, "r", encoding="utf-8") as f:
@@ -1167,7 +1170,7 @@ def load_current_phase2_tiers(viral_records):
     cols = set(rows[0].keys()) if rows else set()
     if P2_REQUIRED_COLUMN not in cols:
         raise RuntimeError(
-            f"{P2_TSV} was produced by the OLD Phase 2 (no '{P2_REQUIRED_COLUMN}' column; "
+            f"{P2_TSV} was produced by an older Phase 2 (no '{P2_REQUIRED_COLUMN}' column; "
             f"tiers still count integrases as viral evidence).\n{order}"
         )
     if CKPT_PATH.exists() and P2_TSV.stat().st_mtime < CKPT_PATH.stat().st_mtime:
@@ -1191,7 +1194,7 @@ def finalize_and_export(viral_records, bac_records, fimo_summary, v_cat_counts, 
         r["viral_origin_tier"] = p2_tier_map.get(r["uid"], "MOSAiC_Proteome_Verified_vMAG" if r["source"] == "MOSAiC" else "UNSCORED")
 
     summary = [
-        "=== Revised Final Phase 1 + Phase 1B Curated Dataset Assembly (2026) ===",
+        "=== Final Phase 1 + Phase 1B Curated Dataset Assembly ===",
         "Rules: Strict CL0013 Highest Bitscore | Own-Seed FIMO (p<=1e-5) | hmm_cov>=0.65 |",
         "       Independent Viral & Bacterial Domain-Slice nr85 | Tagged Bacterial Prophages |",
         "       Strict Structural Hallmark Phase 2 Tier 1 | SBL vs PBP/PRE Functional Stratification.",
@@ -1462,7 +1465,7 @@ def finalize_and_export(viral_records, bac_records, fimo_summary, v_cat_counts, 
 
     rep_txt = "\n".join(summary) + "\n"
     (OUT / "Final_Phase1_Dataset_Summary.txt").write_text(rep_txt, encoding="utf-8")
-    print("[Done] Revised Final Phase 1 + Phase 1B assembly complete!")
+    print("[Done] Phase 1 + Phase 1B assembly complete.")
 
 
 def write_prelim_viral_catalog(viral_records):
@@ -1485,8 +1488,8 @@ def write_prelim_viral_catalog(viral_records):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Revised Phase 1 + Phase 1B Dataset Assembly. Run --stage curate, then "
-                    "build_phase2_neighborhoods.py, then --stage finalize (run_phase1_phase2_rebuild.sh)."
+        description="Phase 1 + Phase 1B dataset assembly. Run --stage curate, then "
+                    "02_genomic_context/01_build_neighborhoods.py, then --stage finalize (run_curation_and_context.sh)."
     )
     parser.add_argument("--stage", choices=["curate", "finalize"], required=True)
     args = parser.parse_args()
@@ -1501,7 +1504,7 @@ def main():
         with open(CKPT_PATH, "wb") as f:
             pickle.dump((v_rec, b_rec, f_sum, vc, bc), f)
         print(f"Saved curation checkpoint ({len(v_rec)} viral, {len(b_rec)} bacterial) & preliminary Final_Viral_SBL_Catalog.tsv.")
-        print("Next: build_phase2_neighborhoods.py, then --stage finalize.")
+        print("Next: 02_genomic_context/01_build_neighborhoods.py, then --stage finalize.")
     else:
         with open(CKPT_PATH, "rb") as f:
             v_rec, b_rec, f_sum, vc, bc = pickle.load(f)

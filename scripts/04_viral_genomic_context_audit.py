@@ -1,6 +1,5 @@
-"""Module 02: Locus-Level Viral Origin Verification, Flanking Gene Neighborhoods, and Prophage Boundary Audit.
-
-Addresses Reviewer Comment 9 (following Martin et al., Nature Microbiology 2025) and Comment 1 (part 1):
+"""Locus-level viral origin verification, flanking gene neighborhoods, and prophage boundary audit
+(following Martin et al., Nature Microbiology 2025):
 1. Documents for every viral SBL locus (n=5,701 across 5,618 contigs) its coordinates, CheckV/geNomad quality metrics,
    geNomad viral hallmark count, and exact distance/relative position within contig/prophage boundaries.
 2. Reconstructs full upstream and downstream ORF genomic neighborhoods across all annotated high-quality viral contigs

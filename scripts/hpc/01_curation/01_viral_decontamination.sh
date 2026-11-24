@@ -6,17 +6,17 @@
 #SBATCH --job-name=sbl_phase1
 #SBATCH --output=phase1_%j.out
 #
-# Submit from scripts/hpc_reanalysis/:   sbatch run_phase1.sh
+# Submit from scripts/hpc/01_curation/:   sbatch 01_viral_decontamination.sh
 # Paths come from hpc.env (next to this script or in config/) or exported SBL_HPC_* variables.
 
 set -euo pipefail
 SCRIPT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 
-for env_file in "${SCRIPT_DIR}/../../config/hpc.env" "${SCRIPT_DIR}/hpc.env"; do
+for env_file in "${SCRIPT_DIR}/../../../config/hpc.env" "${SCRIPT_DIR}/../hpc.env"; do
     if [[ -f "${env_file}" ]]; then set -a; source "${env_file}"; set +a; fi
 done
 : "${SBL_HPC_BASE:?Set SBL_HPC_BASE (see config/hpc.env.example)}"
 
 mkdir -p "${SBL_HPC_BASE}/01_curated_datasets"
 cd "${SBL_HPC_BASE}/01_curated_datasets"
-"${SBL_HPC_PYTHON:-python}" -u "${SCRIPT_DIR}/run_phase1.py"
+"${SBL_HPC_PYTHON:-python}" -u "${SCRIPT_DIR}/01_viral_decontamination.py"

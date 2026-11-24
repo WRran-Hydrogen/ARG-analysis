@@ -1,4 +1,4 @@
-"""Module 01 - Step 1: Official Pfam CL0013 & Seed HMM Verification Across Viral & Bacterial SBLs.
+"""Official Pfam CL0013 & Seed HMM Verification Across Viral & Bacterial SBLs.
 
 Evaluates all initial viral candidates (n=11,368), final curated viral SBLs (n=5,701),
 and bacterial reference sequences (n=2,220) across the three focal SBL families

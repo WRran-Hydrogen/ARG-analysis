@@ -14,7 +14,7 @@ desktop.ini
 # Machine-specific configuration (templates *.example are tracked)
 config/local.env
 config/hpc.env
-scripts/hpc_reanalysis/hpc.env
+scripts/hpc/hpc.env
 
 # Confidential peer-review correspondence (kept locally only)
 docs/private/

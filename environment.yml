@@ -21,3 +21,17 @@ dependencies:
   - iqtree>=2.2
   - clipkit>=2.10
   - seqkit>=2.8
+  # scripts/10_plot_phylogenetic_trees.R (figures were made with R 4.6.0, ape 5.8.1,
+  # phangorn 2.12.1, ggtree 4.2.1, ggtreeExtra 1.22.1, ggnewscale 0.5.2, cowplot 1.2.0, ragg 1.5.2)
+  - r-base>=4.4
+  - r-ape>=5.8
+  - r-phangorn>=2.12
+  - bioconductor-ggtree
+  - bioconductor-ggtreeextra
+  - r-ggnewscale
+  - r-ggplot2
+  - r-dplyr
+  - r-readr
+  - r-stringr
+  - r-cowplot
+  - r-ragg

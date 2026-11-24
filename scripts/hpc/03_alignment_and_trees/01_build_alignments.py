@@ -28,7 +28,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-import hpc_config as hpc
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 IN_DIR = hpc.BASE / "01_final_curated"
 INPUTS = hpc.BASE / "inputs"
@@ -208,12 +209,13 @@ def main():
         print(f"{tag}: {len(sets)} sets aligned, outgroup={len(outgroup)}", flush=True)
 
     with open(OUT_DIR / "alignment_qc.tsv", "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(qc[0]), delimiter="\t")
+        w = csv.DictWriter(fh, fieldnames=list(qc[0]), delimiter="\t", lineterminator="\n")
         w.writeheader()
         w.writerows(qc)
     for wave in (1, 2):
         with open(OUT_DIR / f"tree_tasks_wave{wave}.tsv", "w", newline="", encoding="utf-8") as fh:
-            w = csv.DictWriter(fh, fieldnames=["wave", "name", "alignment", "model_from"], delimiter="\t")
+            # "\n" line endings: csv defaults to "\r\n", which leaves a "\r" in the last field for bash
+            w = csv.DictWriter(fh, fieldnames=["wave", "name", "alignment", "model_from"], delimiter="\t", lineterminator="\n")
             w.writeheader()
             w.writerows(t for t in tasks if t["wave"] == wave)
     n1 = sum(t["wave"] == 1 for t in tasks)

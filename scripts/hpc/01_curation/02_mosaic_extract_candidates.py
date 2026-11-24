@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Extract unique CL0013/MOSAiC SBL candidate proteins from mosaic_virus.faa."""
 
+import sys
 from pathlib import Path
 
-import hpc_config as hpc
-import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # scripts/hpc/hpc_config.py
+import hpc_config as hpc  # noqa: E402
 
 MOSAIC_FAA = hpc.RAW_INPUT_DIR / "mosaic_virus.faa"
 ORIG_TSV = hpc.RAW_INPUT_DIR / "sbl_mosaic.tsv"

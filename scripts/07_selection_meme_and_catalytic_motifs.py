@@ -1,18 +1,16 @@
-"""Script 07: PF00144 MEME Diagnostics (Comment 5) and Direct Statistical Proof of
-Catalytic Motif Purifying Selection (Comment 6, Part 1).
+"""PF00144 MEME diagnostics and statistical tests of purifying selection at catalytic motifs.
 
-Addresses Reviewer Comments 5 and 6:
-1. Comment 5 Diagnostics:
+1. MEME diagnostics:
    - Quantifies threshold sensitivity (p < 0.10 [41.87%] vs p < 0.05 [29.76%] vs p < 0.01 vs BH-FDR q < 0.05),
    - Quantifies tree size/power (1,382 vs 916 vs 252 tested branches; Newick tree total branch length and
      occupancy-weighted effective site branch length),
    - Quantifies sequence divergence (pairwise AA p-distance), alignment quality (column Shannon
      entropy H_aa, occupancy, and SXXK motif alignment shift vs hmmalign domain-anchored MSAs),
    - Tests intragenic homoplasy/recombination via the Bruen et al. (2006) Pairwise Homoplasy Index (PHI).
-2. Comment 6 Part 1 (Purifying Selection & Depletion Proofs):
+2. Purifying selection & depletion tests:
    - Performs Fisher's exact, exact binomial, and 10,000-iteration permutation tests evaluating depletion
      of MEME positively selected sites within catalytic motifs (Motifs 1-3) relative to background codons.
-   - Provides direct codon-level proof of purifying selection at catalytic motifs from domain-anchored
+   - Tests codon-level purifying selection at catalytic motifs from domain-anchored
      (hmmalign back-translated) Nei-Gojobori codon dN/dS (omega_domain), amino-acid Shannon entropy
      (H_aa_domain), and MEME purifying-regime parameters (omega^- = beta^1 / alpha, p^1).
 """
@@ -26,7 +24,7 @@ import sbl_config as cfg
 from sbl_config import linux_cmd
 
 DATA_SEL = cfg.SELECTION_DIR
-DATA_HMM = cfg.HMM_REBUILT_DIR  # seed HMMs rebuilt by script 01 (used for hmmalign)
+DATA_HMM = cfg.HMM_REBUILT_DIR  # seed HMMs rebuilt by 01_build_and_verify_hmm.py (used for hmmalign)
 TABLES_DIR = cfg.TABLES_DIR
 SUPP_DIR = cfg.SUPP_DIR
 FIG_DIR = cfg.FIG_DIR
@@ -431,7 +429,7 @@ def main():
     df_dom = pd.concat(dom_dfs, ignore_index=True)
     df_all.to_csv(f"{STAGE}/PerSite_Selection_Metrics.tsv", sep="\t", index=False)
 
-    # Comment 6 Part 1: Depletion (codon_trim/MEME) + Direct Domain-Anchored Purifying Selection Tests
+    # Depletion (codon_trim/MEME) + domain-anchored purifying selection tests
     for region_lbl, col_mask in [
         ("Core_Catalytic_Motifs", "in_catalytic_motif_core"),
         ("Extended_Catalytic_Pocket_pm1", "in_catalytic_pocket_ext"),
@@ -511,12 +509,12 @@ def main():
     df_diag.to_csv(f"{STAGE}/Table_S09_MEME_Divergence_Alignment_Recombination_Diagnostics.csv", index=False)
     df_proof.to_csv(f"{STAGE}/Table_S10_Catalytic_Motif_Purifying_Selection_Proof.csv", index=False)
 
-    print("=== Comment 5: MEME Divergence, Alignment & Recombination Diagnostics ===")
+    print("=== MEME Divergence, Alignment & Recombination Diagnostics ===")
     print(df_diag.to_string(index=False))
-    print("\n=== Comment 6 Part 1: Catalytic Motif Depletion & Purifying Selection Proof ===")
+    print("\n=== Catalytic Motif Depletion & Purifying Selection Tests ===")
     print(df_proof[df_proof["region_definition"] == "Core_Catalytic_Motifs"].to_string(index=False))
 
-    # Plot Figure S03: MEME Diagnostics & Direct Purifying Selection Proof
+    # Plot Figure S03: MEME diagnostics & purifying selection tests
     fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.8), dpi=300)
 
     # Panel A: Threshold & Alignment Stratification of MEME Positive Selection Rates
@@ -599,7 +597,7 @@ def main():
     proc = subprocess.run(linux_cmd(WSL_PY, f"{WSL_STAGE_LIN}/run_m04_fast.py"), capture_output=True, text=True)
     print(proc.stdout)
     if proc.returncode != 0:
-        raise RuntimeError(f"Script 07 failed:\n{proc.stderr}")
+        raise RuntimeError(f"07_selection_meme_and_catalytic_motifs.py failed:\n{proc.stderr}")
 
     shutil.copy2(WSL_STAGE_WIN / "Table_S09_MEME_Divergence_Alignment_Recombination_Diagnostics.csv",
                  TABLES_DIR / "Table_S09_MEME_Divergence_Alignment_Recombination_Diagnostics.csv")

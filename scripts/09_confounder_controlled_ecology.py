@@ -1,7 +1,6 @@
-"""Module 06: Confounder-Controlled Structural Diversity & Habitat Motif Enrichment Analyses (Comment 7).
-
-Addresses Reviewer Comment 7 (controlling for phylogenetic background, SBL family composition,
-viral taxonomy, and reliable host taxonomy):
+"""Confounder-controlled structural diversity & habitat motif enrichment analyses
+(controlling for phylogenetic background, SBL family composition, viral taxonomy, and reliable
+host taxonomy):
 1. Stratified Structural Diversity Comparison (Viral vs. Bacterial):
    - Evaluates structural diversity using both the structure-guided phylogeny (maxcc.nwk, n=1,561)
      and direct 3D biophysical shape metrics (Ca radius of gyration R_g, domain length, secondary
@@ -647,7 +646,7 @@ def main():
     proc = subprocess.run(linux_cmd(WSL_PY, f"{WSL_STAGE_LIN}/run_m06_confounders.py"), capture_output=True, text=True)
     print(proc.stdout)
     if proc.returncode != 0:
-        raise RuntimeError(f"Module 06 failed:\n{proc.stderr}")
+        raise RuntimeError(f"09_confounder_controlled_ecology.py failed:\n{proc.stderr}")
 
     shutil.copy2(WSL_STAGE_WIN / "Table_S_Stratified_Structural_Diversity.csv",
                  TABLES_DIR / "Table_S12_Stratified_Structural_Diversity.csv")
