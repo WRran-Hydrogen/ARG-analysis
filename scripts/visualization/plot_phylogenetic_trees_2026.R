@@ -265,15 +265,20 @@ build_merged_metadata <- function() {
   message("[Metadata] Loading 2026 curated viral, bacterial, and Phase 2 neighborhood catalogs...")
   v_raw <- read_tsv(file.path(META_DIR, "Final_Viral_SBL_Catalog.tsv"), show_col_types = FALSE)
   b_raw <- read_tsv(file.path(META_DIR, "Final_Bacterial_TripleSource_Catalog.tsv"), show_col_types = FALSE)
+  # Phase 2 tables written before 2026-11-25 name the hallmark columns n_viral_hallmark_in_region and
+  # flanked_strict_structural_hallmark_both (annotation-text hallmarks); both layouts are accepted.
   p2_raw <- read_tsv(
     file.path(META_DIR, "Phase2_Viral_Genomic_Neighborhoods_Full.tsv"),
-    col_select = c(
+    col_select = any_of(c(
       "uid", "contig_length_bp", "genomad_virus_score", "checkv_viral_genes",
-      "checkv_host_genes", "n_viral_hallmark_in_region",
-      "flanked_strict_structural_hallmark_both", "upstream_5_orfs", "downstream_5_orfs"
-    ),
+      "checkv_host_genes", "n_genomad_hallmark_in_region", "n_viral_hallmark_in_region",
+      "flanked_genomad_hallmark_both", "flanked_strict_structural_hallmark_both",
+      "upstream_5_orfs", "downstream_5_orfs"
+    )),
     show_col_types = FALSE
-  )
+  ) |>
+    rename(any_of(c(n_genomad_hallmark_in_region = "n_viral_hallmark_in_region",
+                    flanked_genomad_hallmark_both = "flanked_strict_structural_hallmark_both")))
 
   v_mge <- p2_raw |>
     mutate(
@@ -287,7 +292,7 @@ build_merged_metadata <- function() {
       )
     ) |>
     select(uid, contig_length_bp, checkv_viral_genes, checkv_host_genes,
-           n_viral_hallmark_in_region, flanked_strict_structural_hallmark_both, viral_mge_context)
+           n_genomad_hallmark_in_region, flanked_genomad_hallmark_both, viral_mge_context)
 
   v_df <- v_raw |>
     filter(as_bool(pass_cov65), as_bool(pass_fimo_1e5)) |>
@@ -329,8 +334,8 @@ build_merged_metadata <- function() {
       contig_length_bp = NA_real_,
       checkv_viral_genes = NA_real_,
       checkv_host_genes = NA_real_,
-      n_viral_hallmark_in_region = NA_real_,
-      flanked_strict_structural_hallmark_both = NA
+      n_genomad_hallmark_in_region = NA_real_,
+      flanked_genomad_hallmark_both = NA
     )
 
   keep_cols <- c(

@@ -1,8 +1,8 @@
 set_id	family	set_group	track	n_seqs	n_codons	median_dS	pos3_Iss	pos3_Iss_c_sym	pos3_unsaturated_sym	PHI_p	absrel_tested_branches	absrel_sig_corr_05	absrel_sig_uncorr_05	absrel_pct_corr_05	meme_tree_length	meme_sites_p10	meme_sites_p05	meme_sites_p01	meme_sites_q10	meme_pct_p05	fel_pos_p05	fel_purifying_p05	fel_purifying_pct
-PF00144_N90_hmm	PF00144	benchmark_N90	hmm	90	328	3.0	0.966	0.8625	False	1.0	159.0	40.0	66.0	25.16	79.008	30	21	9	6	6.4	1	206	62.8
-PF00144_N90_mafft	PF00144	benchmark_2x2	mafft	90	303	3.0	0.9567	0.8563	False	0.3787	160.0	21.0	53.0	13.12	202.965	14	10	5	3	3.3	0	255	84.16
-PF00144_N240_hmm	PF00144	benchmark_2x2	hmm	240	327	3.0	0.9668	0.8648	False	1.0					174.416	68	44	20	17	13.46	0	264	80.73
-PF00144_N240_mafft	PF00144	benchmark_2x2	mafft	240	303	3.0	0.956	0.8524	False	0.2425					182.087	35	23	10	8	7.59	0	281	92.74
-PF00905_N90_hmm	PF00905	benchmark_N90	hmm	90	300	3.0	0.9567	0.8547	False	0.9967	166.0	13.0	17.0	7.83	107.548	11	8	2	0	2.67	0	280	93.33
-PF13354_N90_hmm	PF13354	benchmark_N90	hmm	90	255	3.0	0.9612	0.8496	False	0.5947	167.0	21.0	37.0	12.57	135.525	4	1	0	0	0.39	0	236	92.55
-PF00768_N90_hmm	PF00768	benchmark_N90	hmm	90	237	3.0	0.9388	0.8636	False	0.8704	170.0	23.0	39.0	13.53	117.188	7	5	2	1	2.11	0	215	90.72
+PF00144_N90_hmm	PF00144	benchmark_N90	hmm	90	328	3.0	0.9666	0.8582	False	1.0	164	47	72	28.66	77.962	26	16	5	0	4.88	0	217	66.16
+PF00144_N90_mafft	PF00144	benchmark_2x2	mafft	90	303	3.0	0.9543	0.8602	False	0.804	165	25	49	15.15	256.366	13	9	4	0	2.97	0	251	82.84
+PF00144_N240_hmm	PF00144	benchmark_2x2	hmm	240	328	3.0	0.9642	0.8616	False	1.0	446	79	131	17.71	177.015	48	36	17	6	10.98	1	261	79.57
+PF00144_N240_mafft	PF00144	benchmark_2x2	mafft	240	303	3.0	0.9529	0.8557	False	0.6645	445	19	48	4.27	182.773	22	16	4	2	5.28	0	285	94.06
+PF00905_N90_hmm	PF00905	benchmark_N90	hmm	90	300	3.0	0.9546	0.8633	False	0.99	166	23	45	13.86	104.025	12	8	2	0	2.67	0	276	92.0
+PF13354_N90_hmm	PF13354	benchmark_N90	hmm	90	255	3.0	0.9619	0.8554	False	0.9701	167	26	47	15.57	132.671	8	5	0	0	1.96	0	229	89.8
+PF00768_N90_hmm	PF00768	benchmark_N90	hmm	90	237	3.0	0.9382	0.8586	False	0.907	171	25	37	14.62	102.411	8	5	2	0	2.11	0	216	91.14

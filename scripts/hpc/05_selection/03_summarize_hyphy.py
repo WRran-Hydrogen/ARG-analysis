@@ -102,22 +102,24 @@ def parse_fel(fel_json: Path) -> tuple[pd.DataFrame, dict]:
 
 
 def parse_gard(gard_json: Path) -> dict:
+    """Breakpoints of the best GARD model (segments in breakpointData - 1) and its AICc gain over one tree.
+
+    gard.status (written by 02_run_hyphy.sh) says whether the search finished; GARD rewrites gard.json during
+    the search, so a crashed or timed-out run leaves a partial file whose breakpoint count is a lower bound.
+    """
+    status_p = gard_json.with_name("gard.status")
+    status = status_p.read_text(encoding="utf-8").strip() if status_p.is_file() else "no_status"
+    empty = {"gard_status": status, "gard_breakpoints": np.nan, "gard_delta_cAIC": np.nan}
     if not gard_json.is_file():
-        return {"gard_breakpoints": np.nan, "gard_delta_cAIC": np.nan}
+        return empty
     try:
         data = json.loads(gard_json.read_text(encoding="utf-8"))
-        bps = data.get("breakpoints", {})
-        n_bp = len(bps) if isinstance(bps, (list, dict)) else 0
-        # Best AICc vs baseline single-tree AICc
-        imp = data.get("improvements", {})
-        best_daic = 0.0
-        if isinstance(imp, dict):
-            for v in imp.values():
-                if isinstance(v, dict) and "deltaAICc" in v:
-                    best_daic = max(best_daic, float(v["deltaAICc"]))
-        return {"gard_breakpoints": int(n_bp), "gard_delta_cAIC": round(best_daic, 2)}
+        segs = data.get("breakpointData", {})
+        n_bp = max(len(segs) - 1, 0) if isinstance(segs, (list, dict)) else 0
+        d_aic = float(data["singleTreeAICc"]) - float(data["bestModelAICc"])
+        return {"gard_status": status, "gard_breakpoints": int(n_bp), "gard_delta_cAIC": round(d_aic, 2)}
     except Exception:
-        return {"gard_breakpoints": np.nan, "gard_delta_cAIC": np.nan}
+        return empty
 
 
 def weighted_omega(rate_dist) -> tuple[float, float]:

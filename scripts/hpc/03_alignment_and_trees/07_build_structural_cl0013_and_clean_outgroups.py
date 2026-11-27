@@ -460,7 +460,9 @@ def map_anchor_seq_to_fm_cols(sliced_seq: str, fm_row: str) -> dict[int, int]:
     return mapping
 
 
-def build_cl0013_struct_alignments(v_meta: dict[str, dict], b_meta: dict[str, dict]) -> None:
+def build_cl0013_struct_alignments(v_meta: dict[str, dict], b_meta: dict[str, dict], refold: bool = False) -> None:
+    """refold=False reuses an existing FoldMason seed MSA: FoldMason is not deterministic across runs, and the
+    joint-tree (partC) and ancient-HGT backbone alignments are projected onto the same grid."""
     CL_ALN_DIR.mkdir(parents=True, exist_ok=True)
 
     # 1. Slice 14 crystal structures to Chain A HMM domain cores & align with FoldMason
@@ -474,15 +476,18 @@ def build_cl0013_struct_alignments(v_meta: dict[str, dict], b_meta: dict[str, di
             anchor_seqs[stem] = sseq
 
     fm_prefix = CL_ALN_DIR / "cl0013_foldmason_seed"
-    fm_tmp = CL_ALN_DIR / "tmp_foldmason"
-    if fm_tmp.exists():
-        shutil.rmtree(fm_tmp)
-    pdb_args = " ".join(str(p) for p in sliced_pdbs)
-    run(
-        f"{hpc.FOLDMASON_BIN} easy-msa {pdb_args} {fm_prefix} {fm_tmp} "
-        f"--threads {THREADS} --filter-msa 0 --recompute-scores 1 --refine-iters 2"
-    )
     fm_aa_fa = CL_ALN_DIR / "cl0013_foldmason_seed_aa.fa"
+    if refold or not fm_aa_fa.is_file():
+        fm_tmp = CL_ALN_DIR / "tmp_foldmason"
+        if fm_tmp.exists():
+            shutil.rmtree(fm_tmp)
+        pdb_args = " ".join(str(p) for p in sliced_pdbs)
+        run(
+            f"{hpc.FOLDMASON_BIN} easy-msa {pdb_args} {fm_prefix} {fm_tmp} "
+            f"--threads {THREADS} --filter-msa 0 --recompute-scores 1 --refine-iters 2"
+        )
+    else:
+        print(f"[Part A.1] Reusing existing FoldMason seed MSA {fm_aa_fa.name} (--refold to recompute)")
     if not fm_aa_fa.is_file():
         cands = list(CL_ALN_DIR.glob("cl0013_foldmason_seed*aa*.fa*"))
         if not cands:
@@ -990,10 +995,12 @@ def build_clean_gtdb_profile_outgroups(b_meta: dict[str, dict]) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--step", choices=("all", "partA", "partB", "partC"), default="all")
+    ap.add_argument("--refold", action="store_true",
+                    help="recompute the FoldMason seed MSA (changes the grid used by partC and the ancient-HGT backbone)")
     args = ap.parse_args()
     v_meta, b_meta = load_catalogs()
     if args.step in ("all", "partA"):
-        build_cl0013_struct_alignments(v_meta, b_meta)
+        build_cl0013_struct_alignments(v_meta, b_meta, refold=args.refold)
     if args.step in ("all", "partB"):
         build_clean_gtdb_profile_outgroups(b_meta)
     if args.step in ("all", "partC"):

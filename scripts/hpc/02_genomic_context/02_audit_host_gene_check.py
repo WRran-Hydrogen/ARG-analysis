@@ -4,9 +4,11 @@
 Read-only with respect to 01_build_neighborhoods.py outputs. For every primary IMG/VR locus it
   1. finds the CheckV gene (tmp/gene_features.tsv) that overlaps the focal SBL/PBP ORF and
      records its CheckV category (hmm_cat: 0 = no hit, 1 = viral, -1 = host/microbial);
-  2. re-derives the current tier from the Phase 2 table (consistency check against the stored
-     `viral_origin_tier`);
-  3. evaluates two alternative host-gene rules:
+  2. re-derives the tier of the text rule used until 2026-11-25 from the Phase 2 table (consistency
+     check against the stored `viral_origin_tier_text_rule`; that rule allowed `viral_genes >=
+     host_genes - 1` only for loci flanked on both sides by text structural hallmarks);
+  3. evaluates two alternative host-gene rules on the text-rule ingredients (the first is the
+     host-gene check of the current primary tier, `viral_origin_tier`):
        focal_corrected   host check `viral_genes >= host_genes - f`, where f = 1 only when the
                          focal ORF itself is a CheckV host gene inside the evaluated region; applied
                          to every locus, with no flank-based exemption;
@@ -87,8 +89,12 @@ def tier_from_flags(boundary_ok, n_hm, n_rep, gn_present, gn_score, gn_nhm, vg, 
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--out-dir", default=str(OUT_DIR), help="folder holding the Phase 2 table; outputs are written there")
+    out_dir = Path(ap.parse_args().out_dir)
     rows = []
-    with open(PHASE2_TSV, encoding="utf-8") as fh:
+    with open(out_dir / PHASE2_TSV.name, encoding="utf-8") as fh:
         for r in csv.DictReader(fh, delimiter="\t"):
             if r["source"] != "MOSAiC" and truthy(r["in_primary_cov65_fimo1e5"]) and r["host_gene_check_basis"] != "NA":
                 rows.append(r)
@@ -135,21 +141,21 @@ def main():
         topo = r["genomad_topology"]
         gn_present = topo != "Not_in_virus_summary"
         boundary_ok = gn_present and (topo in ("DTR", "ITR") or as_float(r["min_dist_to_viral_boundary_bp"]) >= BOUNDARY_MIN_BP)
-        n_hm, n_rep = as_int(r["n_viral_hallmark_in_region"]), as_int(r["n_viral_replic_lysis_in_region"])
+        n_hm, n_rep = as_int(r["n_text_hallmark_in_region"]), as_int(r["n_text_replic_lysis_in_region"])
         gn_score, gn_nhm = as_float(r["genomad_virus_score"]), as_int(r["genomad_n_hallmarks"])
-        flank_hm2 = truthy(r["flanked_strict_structural_hallmark_both"])
-        flank_sr2 = truthy(r["flanked_viral_structural_or_replic_both"])
+        flank_hm2 = truthy(r["flanked_text_structural_both"])
+        flank_sr2 = truthy(r["flanked_text_structural_or_replic_both"])
         raw_ok = vg >= hg
         skip = basis == "genomad_provirus_skip"
 
-        # current rule (01_build_neighborhoods.py)
+        # text rule used until 2026-11-25 (01_build_neighborhoods.classify_tier_text_rule)
         if skip:
             t1, t2 = flank_sr2 and vg >= 1, True
         else:
             t1 = vg >= 1 and (raw_ok or (flank_hm2 and vg >= hg - 1))
             t2 = raw_ok or flank_hm2
         tier_cur = tier_from_flags(boundary_ok, n_hm, n_rep, gn_present, gn_score, gn_nhm, vg, t1, t2)
-        if tier_cur != r["viral_origin_tier"]:
+        if tier_cur != r["viral_origin_tier_text_rule"]:
             mismatches += 1
 
         # alternative A: focal-gene correction for every locus, no flank exemption
@@ -169,13 +175,14 @@ def main():
             "uid": r["uid"], "uvig": uvig, "winning_acc": r["winning_acc"], "host_gene_check_basis": basis,
             "eval_viral_genes": vg, "eval_host_genes": hg, "focal_checkv_category": focal_cat,
             "focal_checkv_hmm_db": focal_db, "focal_checkv_hmm": focal_hmm,
-            "flanked_strict_structural_hallmark_both": flank_hm2, "checkv_quality": r["checkv_quality"],
+            "flanked_text_structural_both": flank_hm2, "checkv_quality": r["checkv_quality"],
             "checkv_contamination_pct": r["checkv_contamination_pct"],
-            "tier_current": r["viral_origin_tier"], "tier_rederived": tier_cur,
+            "tier_current": r["viral_origin_tier_text_rule"], "tier_rederived": tier_cur,
+            "tier_primary": r["viral_origin_tier"],
             "tier_focal_corrected": tier_a, "tier_focal_corrected_hq": tier_b,
         })
 
-    out_tsv = OUT_DIR / "Phase2_Host_Gene_Check_Audit.tsv"
+    out_tsv = out_dir / "Phase2_Host_Gene_Check_Audit.tsv"
     with open(out_tsv, "w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(out[0]), delimiter="\t", lineterminator="\n")
         w.writeheader()
@@ -185,7 +192,8 @@ def main():
         return t.split("_")[0]
 
     lines = ["=== CheckV host-gene check audit (primary IMG/VR loci) ===",
-             f"Loci: {len(out):,} | re-derived tier differs from stored tier: {mismatches}", "",
+             "'Current' below = the text rule used until 2026-11-25 (viral_origin_tier_text_rule).",
+             f"Loci: {len(out):,} | re-derived text-rule tier differs from stored tier: {mismatches}", "",
              "Focal ORF CheckV category by host-check basis:"]
     for (b, c), n in sorted(Counter((x["host_gene_check_basis"], x["focal_checkv_category"]) for x in out).items()):
         lines.append(f"  {b:24s} {c:9s}: {n:,}")
@@ -206,7 +214,7 @@ def main():
             f"{fam} " + "/".join(str(sum(1 for x in out if x["winning_acc"] == fam and x[col] == t)) for t in TIERS)
             for fam in sorted({x["winning_acc"] for x in out})))
     rep = "\n".join(lines) + "\n"
-    (OUT_DIR / "Phase2_Host_Gene_Check_Audit_Summary.txt").write_text(rep, encoding="utf-8")
+    (out_dir / "Phase2_Host_Gene_Check_Audit_Summary.txt").write_text(rep, encoding="utf-8")
     print(rep)
 
 

@@ -6,7 +6,8 @@ Implements Section 4.1 of docs/METHODS_AND_PIPELINE.md on the IQ-TREE outputs of
        - Crown projection: the family's crown root bipartition in the structure-guided CL0013
          superfamily tree is projected onto the ingroup tree, used only when the family is a
          supported clade there (F1 >= CROWN_MIN_F1 and UFBoot >= CROWN_MIN_UFBOOT)
-         and its crown root position is supported (root-split UFBoot >= CROWN_MIN_ROOT_UFBOOT); otherwise MAD.
+         and its crown root position is supported (root-split UFBoot >= CROWN_MIN_ROOT_UFBOOT), in the current
+         CL0013 taxon sample and in every replicate sample (CROWN_REPLICATE_SAMPLES); otherwise MAD.
          The pre-registered Sister-PRE outgroup rooting (24-sequence outgroup) is kept as an appendix
          comparator because that outgroup is not monophyletic in most primary trees.
        - Cross-validation on the same ingroup tree: MAD (Tria et al. 2017), MinVar (Mai et al. 2017)
@@ -628,11 +629,17 @@ CROWN_LOO_TREES = (
 CROWN_MIN_F1 = 0.95
 CROWN_MIN_UFBOOT = 95.0
 CROWN_MIN_ROOT_UFBOOT = 95.0
+# The crown criteria must also hold in every independent CL0013 taxon sample listed here (subfolders of
+# trees/CL0013 and alignments/CL0013 holding that sample's struct_c20 tree, taxa metadata and outgroup list).
+# Added 2026-11-25: PF00905's crown root-split UFBoot was 49 in the first 90-sequence sample and 97 after
+# re-sampling, so a single sample does not establish a supported root position.
+CROWN_REPLICATE_SAMPLES = ("sample_replicate_1",)
 
 
-def load_cl0013_taxa_families() -> dict[str, str]:
+def load_cl0013_taxa_families(aln_dir: Path | None = None) -> dict[str, str]:
     taxa_fam: dict[str, str] = {}
-    for mp in (ALN_DIR / "CL0013" / "cl0013_taxa_metadata.tsv", ALN_DIR / "CL0013" / "cl0013_struct_taxa_metadata.tsv"):
+    aln_dir = aln_dir or ALN_DIR / "CL0013"
+    for mp in (aln_dir / "cl0013_taxa_metadata.tsv", aln_dir / "cl0013_struct_taxa_metadata.tsv"):
         if mp.is_file():
             with open(mp, encoding="utf-8") as fh:
                 for r in csv.DictReader(fh, delimiter="\t"):
@@ -657,7 +664,8 @@ def _best_family_clade(t_sup: Tree, taxa_fam: dict[str, str], fam: str) -> tuple
     return best_nd, best_f1, n_f
 
 
-def extract_superfamily_crown_splits(tree_spec: tuple[str, str] = CROWN_PRIMARY_TREE) -> dict[str, dict]:
+def extract_superfamily_crown_splits(tree_spec: tuple[str, str] = CROWN_PRIMARY_TREE,
+                                     sample: str = "") -> dict[str, dict]:
     """Crown-group root bipartition (S1 | S2) of each family in a CL0013 superfamily tree.
 
     The superfamily tree is rooted on the non-PRE outgroups. For each family the best-matching clade
@@ -665,11 +673,13 @@ def extract_superfamily_crown_splits(tree_spec: tuple[str, str] = CROWN_PRIMARY_
     members are skipped). Reported support: crown monophyly (UFBoot/SH of the crown node) and the
     root position (UFBoot of the two child splits). The joint PF13354_PF00768 root is the split between
     the two family clades, with the weaker of the two clade F1/UFBoot values.
+    `sample` names a replicate CL0013 taxon sample (subfolder); empty = the current sample.
     """
-    taxa_fam = load_cl0013_taxa_families()
+    tdir, adir = TREES_DIR / "CL0013" / sample, ALN_DIR / "CL0013" / sample
+    taxa_fam = load_cl0013_taxa_families(adir)
     tname, og_fn = tree_spec
-    tp = TREES_DIR / "CL0013" / f"{tname}.treefile"
-    ogp = ALN_DIR / "CL0013" / og_fn
+    tp = tdir / f"{tname}.treefile"
+    ogp = adir / og_fn
     if not taxa_fam or not tp.is_file() or not ogp.is_file():
         return {}
     nw = tp.read_text(encoding="utf-8")
@@ -1513,10 +1523,14 @@ def primary_track(fam: str) -> str:
     if fam != JOINT:
         return "hmm"
     stem = TREES_DIR / fam / f"{fam}.primary.struct"
-    if (Path(f"{stem}_in.treefile").is_file() and Path(f"{stem}_out.treefile").is_file()
-            and Path(f"{stem}_out.iqtree").is_file()):
-        return "struct"
-    return "mafft"
+
+    def finished(side: str) -> bool:
+        # IQ-TREE writes .treefile during the search; a finished run ends its .iqtree report with the wall-clock time
+        iq = Path(f"{stem}_{side}.iqtree")
+        return (Path(f"{stem}_{side}.treefile").is_file() and iq.is_file()
+                and "Total wall-clock time used:" in iq.read_text(encoding="utf-8", errors="ignore")[-4096:])
+
+    return "struct" if finished("in") and finished("out") else "mafft"
 
 
 def model_from_iqtree(path: Path) -> str:
@@ -1568,11 +1582,20 @@ def main() -> int:
     v_meta, b_meta = load_catalog_metadata()
     crown_map = extract_superfamily_crown_splits(CROWN_PRIMARY_TREE)
     crown_loo = {spec[0]: extract_superfamily_crown_splits(spec) for spec in CROWN_LOO_TREES}
+    # crown criteria must hold in every replicate CL0013 taxon sample (missing replicate = not established)
+    reps = [extract_superfamily_crown_splits(CROWN_PRIMARY_TREE, sample=s) for s in CROWN_REPLICATE_SAMPLES]
+    for cfam, ci in crown_map.items():
+        rep_uf = [r[cfam]["crown_root_split_ufboot"] if cfam in r else float("nan") for r in reps]
+        rep_ok = [bool(cfam in r and r[cfam]["crown_reliable"]) for r in reps]
+        ci["crown_root_split_ufboot_replicates"] = ";".join(f"{u:.0f}" if u == u else "NA" for u in rep_uf)
+        ci["crown_reliable_this_sample"] = ci["crown_reliable"]
+        ci["crown_reliable"] = ci["crown_reliable"] and all(rep_ok)
     if crown_map:
         print("[CL0013 crown anchors]", flush=True)
         for cfam, ci in crown_map.items():
             print(f"  {cfam:15s}: S1={ci['crown_s1_n']}, S2={ci['crown_s2_n']}, F1={ci['crown_clade_f1']}, "
                   f"monophyly UFBoot={ci['crown_monophyly_ufboot']:.0f}, root-split UFBoot={ci['crown_root_split_ufboot']:.0f}, "
+                  f"replicate root-split UFBoot={ci['crown_root_split_ufboot_replicates']}, "
                   f"reliable={ci['crown_reliable']}", flush=True)
 
     all_events_rows: list[dict] = []
@@ -1721,8 +1744,9 @@ def main() -> int:
         rrow = {"family": fam, "primary_rooting": primary_method, "primary_alignment_track": track}
         if crown:
             for k in ("crown_clade_f1", "crown_monophyly_ufboot", "crown_monophyly_shalrt", "crown_root_split_ufboot",
-                      "crown_n_family_outside_clade", "crown_s1_n", "crown_s2_n", "crown_reliable"):
-                rrow[k] = crown[k]
+                      "crown_n_family_outside_clade", "crown_s1_n", "crown_s2_n", "crown_reliable_this_sample",
+                      "crown_root_split_ufboot_replicates", "crown_reliable"):
+                rrow[k] = crown.get(k, "")
         prim = root_splits[fam].get("primary_out")
         prim_row = next((r for r in tree_matrix_rows if r["family"] == fam and r["oat_key"] == "primary_out"), {})
         for k in ("root_split_ufboot", "root_on_terminal_branch", "root_split_small_side_n"):
@@ -1886,7 +1910,8 @@ def main() -> int:
         "",
         "--- Rooting decisions (primary = crown projection only where the family is a supported clade in the",
         f"    CL0013 superfamily tree (F1 >= {CROWN_MIN_F1}, UFBoot >= {CROWN_MIN_UFBOOT:.0f}) with a supported root",
-        f"    position (root-split UFBoot >= {CROWN_MIN_ROOT_UFBOOT:.0f}); otherwise MAD) ---",
+        f"    position (root-split UFBoot >= {CROWN_MIN_ROOT_UFBOOT:.0f}), in this and every replicate CL0013 taxon",
+        f"    sample ({', '.join(CROWN_REPLICATE_SAMPLES) or 'none'}); otherwise MAD) ---",
         df_root.to_string(index=False) if len(df_root) else "(none)",
         "",
         "--- Tier-1 totals ---",

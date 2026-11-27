@@ -1,0 +1,56 @@
+Primary IMG/VR loci with context: 4,193; current rule re-derived, mismatches with stored tier: 0
+
+--- Tier counts ---
+  rule            T1      T2      T3
+  current      1,649     786   1,758
+  A            1,698   1,221   1,274
+  B5           1,708   1,966     519
+  B10          1,827   1,949     417
+  B20          1,868   1,959     366
+
+--- current -> A (rows current) ---
+                  T1      T2      T3
+  T1           1,603      45       1
+  T2              42     711      33
+  T3              53     465   1,240
+
+--- current -> B10 (rows current) ---
+                  T1      T2      T3
+  T1           1,517     112      20
+  T2              62     700      24
+  T3             248   1,137     373
+
+--- By family: T1 / T2 / T3 (current | A | B10) ---
+  PF00144    n=1,868   1164/325/379   |   1174/442/252   |   1203/599/66
+  PF00768    n=  836   232/196/408   |   258/306/272   |   283/515/38
+  PF00905    n=1,241   128/215/898   |   139/395/707   |   218/722/301
+  PF13354    n=  248   125/50/73   |   127/78/43   |   123/113/12
+
+--- By host-check basis: T1 (current | A | B10) ---
+  checkv_viral_region      n=  102   43 | 53 | 48
+  genomad_provirus_skip    n=  239   94 | 105 | 87
+  whole_contig             n=3,852   1512 | 1540 | 1692
+
+--- viral nr85 representatives (tree tips): 889 ---
+  current  {'MOSAiC': 6, 'T1': 299, 'T2': 261, 'T3': 323}
+  A        {'MOSAiC': 6, 'T1': 302, 'T2': 352, 'T3': 229}
+  B10      {'MOSAiC': 6, 'T1': 280, 'T2': 519, 'T3': 84}
+
+--- B->V events with pre-registered Tier 1 or Tier 2: singleton gate and viral-evidence gate ---
+  (V->B gates use donor viral sisters, which the event catalog does not list; not re-evaluated)
+  current  events passing both gates: 29/30; of pre-registered Tier-1 B->V: 6/7
+  A        events passing both gates: 29/30; of pre-registered Tier-1 B->V: 6/7
+  B10      events passing both gates: 27/30; of pre-registered Tier-1 B->V: 6/7
+  pre-registered Tier-1 B->V events:
+    PF00144__Primary_MAD__MAD__HGT134: tips current [T1] A [T1] B10 [T2]
+    PF00144__Primary_MAD__MAD__HGT187: tips current [T1] A [T1] B10 [T1]
+    PF00144__Primary_MAD__MAD__HGT212: tips current [T1] A [T1] B10 [T1]
+    PF13354__Primary_MAD__MAD__HGT028: tips current [T3,T3] A [T3,T3] B10 [T2,T2]
+    PF13354__Primary_MAD__MAD__HGT054: tips current [T1] A [T1] B10 [T1]
+    PF13354_PF00768__Primary_MAD__MAD__HGT054: tips current [T1] A [T1] B10 [T1]
+    PF13354_PF00768__Primary_MAD__MAD__HGT072: tips current [T1] A [T1] B10 [T1]
+  events whose gate result changes under B10: 4
+    PF00144__Primary_MAD__MAD__HGT116 (T1 False, T2 True): current [T1] -> B10 [T2]
+    PF00144__Primary_MAD__MAD__HGT134 (T1 True, T2 False): current [T1] -> B10 [T2]
+    PF00144__Primary_MAD__MAD__HGT140 (T1 False, T2 True): current [T1] -> B10 [T3]
+    PF13354__Primary_MAD__MAD__HGT028 (T1 False, T2 False): current [T3,T3] -> B10 [T2,T2]

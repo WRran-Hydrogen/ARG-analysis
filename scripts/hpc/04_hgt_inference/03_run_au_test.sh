@@ -9,8 +9,10 @@
 # AU test of one HGT event (one line of au_test_tasks.tsv, written by 01_hgt_inference.py).
 #   1. Constrained ML search: the donor background (all tips below the grandparent except the focal
 #      clade) must form a clade that excludes the focal tips, i.e. the focal tips are not nested.
-#   2. AU test (RELL, 10,000 replicates) of the unconstrained ML tree against the constrained tree.
-# A small p-AU for the constrained tree rejects the "not nested" alternative.
+#   2. AU test (RELL, 10,000 replicates) of the unconstrained ML tree against the constrained tree, with the
+#      model parameters fitted on the ML tree.
+# A small p-AU for the constrained tree rejects the "not nested" alternative. A constrained tree with a higher
+# likelihood than the ML tree means the unconstrained search missed a better tree (04 reports it).
 #   usage (from scripts/hpc/04_hgt_inference/): sbatch --array=1-N 03_run_au_test.sh <au_test_tasks.tsv>
 
 set -euo pipefail
@@ -41,6 +43,7 @@ fi
 
 cat "${ml_tree}" "${prefix}.constr.treefile" > "${prefix}.candidates.nwk"
 echo "[$(date -Is)] ${event_id}: AU test"
-"${IQTREE}" -s "${aln}" -m "${model}" -z "${prefix}.candidates.nwk" -n 0 -zb 10000 -au \
+# -te: model parameters are fitted on the ML tree (without it they are fitted on a parsimony starting tree)
+"${IQTREE}" -s "${aln}" -m "${model}" -te "${ml_tree}" -z "${prefix}.candidates.nwk" -n 0 -zb 10000 -au \
     -T "${CPUS}" --seed 20261124 --prefix "${prefix}.au" -redo
 echo "[$(date -Is)] ${event_id}: done"

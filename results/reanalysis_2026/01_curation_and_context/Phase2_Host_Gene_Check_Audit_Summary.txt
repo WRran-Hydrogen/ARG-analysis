@@ -1,5 +1,6 @@
 === CheckV host-gene check audit (primary IMG/VR loci) ===
-Loci: 4,193 | re-derived tier differs from stored tier: 0
+'Current' below = the text rule used until 2026-11-25 (viral_origin_tier_text_rule).
+Loci: 4,193 | re-derived text-rule tier differs from stored tier: 0
 
 Focal ORF CheckV category by host-check basis:
   checkv_viral_region      host     : 77
@@ -25,20 +26,20 @@ Focal ORF CheckV category by family:
   PF13354  host     : 247
   PF13354  viral    : 1
 
-Loci in Tier 1/2 that fail the raw check (flank exemption): 38
-  focal category: host=37, no_hit=1
-  host - viral genes: 1=5, 2=1, 3=1, 4=4, 5=3, 6=2, 8=1, 9=2, 10=19 (10 = >=10)
+Loci in Tier 1/2 that fail the raw check (flank exemption): 39
+  focal category: host=38, no_hit=1
+  host - viral genes: 1=6, 2=1, 3=1, 4=5, 5=3, 6=2, 8=1, 9=2, 10=18 (10 = >=10)
 
 Current tier (rows) -> tier_focal_corrected (columns):
                                     Tier1    Tier2    Tier3
-  Tier1_HighConfidence_Viral        1,648        0        1
+  Tier1_HighConfidence_Viral        1,649        0        1
   Tier2_Supported_Viral                 0      753       33
-  Tier3_Fragment_or_Borderline         53      253    1,452
-  by family (T1/T2/T3): PF00144 1197/365/306; PF00768 242/267/327; PF00905 136/299/806; PF13354 126/75/47
+  Tier3_Fragment_or_Borderline         53      255    1,449
+  by family (T1/T2/T3): PF00144 1198/364/306; PF00768 242/267/327; PF00905 136/302/803; PF13354 126/75/47
 
 Current tier (rows) -> tier_focal_corrected_hq (columns):
                                     Tier1    Tier2    Tier3
-  Tier1_HighConfidence_Viral        1,648        0        1
-  Tier2_Supported_Viral                19      753       14
-  Tier3_Fragment_or_Borderline         97      269    1,392
-  by family (T1/T2/T3): PF00144 1203/365/300; PF00768 242/267/327; PF00905 189/314/738; PF13354 130/76/42
+  Tier1_HighConfidence_Viral        1,649        0        1
+  Tier2_Supported_Viral                18      753       15
+  Tier3_Fragment_or_Borderline         98      271    1,388
+  by family (T1/T2/T3): PF00144 1204/364/300; PF00768 242/267/327; PF00905 189/317/735; PF13354 130/76/42

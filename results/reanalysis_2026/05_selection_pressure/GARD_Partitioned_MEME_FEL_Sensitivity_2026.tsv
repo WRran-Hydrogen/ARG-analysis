@@ -1,0 +1,17 @@
+set_id	family	n_codons	meme_status	fel_status	n_partitions	meme_pos_single	meme_pos_partitioned	meme_pos_shared	meme_pos_retained_pct	fel_pos_single	fel_pos_partitioned	fel_pos_shared	fel_pos_retained_pct	fel_pur_single	fel_pur_partitioned	fel_pur_shared	fel_pur_retained_pct
+PF00144_sub1_HGT_clade	PF00144	319	done	done	7	4	2	2	50.0	0	0	0		165	165	146	88.5
+PF00144_sub2_HGT_clade	PF00144	277	failed	done	6					1	0	0	0.0	106	2	1	0.9
+PF00144_sub3_Viral_clade	PF00144	292	done	done	10	7	5	3	42.9	0	0	0		89	82	74	83.1
+PF00144_sub4_Viral_clade	PF00144	267	done	done	8	9	4	2	22.2	0	0	0		92	97	83	90.2
+PF00905_sub1_HGT_clade	PF00905	300	done	done	3	13	10	4	30.8	0	0	0		263	258	249	94.7
+PF00905_sub2_HGT_clade	PF00905	290	done	done	3	0	1	0		0	0	0		219	211	202	92.2
+PF00905_sub3_Viral_clade	PF00905	290	done	done	9	16	3	3	18.8	0	0	0		88	77	69	78.4
+PF00905_sub4_Viral_clade	PF00905	288	done	done	7	4	1	0	0.0	0	0	0		141	142	126	89.4
+PF13354_sub1_HGT_clade	PF13354	255	done	done	3	2	4	0	0.0	0	0	0		100	98	91	91.0
+PF13354_sub2_HGT_clade	PF13354	255	done	done	3	3	1	0	0.0	1	1	1	100.0	213	208	200	93.9
+PF13354_sub3_Viral_clade	PF13354	250	done	done	5	3	3	1	33.3	1	1	0	0.0	138	135	126	91.3
+PF13354_sub4_Bacterial_clade	PF13354	254	done	done	7	3	5	3	100.0	1	1	1	100.0	85	84	74	87.1
+PF00768_sub1_HGT_clade	PF00768	231	done	done	8	3	0	0	0.0	0	0	0		70	82	65	92.9
+PF00768_sub2_HGT_clade	PF00768	231	done	done	4	5	4	2	40.0	0	0	0		166	166	152	91.6
+PF00768_sub3_Viral_clade	PF00768	226	done	done	5	2	1	1	50.0	0	0	0		94	98	84	89.4
+PF00768_sub4_Viral_clade	PF00768	227	done	done	5	5	4	3	60.0	1	1	1	100.0	79	86	73	92.4

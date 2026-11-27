@@ -1225,7 +1225,7 @@ def build_viral_and_bacterial_pools():
 
 
 CKPT_PATH = WORK / "_curated_pools_ckpt.pkl"
-P2_REQUIRED_COLUMN = "flanked_strict_structural_hallmark_any"   # written by the current Phase 2 only
+P2_REQUIRED_COLUMN = "viral_origin_tier_local_w10"   # written by the current Phase 2 only (gene-origin evidence tiers)
 
 
 def load_current_phase2_tiers(viral_records):
@@ -1244,7 +1244,7 @@ def load_current_phase2_tiers(viral_records):
     if P2_REQUIRED_COLUMN not in cols:
         raise RuntimeError(
             f"{P2_TSV} was produced by an older Phase 2 (no '{P2_REQUIRED_COLUMN}' column; "
-            f"tiers still count integrases as viral evidence).\n{order}"
+            f"tiers still use annotation-text gene categories).\n{order}"
         )
     if CKPT_PATH.exists() and P2_TSV.stat().st_mtime < CKPT_PATH.stat().st_mtime:
         raise RuntimeError(f"{P2_TSV} is older than the curation checkpoint; re-run Phase 2 first.\n{order}")

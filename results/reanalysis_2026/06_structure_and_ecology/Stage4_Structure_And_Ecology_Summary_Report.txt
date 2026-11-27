@@ -4,18 +4,18 @@ Stage 4B Report: 3D Biophysics, Controlled Diversity & Stratified Ecology
 ========================================================================
 Curated viral cohort size: n=4203 (matched info.xlsx: 4193)
 Reliable host subset (Isolate/CRISPR): n=941
-High-confidence viral origin (Tier1+Tier2+MOSAiC): n=2445
+High-confidence viral origin (Tier1+Tier2+MOSAiC): n=2929
 
 --- 1. 3D Structural Localization of Constraint vs Diversification ---
-  Ref_Crystal        | PF00144                  | n=304 | dist(cat/div/bg)=6.036/19.923/19.244 A (p_div>cat=2.54e-07) | RSA(cat/div/bg)=0.0151/0.2691/0.0722 (p_div>cat=1.37e-04) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.7489 vs 0.9492 (p=1.61e-03)
-  Ref_Crystal        | PF00905                  | n=255 | dist(cat/div/bg)=6.085/20.269/17.487 A (p_div>cat=1.26e-04) | RSA(cat/div/bg)=0.1767/0.2626/0.0585 (p_div>cat=4.25e-01) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.4911 vs 0.87 (p=1.92e-09)
-  Ref_Crystal        | PF13354                  | n=250 | dist(cat/div/bg)=6.614/18.233/17.899 A (p_div>cat=1.59e-08) | RSA(cat/div/bg)=0.028/0.247/0.1193 (p_div>cat=7.38e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6066 vs 0.9022 (p=9.62e-07)
-  Ref_Crystal        | All_Ref_Crystal_Pooled   | n=809 | dist(cat/div/bg)=6.56/19.506/18.211 A (p_div>cat=4.05e-17) | RSA(cat/div/bg)=0.0562/0.2626/0.0769 (p_div>cat=3.58e-06) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6088 vs 0.9162 (p=1.76e-15)
-  Viral_ESMFold_2026 | PF00144                  | n=318 | dist(cat/div/bg)=5.956/19.102/18.596 A (p_div>cat=1.31e-07) | RSA(cat/div/bg)=0.0187/0.2909/0.1171 (p_div>cat=3.92e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.712 vs 0.9601 (p=9.61e-07)
-  Viral_ESMFold_2026 | PF00905                  | n=298 | dist(cat/div/bg)=5.916/18.312/17.261 A (p_div>cat=1.29e-07) | RSA(cat/div/bg)=0.0152/0.3686/0.1724 (p_div>cat=8.27e-07) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.3427 vs 0.87 (p=2.54e-11)
-  Viral_ESMFold_2026 | PF13354                  | n=222 | dist(cat/div/bg)=7.481/17.689/16.762 A (p_div>cat=3.73e-08) | RSA(cat/div/bg)=0.0904/0.2968/0.1912 (p_div>cat=3.66e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6031 vs 0.9146 (p=1.40e-07)
-  Viral_ESMFold_2026 | PF00768                  | n=226 | dist(cat/div/bg)=15.717/19.03/18.252 A (p_div>cat=1.10e-02) | RSA(cat/div/bg)=0.1284/0.2695/0.1745 (p_div>cat=2.12e-03) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6391 vs 0.7812 (p=1.27e-02)
-  Viral_ESMFold_2026 | All_Viral_ESMFold_2026_Pooled | n=1064 | dist(cat/div/bg)=6.687/18.761/17.726 A (p_div>cat=1.09e-20) | RSA(cat/div/bg)=0.0721/0.3146/0.1617 (p_div>cat=1.94e-15) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.5929 vs 0.893 (p=4.74e-20)
+  Ref_Crystal        | PF00144                  | n=304 | dist(cat/div/bg)=6.036/18.895/20.216 A (p_div>cat=2.52e-07) | RSA(cat/div/bg)=0.0151/0.2315/0.0893 (p_div>cat=6.50e-04) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.7489 vs 0.9492 (p=1.61e-03)
+  Ref_Crystal        | PF00905                  | n=255 | dist(cat/div/bg)=6.085/20.115/17.516 A (p_div>cat=1.22e-04) | RSA(cat/div/bg)=0.1767/0.2532/0.057 (p_div>cat=4.05e-01) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.4911 vs 0.87 (p=1.92e-09)
+  Ref_Crystal        | PF13354                  | n=250 | dist(cat/div/bg)=6.614/18.44/17.787 A (p_div>cat=1.42e-08) | RSA(cat/div/bg)=0.028/0.2343/0.1168 (p_div>cat=6.25e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6066 vs 0.9022 (p=9.62e-07)
+  Ref_Crystal        | All_Ref_Crystal_Pooled   | n=809 | dist(cat/div/bg)=6.56/19.162/18.425 A (p_div>cat=5.06e-17) | RSA(cat/div/bg)=0.0562/0.2433/0.0807 (p_div>cat=9.92e-06) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6088 vs 0.9162 (p=1.76e-15)
+  Viral_ESMFold_2026 | PF00144                  | n=318 | dist(cat/div/bg)=5.954/18.932/19.237 A (p_div>cat=1.61e-07) | RSA(cat/div/bg)=0.0194/0.2775/0.1324 (p_div>cat=2.47e-04) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.712 vs 0.9628 (p=8.58e-07)
+  Viral_ESMFold_2026 | PF00905                  | n=298 | dist(cat/div/bg)=5.945/19.338/17.443 A (p_div>cat=1.29e-07) | RSA(cat/div/bg)=0.0098/0.3899/0.1303 (p_div>cat=4.80e-07) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.4084 vs 0.8764 (p=6.47e-11)
+  Viral_ESMFold_2026 | PF13354                  | n=222 | dist(cat/div/bg)=7.481/17.884/16.76 A (p_div>cat=2.91e-08) | RSA(cat/div/bg)=0.0904/0.296/0.1911 (p_div>cat=3.08e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6031 vs 0.9146 (p=1.40e-07)
+  Viral_ESMFold_2026 | PF00768                  | n=226 | dist(cat/div/bg)=15.717/18.958/18.272 A (p_div>cat=1.31e-02) | RSA(cat/div/bg)=0.1284/0.2695/0.1848 (p_div>cat=2.46e-03) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6391 vs 0.7812 (p=1.27e-02)
+  Viral_ESMFold_2026 | All_Viral_ESMFold_2026_Pooled | n=1064 | dist(cat/div/bg)=6.686/18.802/17.893 A (p_div>cat=1.07e-20) | RSA(cat/div/bg)=0.0698/0.3149/0.1473 (p_div>cat=1.07e-14) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.5962 vs 0.8966 (p=8.27e-20)
 
 --- 2. Confounder-Controlled Structural & Phylogenetic Diversity ---
   1_Global_Baseline_Unfiltered             | V/B PDB=1337/170 | rarefied_k=50 PD(V/B)=70.3011/35.0358 (p=4.83e-67) | norm_Rg(V/B)=2.7853/2.6897 (MW_p=1.11e-38)
@@ -26,7 +26,7 @@ High-confidence viral origin (Tier1+Tier2+MOSAiC): n=2445
   3_Within_PF00768_ViralOnly               | V/B PDB=   3/  0 | rarefied_k= 0 PD(V/B)=nan/nan (p=nan) | norm_Rg(V/B)=2.6716/nan (MW_p=nan)
   4_Tier_PBP_or_PRE_Homolog                | V/B PDB= 806/ 33 | rarefied_k=31 PD(V/B)=46.5405/31.3661 (p=3.07e-67) | norm_Rg(V/B)=2.7638/2.8009 (MW_p=5.12e-01)
   4_Tier_Putative_Hydrolytic_BetaLactamase | V/B PDB=  19/137 | rarefied_k=19 PD(V/B)=20.1225/19.4372 (p=1.18e-06) | norm_Rg(V/B)=2.6885/2.6862 (MW_p=1.92e-01)
-  5_ViralOrigin_Tier1_Tier2_HighConf       | V/B PDB= 461/170 | rarefied_k=50 PD(V/B)=66.2046/35.0358 (p=4.83e-67) | norm_Rg(V/B)=2.7579/2.6897 (MW_p=4.91e-25)
+  5_ViralOrigin_Tier1_Tier2_HighConf       | V/B PDB= 566/170 | rarefied_k=50 PD(V/B)=66.6425/35.0358 (p=4.83e-67) | norm_Rg(V/B)=2.7568/2.6897 (MW_p=3.56e-24)
   6_ReliableHost_Isolate_CRISPR            | V/B PDB= 143/170 | rarefied_k=50 PD(V/B)=49.7161/35.0358 (p=7.92e-67) | norm_Rg(V/B)=2.7485/2.6897 (MW_p=1.83e-08)
 
 --- 3. Confounder-Controlled Ecological Enrichment (CMH Summary) ---

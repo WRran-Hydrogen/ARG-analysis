@@ -3,7 +3,9 @@
 
 For each task in au_test_tasks.tsv, reads au_tests/{event_id}.au.iqtree (tree 1 = unconstrained ML
 tree, tree 2 = constrained "not nested" tree) and reports logL, deltaL and p-AU of the constrained
-tree. The alternative is rejected when p-AU < 0.05.
+tree. The alternative is rejected when p-AU < 0.05 and the ML tree is more likely than the constrained
+tree; a constrained tree with the higher likelihood (also as the score of its own search) is reported as
+'ml_tree_suboptimal' (the unconstrained search missed a better tree; the nesting is not supported).
 
 Outputs ($SBL_HPC_BASE/04_hgt_inference/):
   AU_Test_Results.tsv
@@ -43,21 +45,43 @@ def parse_au(path: Path) -> dict:
     return trees
 
 
+def best_score(log: Path) -> float | None:
+    """Final 'BEST SCORE FOUND' of an IQ-TREE search log."""
+    if not log.is_file():
+        return None
+    m = re.findall(r"BEST SCORE FOUND\s*:\s*(-?[0-9.]+)", log.read_text(encoding="utf-8", errors="ignore"))
+    return float(m[-1]) if m else None
+
+
+AU_FIELDS = ["status", "logL_ml", "logL_constrained", "logL_constrained_search", "deltaL_constrained",
+             "p_AU_constrained", "alternative_rejected"]
+
+
+def au_result(prefix: Path) -> dict:
+    """Result of one AU test ({prefix}.au.iqtree: tree 1 = unconstrained ML tree, tree 2 = constrained tree).
+
+    deltaL_constrained = logL(ML tree) - logL(constrained tree), signed. When the constrained tree has the
+    higher likelihood (in the AU table, or as the score of its own constrained search), the unconstrained
+    search did not find the ML tree: status 'ml_tree_suboptimal' and the alternative is not rejected.
+    """
+    res = parse_au(Path(f"{prefix}.au.iqtree"))
+    if 1 not in res or 2 not in res:
+        return {k: "" for k in AU_FIELDS} | {"status": "missing"}
+    ml, co = res[1]["logL"], res[2]["logL"]
+    cs = best_score(Path(f"{prefix}.constr.log"))
+    subopt = co > ml or (cs is not None and cs > ml)
+    p = res[2]["p_AU"]
+    return {"status": "ml_tree_suboptimal" if subopt else "done", "logL_ml": ml, "logL_constrained": co,
+            "logL_constrained_search": cs if cs is not None else "", "deltaL_constrained": round(ml - co, 4),
+            "p_AU_constrained": p, "alternative_rejected": (not subopt) and p < ALPHA}
+
+
 def main() -> int:
     tasks = list(csv.DictReader(open(OUT_DIR / "au_test_tasks.tsv", encoding="utf-8"), delimiter="\t"))
     results = {}
     rows = []
     for t in tasks:
-        res = parse_au(AU_DIR / f"{t['event_id']}.au.iqtree")
-        if 1 in res and 2 in res:
-            p = res[2]["p_AU"]
-            row = {"event_id": t["event_id"], "family": t["family"], "status": "done",
-                   "logL_ml": res[1]["logL"], "logL_constrained": res[2]["logL"], "deltaL_constrained": res[2]["deltaL"],
-                   "p_AU_constrained": p, "alternative_rejected": p < ALPHA}
-        else:
-            row = {"event_id": t["event_id"], "family": t["family"], "status": "missing",
-                   "logL_ml": "", "logL_constrained": "", "deltaL_constrained": "", "p_AU_constrained": "",
-                   "alternative_rejected": ""}
+        row = {"event_id": t["event_id"], "family": t["family"]} | au_result(AU_DIR / t["event_id"])
         rows.append(row)
         results[t["event_id"]] = row
 
@@ -79,10 +103,13 @@ def main() -> int:
             w.writeheader()
             w.writerows(cat)
 
-    done = [r for r in rows if r["status"] == "done"]
+    done = [r for r in rows if r["status"] in ("done", "ml_tree_suboptimal")]
     rej = [r for r in done if r["alternative_rejected"]]
+    sub = [r for r in done if r["status"] == "ml_tree_suboptimal"]
     lines = ["", "--- AU tests of pre-registered Tier-1 events (constrained: focal tips not nested in the donor background) ---",
-             f"Tasks: {len(rows)}, finished: {len(done)}, alternative rejected (p-AU < {ALPHA}): {len(rej)}"]
+             f"Tasks: {len(rows)}, finished: {len(done)}, alternative rejected (p-AU < {ALPHA}): {len(rej)}, "
+             f"constrained tree more likely than the ML tree (ml_tree_suboptimal, nesting not supported): {len(sub)}",
+             "deltaL = logL(ML tree) - logL(constrained tree); model parameters fitted on the ML tree"]
     for r in rows:
         lines.append(f"  {r['event_id']}: {r['status']} p-AU={r['p_AU_constrained']} deltaL={r['deltaL_constrained']}")
     rep = OUT_DIR / "Stage3_HGT_Summary_Report.txt"

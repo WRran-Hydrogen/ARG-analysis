@@ -36,9 +36,16 @@ fi
 if [[ ! -s "fel.json" ]]; then
     "${HYPHY}" CPU="${CPUS}" fel --alignment codon.fna --tree tree.nwk --output fel.json
 fi
-if [[ "${set_group}" == "subclade" && ! -s "gard.json" ]]; then
-    timeout 25m "${HYPHY}" CPU="${CPUS}" gard --type nucleotide --model GTR --rv GDD --rate-classes 3 --mode Faster \
-        --alignment codon.fna --output gard.json --output-lf gard.bf || true
+# GARD writes gard.json as a checkpoint during the search, so a crashed or timed-out run leaves a partial file;
+# gard.status records how the run ended (03_summarize_hyphy.py reports breakpoints only for 'complete').
+# TOLERATE_NUMERICAL_ERRORS: without it most subclade runs stop with a ConjugateGradientDescent LF mismatch.
+if [[ "${set_group}" == "subclade" && ! -s "gard.status" ]]; then
+    rc=0
+    timeout 8h "${HYPHY}" CPU="${CPUS}" ENV="TOLERATE_NUMERICAL_ERRORS=1;" gard --type nucleotide --model GTR --rv GDD \
+        --rate-classes 3 --mode Faster --alignment codon.fna --output gard.json --output-lf gard.bf || rc=$?
+    if [[ ${rc} -eq 0 && -s gard.json ]] && ! grep -q "Error" errors.log 2>/dev/null; then echo complete > gard.status
+    elif [[ ${rc} -eq 124 ]]; then echo timeout > gard.status
+    else echo "error_rc${rc}" > gard.status; fi
 fi
 
 echo "[$(date -Is)] ${set_id}: done"
