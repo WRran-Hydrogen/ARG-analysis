@@ -1,0 +1,19 @@
+family	architecture_class	n	total	share	main_text
+PF00144	Cell-surface binding	168	1876	0.0896	True
+PF00144	Other fusion	34	1876	0.0181	True
+PF00144	SBL domain only	1045	1876	0.557	True
+PF00144	Signalling / sensor	2	1876	0.0011	True
+PF00144	Verified hydrolytic SBL	1	1876	0.0005	True
+PF00144	Virion structure	626	1876	0.3337	True
+PF00768	Other fusion	56	837	0.0669	False
+PF00768	SBL domain only	781	837	0.9331	False
+PF00905	Cell-wall synthesis (PBP)	798	1242	0.6425	True
+PF00905	SBL domain only	432	1242	0.3478	True
+PF00905	Signalling / sensor	3	1242	0.0024	True
+PF00905	Verified hydrolytic SBL	9	1242	0.0072	True
+PF13354	Cell-surface binding	1	248	0.004	True
+PF13354	Lysis / peptidoglycan hydrolysis	13	248	0.0524	True
+PF13354	Other fusion	1	248	0.004	True
+PF13354	SBL domain only	41	248	0.1653	True
+PF13354	Verified hydrolytic SBL	144	248	0.5806	True
+PF13354	Virion structure	48	248	0.1935	True

@@ -1,0 +1,29 @@
+acc	name	module	rationale
+PF38217	Phage_spike_CBM	Virion structure	Carbohydrate-binding module of phage tail spikes (receptor binding)
+PF38215	Phage_tail_CBM	Virion structure	Carbohydrate-binding module of phage tail proteins (receptor binding)
+PF20155	TMP_3	Virion structure	Phage tail tape measure protein
+PF21722	Gly_rich_2	Linker	Glycine-rich segment; occurs between the spike CBM and the SBL domain; not used to assign a class
+PF31186	Endolysin	Lysis / peptidoglycan hydrolysis	Phage endolysin domain
+PF00959	Phage_lysozyme	Lysis / peptidoglycan hydrolysis	Phage lysozyme
+PF01464	SLT	Lysis / peptidoglycan hydrolysis	Lytic transglycosylase
+PF01551	Peptidase_M23	Lysis / peptidoglycan hydrolysis	Peptidoglycan endopeptidase (M23)
+PF01510	Amidase_2	Lysis / peptidoglycan hydrolysis	N-acetylmuramoyl-L-alanine amidase
+PF02557	VanY	Lysis / peptidoglycan hydrolysis	D-alanyl-D-alanine carboxypeptidase acting on peptidoglycan
+PF01522	Polysacc_deac_1	Lysis / peptidoglycan hydrolysis	Polysaccharide (peptidoglycan) deacetylase
+PF00395	SLH	Cell-surface binding	S-layer homology domain (cell-wall anchoring)
+PF08239	SH3_3	Cell-surface binding	Bacterial SH3 domain (cell-wall binding)
+PF17660	BTRD1	Cell-surface binding	Bacterial tandem repeat domain (surface protein)
+PF17957	Big_7	Cell-surface binding	Bacterial Ig-like domain (surface protein)
+PF18962	Por_Secre_tail	Cell-surface binding	Type IX secretion C-terminal sorting domain
+PF00404	Dockerin_1	Cell-surface binding	Dockerin type I (cellulosome attachment)
+PF00912	Transgly	Cell-wall synthesis (PBP)	Peptidoglycan glycosyltransferase of class A PBPs
+PF03793	PASTA	Cell-wall synthesis (PBP)	PBP and serine/threonine kinase associated domain
+PF17092	PCB_OB	Cell-wall synthesis (PBP)	Penicillin-binding protein OB-like domain
+PF28500	PBP_middle	Cell-wall synthesis (PBP)	PBP middle domain
+PF29195	PBP_1A_C	Cell-wall synthesis (PBP)	PBP1A C-terminal domain
+PF06832	BiPBP_C	Cell-wall synthesis (PBP)	Bifunctional PBP C-terminal domain
+PF21922	PBP_dimer_2	Cell-wall synthesis (PBP)	PBP dimerisation domain
+PF03717	PBP_dimer	Cell-wall synthesis (PBP)	PBP dimerisation domain
+PF05569	Peptidase_M56	Signalling / sensor	BlaR1 sensor protease (beta-lactam sensing)
+PF00069	Pkinase	Signalling / sensor	Protein kinase
+PF03109	ABC1	Signalling / sensor	ABC1 atypical kinase

@@ -22,6 +22,9 @@ docs/private/
 # Large inputs distributed via Figshare (see README > Data availability)
 data/structures/ProteinStructure/
 
+# Third-party GOLD public export (download from gold.jgi.doe.gov/downloads; ~240 MB)
+data/metadata/goldData.xlsx
+
 # Staging / scratch produced while running the pipeline
 scratch/
 .wsl_stage/
