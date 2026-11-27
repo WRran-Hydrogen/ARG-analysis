@@ -1,0 +1,17 @@
+=== GTDB/RefSeq 3,000 Bacterial Representative Scan Summary ===
+Valid proteomes scanned: 3000 / 3000 (bad/missing: 0)
+Total bacterial proteins scanned: 10,280,376
+CL0013 --cut_ga hits: 37241
+Genomes carrying >=1 winning CL0013 hit: 2959
+1:1 Translation-verified bacterial CDSs: 37163 / 37239 (99.80%)
+
+Category breakdown:
+  aux_PF00768: 3896
+  aux_PF02113: 2014
+  drop_non_CL0013_only: 2
+  focal_PF00144: 11691
+  focal_PF00905: 14819
+  focal_PF13354: 2746
+  outgroup_PF04960: 1192
+  outgroup_PF06089: 843
+  outgroup_PF27310: 38

@@ -1,0 +1,152 @@
+habitat	viral_phylum	host_phylum	confidence	carries_main_family	n_uvig	n_PF00144	n_PF00905	n_PF13354	n_PF00768
+Digestive	Uroviricota	Unknown	Putative	True	440	10	419	11	0
+Freshwater	Uroviricota	Unknown	Putative	False	416	0	0	0	416
+Respiratory	Uroviricota	Actinobacteriota	High-confidence	True	345	345	0	0	0
+Digestive	Uroviricota	Bacteroidota	Putative	True	297	2	281	14	0
+Freshwater	Uroviricota	Unknown	High-confidence	False	289	0	0	0	289
+Digestive	Uroviricota	Bacillota	Putative	True	265	121	138	6	0
+Freshwater	Uroviricota	Unknown	Putative	True	201	155	41	5	5
+Digestive	Uroviricota	Bacillota	High-confidence	True	187	89	42	56	0
+Soil	Uroviricota	Unknown	High-confidence	True	159	156	0	3	0
+Freshwater	Nucleocytoviricota	Unknown	Putative	True	121	120	1	0	0
+Unclassified	Uroviricota	Unknown	High-confidence	True	106	106	0	0	0
+Other environmental	Uroviricota	Unknown	Putative	True	100	6	94	0	0
+Microbial	Uroviricota	Unknown	High-confidence	True	90	90	0	0	0
+Unclassified	Uroviricota	Actinobacteriota	High-confidence	True	79	79	0	0	0
+Marine	Uroviricota	Unknown	Putative	True	74	63	3	8	0
+Digestive	Uroviricota	Bacillota	Putative	False	64	0	0	0	64
+Freshwater	Uroviricota	Unknown	High-confidence	True	63	53	2	8	0
+Soil	Uroviricota	Unknown	Putative	True	63	57	2	4	0
+Bioreactor	Uroviricota	Unknown	Putative	True	51	14	34	3	0
+Freshwater	Uroviricota	Cyanobacteriota	High-confidence	True	45	0	0	45	0
+Plants	Uroviricota	Unknown	Putative	True	37	20	17	0	0
+Digestive	Uroviricota	Actinobacteriota	High-confidence	True	32	0	32	0	0
+Digestive	Uroviricota	Bacteroidota	High-confidence	True	31	2	11	18	0
+Freshwater	Nucleocytoviricota	Unknown	High-confidence	True	31	31	0	0	0
+Digestive	Uroviricota	Actinobacteriota	Putative	True	30	0	29	1	0
+Digestive	Uroviricota	Unknown	High-confidence	True	23	6	15	2	0
+Soil	Nucleocytoviricota	Unknown	Putative	True	23	23	0	0	0
+Respiratory	Uroviricota	Actinobacteriota	Putative	True	22	22	0	0	0
+Marine	Uroviricota	Unknown	High-confidence	True	20	16	1	3	1
+Other environmental	Uroviricota	Unknown	High-confidence	True	20	18	0	2	0
+Marine	Nucleocytoviricota	Unknown	Putative	True	19	19	0	0	0
+Unclassified	Uroviricota	Pseudomonadota	High-confidence	True	18	6	4	8	0
+Bioreactor	Uroviricota	Unknown	High-confidence	True	18	17	1	0	0
+Other host-associated	Uroviricota	Unknown	Putative	True	15	1	13	1	0
+Other host-associated	Uroviricota	Bacillota	High-confidence	True	15	8	2	7	0
+Marine	Uroviricota	Unknown	Putative	False	13	0	0	0	13
+Other host-associated	Uroviricota	Actinobacteriota	High-confidence	True	12	11	1	0	0
+Unclassified	Uroviricota	Bacillota	High-confidence	True	11	10	1	0	0
+Plants	Uroviricota	Unknown	High-confidence	True	11	9	2	0	0
+Freshwater	Uroviricota	Actinobacteriota	High-confidence	True	11	11	0	0	0
+Freshwater	Unassigned	Unknown	Putative	True	10	10	0	0	0
+Other host-associated	Uroviricota	Pseudomonadota	High-confidence	True	10	0	2	8	0
+Other host-associated	Uroviricota	Bacteroidota	High-confidence	True	10	0	1	9	0
+Solid waste	Uroviricota	Unknown	Putative	True	9	8	1	0	0
+Solid waste	Uroviricota	Unknown	High-confidence	True	9	9	0	0	0
+Marine	Nucleocytoviricota	Unknown	High-confidence	True	8	8	0	0	0
+Wastewater	Uroviricota	Unknown	Putative	True	8	7	1	0	0
+Other environmental	Hofneiviricota	Pseudomonadota	High-confidence	True	7	0	7	0	0
+Other environmental	Uroviricota	Unknown	Putative	False	7	0	0	0	7
+Marine	Unassigned	Unknown		True	7	6	1	0	0
+Soil	Uroviricota	Unknown	Putative	False	7	0	0	0	7
+Soil	Uroviricota	Bacillota	Putative	False	7	0	0	0	7
+Unclassified	Uroviricota	Actinobacteriota	Putative	True	7	7	0	0	0
+Other engineered	Uroviricota	Unknown	High-confidence	True	7	6	1	0	0
+Wastewater	Unassigned	Unknown	Putative	True	6	6	0	0	0
+Digestive	Uroviricota	Pseudomonadota	High-confidence	True	6	0	2	4	0
+Marine	Unassigned	Unknown	Putative	True	5	5	0	0	0
+Soil	Unassigned	Unknown	Putative	True	5	5	0	0	0
+Freshwater	Uroviricota	Actinobacteriota	Putative	True	5	5	0	0	0
+Plants	Uroviricota	Pseudomonadota	High-confidence	True	5	5	0	0	0
+Other engineered	Uroviricota	Unknown	Putative	True	4	0	3	1	0
+Other environmental	Unassigned	Unknown	Putative	True	4	3	0	1	0
+Wastewater	Uroviricota	Bacillota	High-confidence	True	4	1	3	0	0
+Wastewater	Uroviricota	Unknown	High-confidence	True	4	2	2	0	0
+Other host-associated	Uroviricota	Bacillota	Putative	True	4	2	2	0	0
+Digestive	Uroviricota	Bacillota	High-confidence	False	4	0	0	0	4
+Thermal	Uroviricota	Pseudomonadota	High-confidence	True	4	4	0	0	0
+Marine	Uroviricota	Pseudomonadota	High-confidence	True	3	2	0	1	0
+Digestive	Unassigned	Unknown	Putative	True	3	1	2	0	0
+Other host-associated	Uroviricota	Actinobacteriota	Putative	True	3	1	2	0	0
+Freshwater	Uroviricota	Pseudomonadota	High-confidence	True	3	2	1	0	0
+Unclassified	Uroviricota	Bacteroidota	Putative	True	3	0	3	0	0
+Unclassified	Uroviricota	Bacillota	High-confidence	False	3	0	0	0	3
+Unclassified	Uroviricota	Pseudomonadota	Putative	True	3	1	1	1	0
+Unclassified	Uroviricota	Bacillota	Putative	True	3	1	2	0	0
+Soil	Uroviricota	Pseudomonadota	High-confidence	True	3	3	0	0	0
+Plants	Uroviricota	Unknown	Putative	False	3	0	0	0	3
+Soil	Uroviricota	Bacillota	High-confidence	True	3	2	0	1	0
+Wastewater	Nucleocytoviricota	Unknown	Putative	True	3	3	0	0	0
+Digestive	Uroviricota	Unknown	Putative	False	3	0	0	0	3
+Other environmental	Nucleocytoviricota	Unknown	Putative	True	3	3	0	0	0
+Digestive	Uroviricota	Patescibacteria	Putative	True	3	0	3	0	0
+Bioreactor	Uroviricota	Bacteroidota	Putative	True	2	1	1	0	0
+Digestive	Nucleocytoviricota	Unknown	Putative	False	2	0	0	0	2
+Bioreactor	Nucleocytoviricota	Unknown	Putative	True	2	2	0	0	0
+Bioreactor	Uroviricota	Bacillota	Putative	True	2	1	1	0	0
+Bioreactor	Uroviricota	Bacillota	High-confidence	True	2	1	0	1	0
+Freshwater	Uroviricota	Cyanobacteriota	Putative	True	2	0	0	2	0
+Freshwater	Uroviricota	Pseudomonadota	Putative	True	2	2	0	0	0
+Microbial	Uroviricota	Pseudomonadota	High-confidence	True	2	0	0	2	0
+Other engineered	Uroviricota	Pseudomonadota	Putative	True	2	1	1	0	0
+Other engineered	Uroviricota	Bacillota	High-confidence	True	2	2	0	0	0
+Other host-associated	Unassigned	Unknown	Putative	True	2	2	0	0	0
+Bioreactor	Uroviricota	Pseudomonadota	High-confidence	True	2	0	0	2	0
+Digestive	Unassigned	Bacillota	Putative	True	2	0	2	0	0
+Marine	Uroviricota	Unknown		True	2	2	0	0	0
+Other host-associated	Uroviricota	Bacteroidota	Putative	True	2	0	1	1	0
+Thermal	Uroviricota	Unknown	High-confidence	False	2	0	0	0	2
+Plants	Nucleocytoviricota	Unknown	Putative	True	2	2	0	0	0
+Plants	Uroviricota	Pseudomonadota	Putative	True	2	0	2	0	0
+Soil	Unassigned	Actinobacteriota	Putative	True	2	0	2	0	0
+Soil	Nucleocytoviricota	Unknown	High-confidence	True	2	2	0	0	0
+Digestive	Uroviricota	Unknown	High-confidence	False	2	0	0	0	2
+Digestive	Uroviricota	Fusobacteriota	Putative	True	2	0	2	0	0
+Bioreactor	Uroviricota	Planctomycetota	Putative	True	1	1	0	0	0
+Digestive	Hofneiviricota	Bacillota	High-confidence	False	1	0	0	0	1
+Bioreactor	Uroviricota	Bacteroidota	High-confidence	True	1	0	0	1	0
+Bioreactor	Unassigned	Unknown	Putative	True	1	1	0	0	0
+Bioreactor	Nucleocytoviricota	Unknown	High-confidence	True	1	1	0	0	0
+Digestive	Nucleocytoviricota	Unknown	Putative	True	1	0	1	0	0
+Other engineered	Hofneiviricota	Pseudomonadota	High-confidence	True	1	1	0	0	0
+Marine	Uroviricota	Unknown		False	1	0	0	0	1
+Marine	Uroviricota	Unknown	High-confidence	False	1	0	0	0	1
+Digestive	Uroviricota	Bacteroidota	Putative	False	1	0	0	0	1
+Digestive	Uroviricota	Verrucomicrobiota	Putative	True	1	0	0	1	0
+Freshwater	Unassigned	Bacteroidota	Putative	True	1	1	0	0	0
+Marine	Hofneiviricota	Patescibacteria	High-confidence	True	1	0	0	1	0
+Marine	Unassigned	Actinobacteriota	Putative	True	1	1	0	0	0
+Marine	Uroviricota	Actinobacteriota	Putative	True	1	1	0	0	0
+Other host-associated	Nucleocytoviricota	Unknown	Putative	True	1	0	1	0	0
+Other environmental	Nucleocytoviricota	Unknown	High-confidence	True	1	1	0	0	0
+Other environmental	Uroviricota	Pseudomonadota	Putative	True	1	1	0	0	0
+Other environmental	Uroviricota	Halobacteriota	High-confidence	False	1	0	0	0	1
+Other environmental	Uroviricota	Actinobacteriota	High-confidence	True	1	1	0	0	0
+Marine	Uroviricota	Pseudomonadota	Putative	True	1	1	0	0	0
+Other engineered	Uroviricota	Bacillota	Putative	True	1	1	0	0	0
+Soil	Preplasmiviricota	Actinobacteriota	Putative	True	1	0	0	1	0
+Plants	Unassigned	Unknown	Putative	True	1	1	0	0	0
+Plants	Nucleocytoviricota	Unknown	High-confidence	True	1	1	0	0	0
+Plants	Hofneiviricota	Unknown	High-confidence	True	1	0	0	1	0
+Other host-associated	Uroviricota	Pseudomonadota	Putative	True	1	0	0	1	0
+Respiratory	Uroviricota	Pseudomonadota	High-confidence	True	1	0	0	1	0
+Plants	Uroviricota	Pseudomonadota	High-confidence	False	1	0	0	0	1
+Plants	Uroviricota	Bacillota	High-confidence	True	1	1	0	0	0
+Respiratory	Hofneiviricota	Pseudomonadota	Putative	True	1	1	0	0	0
+Soil	Uroviricota	Unknown	High-confidence	False	1	0	0	0	1
+Soil	Uroviricota	Bacillota	Putative	True	1	0	1	0	0
+Soil	Hofneiviricota	Unknown	Putative	True	1	1	0	0	0
+Unclassified	Hofneiviricota	Pseudomonadota	High-confidence	True	1	1	0	0	0
+Solid waste	Uroviricota	Actinobacteriota	Putative	True	1	1	0	0	0
+Thermal	Nucleocytoviricota	Unknown	High-confidence	True	1	1	0	0	0
+Thermal	Nucleocytoviricota	Unknown	Putative	True	1	1	0	0	0
+Thermal	Uroviricota	Chloroflexota	High-confidence	True	1	1	0	0	0
+Thermal	Uroviricota	Unknown	Putative	True	1	1	0	0	0
+Wastewater	Nucleocytoviricota	Unknown	High-confidence	True	1	1	0	0	0
+Unclassified	Uroviricota	Bacteroidota	High-confidence	True	1	1	0	0	0
+Unclassified	Uroviricota	Pseudomonadota	High-confidence	False	1	0	0	0	1
+Wastewater	Uroviricota	Bacteroidota	Putative	True	1	0	0	1	0
+Wastewater	Uroviricota	Bacteroidota	High-confidence	True	1	1	0	0	0
+Wastewater	Uroviricota	Unknown	High-confidence	False	1	0	0	0	1
+Wastewater	Uroviricota	Pseudomonadota	High-confidence	True	1	1	0	0	0

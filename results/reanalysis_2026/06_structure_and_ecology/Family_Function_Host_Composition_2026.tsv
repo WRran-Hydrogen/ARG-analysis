@@ -1,0 +1,41 @@
+group	panel	category	n	total	main_text
+PF00144	function	PBP / esterase / lysin homolog	1874	1876	True
+PF00144	function	Verified hydrolytic SBL	1	1876	True
+PF00144	function	Other	1	1876	True
+PF00905	function	PBP / esterase / lysin homolog	1230	1242	True
+PF00905	function	Verified hydrolytic SBL	9	1242	True
+PF00905	function	Other	3	1242	True
+PF13354	function	Verified hydrolytic SBL	144	248	True
+PF13354	function	PBP / esterase / lysin homolog	101	248	True
+PF13354	function	Other	3	248	True
+PF00768	function	PBP / esterase / lysin homolog	837	837	False
+PF00144	host	Unknown	1092	1859	True
+PF00144	host	Actinobacteriota	485	1859	True
+PF00144	host	Bacillota	240	1859	True
+PF00144	host	Pseudomonadota	32	1859	True
+PF00144	host	Bacteroidota	8	1859	True
+PF00144	host	Others	2	1859	True
+PF00905	host	Unknown	658	1241	True
+PF00905	host	Bacteroidota	298	1241	True
+PF00905	host	Bacillota	194	1241	True
+PF00905	host	Actinobacteriota	66	1241	True
+PF00905	host	Pseudomonadota	20	1241	True
+PF00905	host	Others	5	1241	True
+PF13354	host	Bacillota	71	247	True
+PF13354	host	Unknown	53	247	True
+PF13354	host	Cyanobacteriota	47	247	True
+PF13354	host	Bacteroidota	44	247	True
+PF13354	host	Pseudomonadota	28	247	True
+PF13354	host	Actinobacteriota	2	247	True
+PF13354	host	Others	2	247	True
+PF00768	host	Unknown	754	837	False
+PF00768	host	Bacillota	79	837	False
+PF00768	host	Pseudomonadota	2	837	False
+PF00768	host	Bacteroidota	1	837	False
+PF00768	host	Others	1	837	False
+Hydrolytic_main	host	Bacillota	64	153	True
+Hydrolytic_main	host	Bacteroidota	44	153	True
+Hydrolytic_main	host	Pseudomonadota	36	153	True
+Hydrolytic_main	host	Unknown	6	153	True
+Hydrolytic_main	host	Actinobacteriota	2	153	True
+Hydrolytic_main	host	Others	1	153	True

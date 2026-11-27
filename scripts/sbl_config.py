@@ -1,0 +1,154 @@
+"""Shared path and tool configuration for the SBL_research pipeline (scripts 01-09).
+
+Every repository path is derived from the repository root, so the project can be
+cloned anywhere. External tool locations are resolved in this order:
+
+1. environment variables (e.g. ``SBL_WSL_PYTHON=/opt/conda/bin/python``),
+2. ``config/local.env`` (machine-specific, git-ignored; copy ``config/local.env.example``),
+3. a plain command name that is expected to be on ``PATH``.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# ---------------------------------------------------------------------------
+# Repository layout
+# ---------------------------------------------------------------------------
+DATA_DIR = REPO_ROOT / "data"
+LEGACY_DATA_DIR = DATA_DIR / "legacy_2023"
+SEQ_DIR = DATA_DIR / "sequences"              # Pfam seed alignments; 2023 cohort FASTAs are in legacy_2023/
+CURATED_2026_DIR = DATA_DIR / "curated_2026"  # HPC re-analysis cohort (inputs)
+HMM_DIR = DATA_DIR / "hmm_models"             # official Pfam / CL0013 HMMs (inputs)
+META_DIR = DATA_DIR / "metadata"
+MOTIF_DIR = DATA_DIR / "motifs"
+PHYLO_DIR = DATA_DIR / "phylogeny"
+SELECTION_DIR = (LEGACY_DATA_DIR / "selection") if (LEGACY_DATA_DIR / "selection").exists() else (DATA_DIR / "selection")
+STRUCT_DIR = DATA_DIR / "structures"
+PDB_DIR = STRUCT_DIR / "ProteinStructure"     # 1,508 models; distributed via Figshare, not git
+REF_PDB_DIR = STRUCT_DIR / "ref_pdbs"
+
+PROCESSED_DIR = (LEGACY_DATA_DIR / "processed") if (LEGACY_DATA_DIR / "processed").exists() else (DATA_DIR / "processed")
+BAC_CLEAN_DIR = PROCESSED_DIR / "bacterial_clean"   # archived baseline script 03 outputs
+HMM_REBUILT_DIR = PROCESSED_DIR / "hmm_rebuilt"     # archived baseline script 01 outputs
+
+RESULTS_DIR = REPO_ROOT / "results"
+TABLES_DIR = RESULTS_DIR / "tables"
+SUPP_DIR = RESULTS_DIR / "supplementary_data"
+FIG_DIR = REPO_ROOT / "figures"
+
+# WSL staging root. Worker scripts locate the repository as <stage>/../.., so the
+# staging folders must stay exactly two levels below REPO_ROOT.
+WSL_STAGE_ROOT = REPO_ROOT / ".wsl_stage"
+
+FAMILIES = ["PF00144", "PF00905", "PF13354"]
+
+
+# ---------------------------------------------------------------------------
+# Tool configuration
+# ---------------------------------------------------------------------------
+def _load_env_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not path.is_file():
+        return values
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, val = line.split("=", 1)
+        values[key.strip()] = val.strip().strip('"').strip("'")
+    return values
+
+
+_LOCAL_ENV = _load_env_file(REPO_ROOT / "config" / "local.env")
+
+
+def setting(key: str, default: str = "") -> str:
+    """Return a configuration value from the environment, config/local.env, or the default."""
+    return os.environ.get(key) or _LOCAL_ENV.get(key) or default
+
+
+def _in_dir(bin_dir: str, name: str) -> str:
+    return f"{bin_dir.rstrip('/')}/{name}" if bin_dir else name
+
+
+# Python interpreter inside WSL/Linux that has numpy, pandas, scipy, ete4, matplotlib.
+WSL_PY = setting("SBL_WSL_PYTHON", "python3")
+# Directory holding meme/fimo (MEME Suite). Empty -> use PATH.
+MEME_BIN_DIR = setting("SBL_MEME_BIN_DIR", "")
+MEME = _in_dir(MEME_BIN_DIR, "meme")
+FIMO = _in_dir(MEME_BIN_DIR, "fimo")
+MUSCLE = setting("SBL_MUSCLE", "muscle")
+# Set SBL_USE_WSL=0 to run tool commands directly with bash (Linux/macOS hosts).
+USE_WSL = setting("SBL_USE_WSL", "1" if sys.platform.startswith("win") else "0") == "1"
+
+
+def to_wsl_path(p: Path) -> str:
+    """Translate a drive-qualified path to its WSL mount (/mnt/<drive>/...); POSIX paths pass through."""
+    resolved = Path(p).resolve()
+    drive = resolved.drive.rstrip(":").lower()
+    posix = resolved.as_posix()
+    if not USE_WSL or not drive:
+        return posix
+    tail = posix.split(":", 1)[1]
+    return f"/mnt/{drive}{tail}"
+
+
+def stage_dirs(name: str) -> tuple[Path, str]:
+    """Return (host path, path as seen by the Linux tools) for a WSL staging folder."""
+    host = WSL_STAGE_ROOT / name
+    return host, to_wsl_path(host)
+
+
+def linux_cmd(*args: str) -> list[str]:
+    """Prefix a command with ``wsl -e`` on Windows hosts."""
+    return ["wsl", "-e", *args] if USE_WSL else list(args)
+
+
+def preflight() -> list[str]:
+    """Check that the Linux side can reach the repository and the configured tools.
+
+    Returns a list of human-readable problems (empty when everything is reachable).
+    """
+    import subprocess
+
+    problems: list[str] = []
+    repo_lin = to_wsl_path(REPO_ROOT)
+    checks = [
+        (["test", "-d", repo_lin],
+         f"Linux tools cannot see the repository at {repo_lin}. On Windows, the drive must be "
+         f"mounted in WSL, e.g. `sudo mkdir -p /mnt/{REPO_ROOT.drive[:1].lower()} && "
+         f"sudo mount -t drvfs {REPO_ROOT.drive} /mnt/{REPO_ROOT.drive[:1].lower()}`, "
+         "or clone the repository onto C:."),
+        ([WSL_PY, "-c", "import ete4, numpy, pandas, scipy, matplotlib"],
+         f"SBL_WSL_PYTHON ({WSL_PY}) is missing or lacks ete4/numpy/pandas/scipy/matplotlib."),
+    ]
+    for args, msg in checks:
+        try:
+            r = subprocess.run(linux_cmd(*args), capture_output=True, text=True, cwd=Path.home())
+        except FileNotFoundError:
+            problems.append("`wsl` was not found; install WSL or set SBL_USE_WSL=0 on Linux/macOS.")
+            break
+        if r.returncode != 0:
+            problems.append(msg)
+    return problems
+
+
+def require(path: Path, hint: str = "") -> Path:
+    """Fail early with a readable message when an input is missing."""
+    if not Path(path).exists():
+        msg = f"Required input not found: {path}"
+        if hint:
+            msg += f"\n  -> {hint}"
+        raise FileNotFoundError(msg)
+    return Path(path)
+
+
+PDB_HINT = (
+    "Download the ProteinStructure archives (Parts 1-4) from the Figshare collection "
+    "listed in README.md and extract them into data/structures/ProteinStructure/."
+)

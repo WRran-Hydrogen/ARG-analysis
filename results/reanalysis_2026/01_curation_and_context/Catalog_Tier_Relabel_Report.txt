@@ -1,0 +1,9 @@
+Phase 2 table: $SBL_HPC_BASE/02_genomic_context/Phase2_Viral_Genomic_Neighborhoods_Full.tsv
+
+Final_Viral_SBL_Catalog.tsv: 4,592 rows; relabelled 4,592; not in Phase 2 (kept) 0; backup Final_Viral_SBL_Catalog.tsv.before_tier_relabel
+  old -> new: MOSAiC->MOSAiC 25, T1->T1 1,804, T2->T2 1,406, T3->T3 1,357
+  nr85 clusters: 890; representatives kept fixed; clusters where another member now has a better tier than the representative: 27
+  representative tiers (single-family exports): MOSAiC 6, T1 301, T2 353, T3 229
+
+Viral_Enzymatic_Function_Verification_2026.tsv: 4,203 rows; relabelled 4,203; not in Phase 2 (kept) 0; backup Viral_Enzymatic_Function_Verification_2026.tsv.before_tier_relabel
+  old -> new: MOSAiC->MOSAiC 10, T1->T1 1,696, T2->T2 1,223, T3->T3 1,274

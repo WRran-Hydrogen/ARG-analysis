@@ -1,0 +1,151 @@
+Loci: 4,190 primary IMG/VR loci; neighbourhood ORFs (viral region, focal excluded, unique): 262,763
+
+--- eggNOG seed-ortholog domain ---
+  no_hit         183,596 (69.9%)
+  Bacteria       52,933 (20.1%)
+  Viruses        24,880 (9.5%)
+  Eukaryota      708 (0.3%)
+  root_only      491 (0.2%)
+  Archaea        155 (0.1%)
+
+--- CheckV HMM category ---
+  no_hmm_hit     170,019 (64.7%)
+  viral          78,589 (29.9%)
+  microbial      12,320 (4.7%)
+  not_called     1,835 (0.7%)
+
+--- geNomad marker specificity class ---
+  none           138,000 (52.5%)
+  VV             94,219 (35.9%)
+  VP             21,218 (8.1%)
+  VC             6,661 (2.5%)
+  PV             835 (0.3%)
+  CP             781 (0.3%)
+  PC             451 (0.2%)
+  CC             275 (0.1%)
+  PP             170 (0.1%)
+  CV             153 (0.1%)
+
+geNomad virus hallmark: 13,654 (5.2%)
+Any viral evidence (CheckV viral | geNomad V* marker | eggNOG Viruses | geNomad hallmark): 131,486 (50.0%)
+Host evidence only (CheckV microbial | geNomad C* marker, no viral evidence): 9,613 (3.7%)
+Neither: 121,664 (46.3%)
+
+--- CheckV vs geNomad marker group (rows cv_cat, cols gn_grp) ---
+                    chromosome          none       plasmid         virus
+       microbial           714         8,289           172         3,145
+      no_hmm_hit           445       119,079         1,270        49,225
+      not_called             0         1,835             0             0
+           viral            50         8,797            14        69,728
+
+--- CheckV vs eggNOG domain (rows cv_cat, cols egg_dom) ---
+                       Archaea      Bacteria     Eukaryota       Viruses        no_hit     root_only
+       microbial            60         7,053           135            69         5,002             1
+      no_hmm_hit            82        27,070           320         2,249       140,039           259
+      not_called             0            68             0             4         1,762             1
+           viral            13        18,742           253        22,558        36,793           230
+
+--- ORFs flagged by regex replication/lysis: 15,517 ---
+  with viral evidence: 12,336 (79.5%); host evidence only: 909 (5.9%)
+  matched token                  n  viral_ev host_only  egg_Bact
+  endonuclease               3,590     3,082        29     1,610
+  helicase                   2,152     1,557       255       670
+  dna polymerase             1,485     1,201        87       754
+  erf                        1,336     1,185       115       813
+  exonuclease                  941       915         3       165
+  primase                      599       559         0       269
+  sigma70                      591       190        36       224
+  lysis                        589       382       109       574
+  holin                        578       541         1       141
+  amidase                      488       392        21       254
+  endolysin                    377       371         1       337
+  rect                         341       187        28       187
+  thymidylate                  324       265         9       231
+  lysozyme                     307       276         0       111
+  dutpase                      296       196         0       261
+  ssb                          274        78        16       176
+  rna polymerase               264       184        78       141
+  ribonucleotide reductase     242       229         0        99
+  replication                  201       152         3       174
+  antirepressor                174       173         0       140
+  peptidoglycan                167       160         1        24
+  rece                         157        29       117       128
+  muramidase                    22        19         0        19
+  single-stranded dna, rec       8         0         0         8
+  single-stranded dna bind       7         7         0         7
+  single stranded dna-bind       2         2         0         1
+  sigma-70                       2         2         0         0
+  single-stranded dna-bind       1         1         0         0
+  anti-repressor                 1         1         0         1
+  single-strand binding          1         0         0         1
+
+--- ORFs flagged by regex structural (text only): 11,150 ---
+  with viral evidence: 11,093 (99.5%); host evidence only: 14 (0.1%)
+  matched token                  n  viral_ev host_only  egg_Bact
+  tail                       3,944     3,916         2     1,324
+  terminase                  2,166     2,155         0     1,088
+  portal                     1,295     1,292         0       677
+  capsid                       965       963         0       652
+  minor capsid                 503       503         0        46
+  baseplate                    393       393         0       129
+  phage_spike                  345       345         0        42
+  prohead                      278       278         0       160
+  gp10_like bacteriophage      151       151         0        14
+  gp24_25 pfam:gp24_25 myc     131       131         0         0
+  phage_sheath                 113       113         0        53
+  major capsid                 112       112         0        42
+  gp6-like head-tail           109       109         0       107
+  gp15_tss t4-like virus m      50        50         0         0
+  collar                        47        47         0         9
+  virion                        45        45         0        17
+  gp10_c tail                   40        40         0        40
+  mcp                           37        24        12        17
+  gp24_25 mycobacteriophag      35        35         0         0
+  gp23+pf07068:gp23 major       31        31         0         0
+  gp6-like head-tail conne      30        30         0        30
+  gp10_like bacteriophage       26        26         0        26
+  gp10, putative tail           20        20         0         0
+  gp23 major capsid protei      19        19         0         0
+  gp23 major capsid             18        18         0         0
+  phage_fiber                   17        17         0         9
+  tape measure                  16        16         0        16
+  gp84_n phage conserved h      16        16         0        16
+  gp15_tss pfam:t4-gp15_ts      16        16         0         0
+  gp10_like bacteriophage       15        15         0        15
+
+--- Locus level: old regex flank vs new evidence-based flank ---
+  [checkv_viral_region] n=102
+    old flanked_structural_or_replic_both: 44 (43.1%)
+    new viral-evidence both sides (window 5): 67 (65.7%); old pass & new fail: 4
+    new viral-evidence both sides (window 10): 77 (75.5%); old pass & new fail: 1
+    new viral-evidence both sides (window region): 78 (76.5%); old pass & new fail: 0
+    old flanked_strict_structural_both: 13 (12.7%); geNomad hallmark both sides (region): 13 (12.7%)
+  [genomad_provirus_skip] n=239
+    old flanked_structural_or_replic_both: 182 (76.2%)
+    new viral-evidence both sides (window 5): 103 (43.1%); old pass & new fail: 115
+    new viral-evidence both sides (window 10): 208 (87.0%); old pass & new fail: 15
+    new viral-evidence both sides (window region): 223 (93.3%); old pass & new fail: 7
+    old flanked_strict_structural_both: 26 (10.9%); geNomad hallmark both sides (region): 29 (12.1%)
+  [whole_contig] n=3,849
+    old flanked_structural_or_replic_both: 1,648 (42.8%)
+    new viral-evidence both sides (window 5): 2,271 (59.0%); old pass & new fail: 247
+    new viral-evidence both sides (window 10): 2,521 (65.5%); old pass & new fail: 116
+    new viral-evidence both sides (window region): 2,640 (68.6%); old pass & new fail: 48
+    old flanked_strict_structural_both: 843 (21.9%); geNomad hallmark both sides (region): 818 (21.3%)
+  [ALL] n=4,190
+    old flanked_structural_or_replic_both: 1,874 (44.7%)
+    new viral-evidence both sides (window 5): 2,441 (58.3%); old pass & new fail: 366
+    new viral-evidence both sides (window 10): 2,806 (67.0%); old pass & new fail: 132
+    new viral-evidence both sides (window region): 2,941 (70.2%); old pass & new fail: 55
+    old flanked_strict_structural_both: 882 (21.1%); geNomad hallmark both sides (region): 860 (20.5%)
+
+--- Locus level by current tier: median viral / host evidence ORFs in region; focal ORF CheckV call ---
+  Tier1_HighConfidence_Viral     n=1,649  viral_ev median    61  host_ev median     0  both-side viral (10 ORFs) 1,563 (94.8%)  focal CheckV {'microbial': 703, 'no_hmm_hit': 96, 'viral': 850}
+  Tier2_Supported_Viral          n=  783  viral_ev median     9  host_ev median     0  both-side viral (10 ORFs) 429 (54.8%)  focal CheckV {'microbial': 623, 'no_hmm_hit': 128, 'viral': 32}
+  Tier3_Fragment_or_Borderline   n=1,758  viral_ev median   5.0  host_ev median   1.0  both-side viral (10 ORFs) 814 (46.3%)  focal CheckV {'microbial': 1526, 'no_hmm_hit': 231, 'viral': 1}
+
+--- Focal ORF eggNOG domain by family ---
+  PF00144: {'no_hit': 762, 'Bacteria': 891, 'Eukaryota': 1, 'Viruses': 211}
+  PF00768: {'Bacteria': 425, 'no_hit': 411}
+  PF00905: {'Bacteria': 834, 'no_hit': 407}
+  PF13354: {'Bacteria': 156, 'no_hit': 92}

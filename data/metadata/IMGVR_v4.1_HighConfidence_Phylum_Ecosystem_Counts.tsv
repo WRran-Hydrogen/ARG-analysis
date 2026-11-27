@@ -1,0 +1,1141 @@
+viral_phylum	ecosystem_l1_l3	n_uvig
+Artverviricota	;;	141
+Artverviricota	Engineered;Bioreactor;Anaerobic	9
+Artverviricota	Engineered;Bioreactor;Semi-continuous	1
+Artverviricota	Engineered;Solid waste;Mixed feedstock	1
+Artverviricota	Environmental;Aquatic;Deep subsurface	1
+Artverviricota	Environmental;Aquatic;Freshwater	2
+Artverviricota	Environmental;Aquatic;Marine	9
+Artverviricota	Environmental;Terrestrial;Plant litter	2
+Artverviricota	Environmental;Terrestrial;Soil	5
+Artverviricota	Host-associated;Amphibia;	1
+Artverviricota	Host-associated;Arthropoda: Insects;Digestive system	2
+Artverviricota	Host-associated;Arthropoda: Insects;Unclassified	3
+Artverviricota	Host-associated;Fish;Unclassified	4
+Artverviricota	Host-associated;Fungi;Mycelium	18
+Artverviricota	Host-associated;Invertebrates;Unclassified	1
+Artverviricota	Host-associated;Mammals: Human;Integumentary system	1
+Artverviricota	Host-associated;Mammals: Human;Unclassified	3
+Artverviricota	Host-associated;Mammals;Circulatory system	1
+Artverviricota	Host-associated;Mammals;Digestive system	2
+Artverviricota	Host-associated;Mammals;Unclassified	20
+Artverviricota	Host-associated;Plants;Phyllosphere	2
+Artverviricota	Host-associated;Plants;Roots	9
+Artverviricota	Host-associated;Plants;Unclassified	36
+Artverviricota	Host-associated;Unclassified;Unclassified	3
+Cossaviricota	;;	296
+Cossaviricota	Engineered;Built environment;City	4
+Cossaviricota	Engineered;Unclassified;Unclassified	1
+Cossaviricota	Engineered;WWTP;Activated sludge	1
+Cossaviricota	Engineered;WWTP;Wastewater	2
+Cossaviricota	Engineered;Wastewater;Unclassified	1
+Cossaviricota	Environmental;Aquatic;Deep subsurface	1
+Cossaviricota	Environmental;Aquatic;Freshwater	4
+Cossaviricota	Environmental;Aquatic;Marine	11
+Cossaviricota	Environmental;Aquatic;Sediment	1
+Cossaviricota	Environmental;Terrestrial;Deep subsurface	2
+Cossaviricota	Environmental;Terrestrial;Soil	4
+Cossaviricota	Host-associated;;	1
+Cossaviricota	Host-associated;Arthropoda: Crustaceans;Unclassified	1
+Cossaviricota	Host-associated;Arthropoda: Insects;Digestive system	2
+Cossaviricota	Host-associated;Arthropoda: Insects;Unclassified	1
+Cossaviricota	Host-associated;Birds;Digestive system	2
+Cossaviricota	Host-associated;Birds;Unclassified	9
+Cossaviricota	Host-associated;Fish;Integumentary system	1
+Cossaviricota	Host-associated;Fish;Unclassified	8
+Cossaviricota	Host-associated;Human;Reproductive system	10
+Cossaviricota	Host-associated;Human;Unclassified	7
+Cossaviricota	Host-associated;Invertebrates;Echinodermata	1
+Cossaviricota	Host-associated;Invertebrates;Unclassified	5
+Cossaviricota	Host-associated;Mammals: Human;Digestive system	82
+Cossaviricota	Host-associated;Mammals: Human;Integumentary system	88
+Cossaviricota	Host-associated;Mammals: Human;Respiratory system	4
+Cossaviricota	Host-associated;Mammals: Human;Unclassified	19
+Cossaviricota	Host-associated;Mammals;Digestive system	13
+Cossaviricota	Host-associated;Mammals;Integumentary system	1
+Cossaviricota	Host-associated;Mammals;Unclassified	129
+Cossaviricota	Host-associated;Microbial;Bacteria	3
+Cossaviricota	Host-associated;Plants;Roots	2
+Cossaviricota	Host-associated;Protists;Oomycetes	1
+Cossaviricota	Host-associated;Reptilia;Unclassified	2
+Cossaviricota	Host-associated;Unclassified;Unclassified	29
+Cressdnaviricota	;;	775
+Cressdnaviricota	Engineered;Artificial ecosystem;Sand microcosm	3
+Cressdnaviricota	Engineered;Bioreactor;Anaerobic	13
+Cressdnaviricota	Engineered;Bioreactor;Continuous culture	29
+Cressdnaviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	2
+Cressdnaviricota	Engineered;Built environment;City	1
+Cressdnaviricota	Engineered;Built environment;Spacecraft Assembly Cleanrooms	51
+Cressdnaviricota	Engineered;Built environment;Unclassified	1
+Cressdnaviricota	Engineered;Food production;Unclassified	3
+Cressdnaviricota	Engineered;Solid waste;Landfill	1
+Cressdnaviricota	Engineered;WWTP;Effluent	41
+Cressdnaviricota	Engineered;WWTP;Wastewater	8
+Cressdnaviricota	Engineered;Wastewater;Activated Sludge	2
+Cressdnaviricota	Engineered;Wastewater;Nutrient removal	1
+Cressdnaviricota	Engineered;Wastewater;Unclassified	39
+Cressdnaviricota	Environmental;Air;Outdoor Air	1
+Cressdnaviricota	Environmental;Aquatic;Aquaculture	21
+Cressdnaviricota	Environmental;Aquatic;Deep subsurface	15
+Cressdnaviricota	Environmental;Aquatic;Freshwater	7744
+Cressdnaviricota	Environmental;Aquatic;Marine	2192
+Cressdnaviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	35
+Cressdnaviricota	Environmental;Aquatic;Sediment	383
+Cressdnaviricota	Environmental;Aquatic;Thermal springs	4
+Cressdnaviricota	Environmental;Aquatic;Unclassified	2
+Cressdnaviricota	Environmental;Terrestrial;Deep subsurface	80
+Cressdnaviricota	Environmental;Terrestrial;Oil reservoir	1
+Cressdnaviricota	Environmental;Terrestrial;Plant litter	8
+Cressdnaviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	1
+Cressdnaviricota	Environmental;Terrestrial;Soil	91
+Cressdnaviricota	Host-associated;Algae;Microalgae	2
+Cressdnaviricota	Host-associated;Algae;Red algae	1
+Cressdnaviricota	Host-associated;Algae;Unclassified	7
+Cressdnaviricota	Host-associated;Annelida;Integument	1
+Cressdnaviricota	Host-associated;Arthropoda: Crustaceans;Unclassified	13
+Cressdnaviricota	Host-associated;Arthropoda: Insects;Digestive system	81
+Cressdnaviricota	Host-associated;Arthropoda: Insects;Unclassified	1
+Cressdnaviricota	Host-associated;Birds;Digestive system	18
+Cressdnaviricota	Host-associated;Birds;Unclassified	3
+Cressdnaviricota	Host-associated;Cephalochordata;Digestive system	1
+Cressdnaviricota	Host-associated;Fish;Integumentary system	2
+Cressdnaviricota	Host-associated;Fish;Unclassified	1
+Cressdnaviricota	Host-associated;Fungi;Mycelium	5
+Cressdnaviricota	Host-associated;Fungi;Unclassified	1
+Cressdnaviricota	Host-associated;Human;Circulatory system	1
+Cressdnaviricota	Host-associated;Human;Digestive system	19
+Cressdnaviricota	Host-associated;Human;Unclassified	5
+Cressdnaviricota	Host-associated;Invertebrates;Cnidaria	19
+Cressdnaviricota	Host-associated;Invertebrates;Echinodermata	1
+Cressdnaviricota	Host-associated;Invertebrates;Unclassified	129
+Cressdnaviricota	Host-associated;Mammals: Human;Digestive system	20
+Cressdnaviricota	Host-associated;Mammals: Human;Integumentary system	3
+Cressdnaviricota	Host-associated;Mammals: Human;Reproductive system	1
+Cressdnaviricota	Host-associated;Mammals: Human;Respiratory system	2
+Cressdnaviricota	Host-associated;Mammals: Human;Unclassified	17
+Cressdnaviricota	Host-associated;Mammals;Digestive system	101
+Cressdnaviricota	Host-associated;Mammals;Unclassified	48
+Cressdnaviricota	Host-associated;Microbial;Bacteria	536
+Cressdnaviricota	Host-associated;Mollusca;Respiratory system	1
+Cressdnaviricota	Host-associated;Mollusca;Shell	1
+Cressdnaviricota	Host-associated;Mollusca;Unclassified	3
+Cressdnaviricota	Host-associated;Plants;Peat moss	9
+Cressdnaviricota	Host-associated;Plants;Phyllosphere	39
+Cressdnaviricota	Host-associated;Plants;Roots	36
+Cressdnaviricota	Host-associated;Plants;Tissue	1
+Cressdnaviricota	Host-associated;Plants;Unclassified	241
+Cressdnaviricota	Host-associated;Porifera;Sponge	101
+Cressdnaviricota	Host-associated;Reptilia;Unclassified	2
+Cressdnaviricota	Host-associated;Tunicates;Unclassified	1
+Cressdnaviricota	Host-associated;Unclassified;Unclassified	17
+Dividoviricota	;;	9
+Dividoviricota	Engineered;Bioreactor;Anaerobic	1
+Dividoviricota	Engineered;Food production;Fermented seafood	2
+Dividoviricota	Engineered;Solid waste;Feedstock	2
+Dividoviricota	Engineered;Solid waste;Grass	3
+Dividoviricota	Environmental;Aquatic;Freshwater	1
+Dividoviricota	Environmental;Aquatic;Marine	1
+Dividoviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	10
+Dividoviricota	Environmental;Aquatic;Sediment	1
+Dividoviricota	Environmental;Aquatic;Thermal springs	36
+Dividoviricota	Environmental;Aquatic;Unclassified	1
+Dividoviricota	Environmental;Terrestrial;Deep subsurface	1
+Dividoviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	8
+Dividoviricota	Environmental;Terrestrial;Soil	1
+Dividoviricota	Environmental;Terrestrial;Unclassified	1
+Dividoviricota	Host-associated;Microbial;Unclassified	2
+Duplornaviricota	;;	743
+Duplornaviricota	Engineered;Artificial ecosystem;Soil microcosm	11
+Duplornaviricota	Engineered;Bioreactor;Anaerobic	84
+Duplornaviricota	Engineered;Bioreactor;Denitrification	11
+Duplornaviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	7
+Duplornaviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	10
+Duplornaviricota	Engineered;Lab enrichment;Defined media	8
+Duplornaviricota	Engineered;Modeled;Simulated communities (microbial mixture)	9
+Duplornaviricota	Engineered;Solid waste;Mixed feedstock	2
+Duplornaviricota	Engineered;Solid waste;Zoo waste	2
+Duplornaviricota	Engineered;WWTP;Aerobic digester	48
+Duplornaviricota	Engineered;WWTP;Effluent	125
+Duplornaviricota	Engineered;Wastewater;Activated Sludge	13
+Duplornaviricota	Environmental;Aquatic;Aquaculture	1
+Duplornaviricota	Environmental;Aquatic;Deep subsurface	8
+Duplornaviricota	Environmental;Aquatic;Freshwater	1081
+Duplornaviricota	Environmental;Aquatic;Marine	1279
+Duplornaviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	17
+Duplornaviricota	Environmental;Terrestrial;Plant litter	49
+Duplornaviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	1
+Duplornaviricota	Environmental;Terrestrial;Soil	1752
+Duplornaviricota	Environmental;Terrestrial;Unclassified	1
+Duplornaviricota	Host-associated;Algae;Diatoms	34
+Duplornaviricota	Host-associated;Arthropoda: Chelicerates;Whole body	21
+Duplornaviricota	Host-associated;Arthropoda: Insects;Unclassified	47
+Duplornaviricota	Host-associated;Arthropoda;Unclassified	1
+Duplornaviricota	Host-associated;Fish;Unclassified	43
+Duplornaviricota	Host-associated;Fungi;Unclassified	88
+Duplornaviricota	Host-associated;Human;Digestive system	49
+Duplornaviricota	Host-associated;Invertebrates;Cnidaria	15
+Duplornaviricota	Host-associated;Invertebrates;Unclassified	71
+Duplornaviricota	Host-associated;Mammals: Human;Unclassified	20
+Duplornaviricota	Host-associated;Mammals;Digestive system	103
+Duplornaviricota	Host-associated;Mammals;Unclassified	51
+Duplornaviricota	Host-associated;Microbial;Bacteria	6
+Duplornaviricota	Host-associated;Plants;Peat moss	5
+Duplornaviricota	Host-associated;Plants;Phyllosphere	3252
+Duplornaviricota	Host-associated;Plants;Roots	514
+Duplornaviricota	Host-associated;Plants;Unclassified	45
+Duplornaviricota	Host-associated;Protists;Unclassified	1
+Duplornaviricota	Host-associated;Protozoa;Unclassified	7
+Duplornaviricota	Host-associated;Unclassified;Unclassified	1
+Hofneiviricota	;;	3282
+Hofneiviricota	Engineered;Artificial ecosystem;Algal pond	1
+Hofneiviricota	Engineered;Artificial ecosystem;Mesocosm	5
+Hofneiviricota	Engineered;Artificial ecosystem;Plant growth chamber	6
+Hofneiviricota	Engineered;Artificial ecosystem;Sand microcosm	2
+Hofneiviricota	Engineered;Artificial ecosystem;Soil microcosm	9
+Hofneiviricota	Engineered;Bioreactor;Aerobic	40
+Hofneiviricota	Engineered;Bioreactor;Anaerobic	117
+Hofneiviricota	Engineered;Bioreactor;Continuous culture	20
+Hofneiviricota	Engineered;Bioreactor;Denitrification	10
+Hofneiviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	13
+Hofneiviricota	Engineered;Bioreactor;Membrane bioreactor	4
+Hofneiviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	44
+Hofneiviricota	Engineered;Bioreactor;Semi-continuous	8
+Hofneiviricota	Engineered;Bioreactor;Thiocyanate-remediating	67
+Hofneiviricota	Engineered;Bioreactor;Unclassified	1
+Hofneiviricota	Engineered;Bioremediation;Metal	1
+Hofneiviricota	Engineered;Bioremediation;Persistent organic pollutants (POP)	1
+Hofneiviricota	Engineered;Bioremediation;Terephthalate	9
+Hofneiviricota	Engineered;Bioremediation;Tetrachloroethylene and derivatives	2
+Hofneiviricota	Engineered;Bioremediation;Thiocyanate	22
+Hofneiviricota	Engineered;Biotransformation;Microbial enhanced oil recovery	3
+Hofneiviricota	Engineered;Biotransformation;Microbial solubilization of coal	11
+Hofneiviricota	Engineered;Biotransformation;Unclassified	2
+Hofneiviricota	Engineered;Built environment;Canal	11
+Hofneiviricota	Engineered;Built environment;City	893
+Hofneiviricota	Engineered;Built environment;Hospital	1
+Hofneiviricota	Engineered;Built environment;Oil refinery	3
+Hofneiviricota	Engineered;Built environment;Spacecraft Assembly Cleanrooms	14
+Hofneiviricota	Engineered;Built environment;Tailings pond	6
+Hofneiviricota	Engineered;Built environment;Unclassified	12
+Hofneiviricota	Engineered;Food production;Dairy products	1
+Hofneiviricota	Engineered;Food production;Meat products	1
+Hofneiviricota	Engineered;Food production;Seafood	1
+Hofneiviricota	Engineered;Food production;Unclassified	7
+Hofneiviricota	Engineered;Industrial production;Chemical products	5
+Hofneiviricota	Engineered;Industrial production;Engineered product	10
+Hofneiviricota	Engineered;Industrial production;Unclassified	1
+Hofneiviricota	Engineered;Lab enrichment;Defined media	17
+Hofneiviricota	Engineered;Lab enrichment;Unclassified	12
+Hofneiviricota	Engineered;Lab synthesis;Unclassified	8
+Hofneiviricota	Engineered;Modeled;Unclassified	4
+Hofneiviricota	Engineered;Solid waste;Animal waste	1
+Hofneiviricota	Engineered;Solid waste;Grass	18
+Hofneiviricota	Engineered;Solid waste;Landfill	16
+Hofneiviricota	Engineered;Solid waste;Mixed feedstock	12
+Hofneiviricota	Engineered;Unclassified;Unclassified	2
+Hofneiviricota	Engineered;WWTP;Activated sludge	4
+Hofneiviricota	Engineered;WWTP;Aerobic digester	26
+Hofneiviricota	Engineered;WWTP;Effluent	9
+Hofneiviricota	Engineered;WWTP;Influent	6
+Hofneiviricota	Engineered;WWTP;Wastewater	12
+Hofneiviricota	Engineered;Wastewater;Activated Sludge	66
+Hofneiviricota	Engineered;Wastewater;Industrial wastewater	88
+Hofneiviricota	Engineered;Wastewater;Nutrient removal	25
+Hofneiviricota	Engineered;Wastewater;Sewage	5
+Hofneiviricota	Engineered;Wastewater;Unclassified	31
+Hofneiviricota	Environmental;Air;Outdoor Air	8
+Hofneiviricota	Environmental;Aquatic;Aquaculture	2
+Hofneiviricota	Environmental;Aquatic;Deep subsurface	419
+Hofneiviricota	Environmental;Aquatic;Floodplain	7
+Hofneiviricota	Environmental;Aquatic;Freshwater	1351
+Hofneiviricota	Environmental;Aquatic;Marine	1193
+Hofneiviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	55
+Hofneiviricota	Environmental;Aquatic;Sediment	14
+Hofneiviricota	Environmental;Aquatic;Thermal springs	39
+Hofneiviricota	Environmental;Aquatic;Unclassified	43
+Hofneiviricota	Environmental;Terrestrial;Asphalt lakes	36
+Hofneiviricota	Environmental;Terrestrial;Cave	1
+Hofneiviricota	Environmental;Terrestrial;Deep subsurface	112
+Hofneiviricota	Environmental;Terrestrial;Floodplain	8
+Hofneiviricota	Environmental;Terrestrial;Geologic	2
+Hofneiviricota	Environmental;Terrestrial;Nest	87
+Hofneiviricota	Environmental;Terrestrial;Oil reservoir	26
+Hofneiviricota	Environmental;Terrestrial;Plant litter	16
+Hofneiviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	1
+Hofneiviricota	Environmental;Terrestrial;Soil	483
+Hofneiviricota	Environmental;Terrestrial;Unclassified	13
+Hofneiviricota	Environmental;Unclassified;Unclassified	16
+Hofneiviricota	Host-associated;Algae;Brown Algae	5
+Hofneiviricota	Host-associated;Algae;Green algae	12
+Hofneiviricota	Host-associated;Algae;Red algae	11
+Hofneiviricota	Host-associated;Annelida;Digestive system	9
+Hofneiviricota	Host-associated;Annelida;Integument	1
+Hofneiviricota	Host-associated;Annelida;Unclassified	1
+Hofneiviricota	Host-associated;Annelida;Whole body	1
+Hofneiviricota	Host-associated;Arthropoda: Crustaceans;Digestive system	1
+Hofneiviricota	Host-associated;Arthropoda: Crustaceans;Unclassified	4
+Hofneiviricota	Host-associated;Arthropoda: Insects;Circulatory system	1
+Hofneiviricota	Host-associated;Arthropoda: Insects;Digestive system	224
+Hofneiviricota	Host-associated;Arthropoda: Insects;Larva	15
+Hofneiviricota	Host-associated;Arthropoda: Insects;Unclassified	7
+Hofneiviricota	Host-associated;Arthropoda: Insects;Whole body	1
+Hofneiviricota	Host-associated;Arthropoda;Unclassified	4
+Hofneiviricota	Host-associated;Birds;Digestive system	6
+Hofneiviricota	Host-associated;Birds;Unclassified	4
+Hofneiviricota	Host-associated;Cephalochordata;Digestive system	4
+Hofneiviricota	Host-associated;Fish;Digestive system	8
+Hofneiviricota	Host-associated;Fish;Integumentary system	13
+Hofneiviricota	Host-associated;Fish;Unclassified	22
+Hofneiviricota	Host-associated;Fish;Urinary system	1
+Hofneiviricota	Host-associated;Fungi;Mycelium	48
+Hofneiviricota	Host-associated;Fungi;Unclassified	2
+Hofneiviricota	Host-associated;Human;Abdomen	1
+Hofneiviricota	Host-associated;Human;Circulatory system	34
+Hofneiviricota	Host-associated;Human;Digestive system	2000
+Hofneiviricota	Host-associated;Human;Nervous system	2
+Hofneiviricota	Host-associated;Human;Reproductive system	9
+Hofneiviricota	Host-associated;Human;Respiratory system	136
+Hofneiviricota	Host-associated;Human;Unclassified	848
+Hofneiviricota	Host-associated;Invertebrates;Cnidaria	10
+Hofneiviricota	Host-associated;Invertebrates;Echinodermata	1
+Hofneiviricota	Host-associated;Invertebrates;Nematoda	2
+Hofneiviricota	Host-associated;Invertebrates;Unclassified	1
+Hofneiviricota	Host-associated;Mammals: Human;Auditory/Hearing system	5
+Hofneiviricota	Host-associated;Mammals: Human;Circulatory system	35
+Hofneiviricota	Host-associated;Mammals: Human;Digestive system	291
+Hofneiviricota	Host-associated;Mammals: Human;Integumentary system	69
+Hofneiviricota	Host-associated;Mammals: Human;Lymphatic system	9
+Hofneiviricota	Host-associated;Mammals: Human;Nervous system	9
+Hofneiviricota	Host-associated;Mammals: Human;Reproductive system	2
+Hofneiviricota	Host-associated;Mammals: Human;Respiratory system	56
+Hofneiviricota	Host-associated;Mammals: Human;Skeletal system	2
+Hofneiviricota	Host-associated;Mammals: Human;Unclassified	37
+Hofneiviricota	Host-associated;Mammals: Human;Urinary system	15
+Hofneiviricota	Host-associated;Mammals: Human;Visual system	5
+Hofneiviricota	Host-associated;Mammals;Digestive system	103
+Hofneiviricota	Host-associated;Mammals;Integumentary system	2
+Hofneiviricota	Host-associated;Mammals;Multiple systems	2
+Hofneiviricota	Host-associated;Mammals;Respiratory system	5
+Hofneiviricota	Host-associated;Mammals;Unclassified	42
+Hofneiviricota	Host-associated;Mammals;Unspecified system	13
+Hofneiviricota	Host-associated;Microbial;Bacteria	13
+Hofneiviricota	Host-associated;Mollusca;Digestive system	6
+Hofneiviricota	Host-associated;Mollusca;Shell	1
+Hofneiviricota	Host-associated;Mollusca;Unclassified	10
+Hofneiviricota	Host-associated;Plankton;Zooplankton	1
+Hofneiviricota	Host-associated;Plants;Peat moss	4
+Hofneiviricota	Host-associated;Plants;Phyllosphere	129
+Hofneiviricota	Host-associated;Plants;Roots	434
+Hofneiviricota	Host-associated;Plants;Tissue	3
+Hofneiviricota	Host-associated;Plants;Unclassified	273
+Hofneiviricota	Host-associated;Porifera;Sponge	3
+Hofneiviricota	Host-associated;Porifera;Unclassified	1
+Hofneiviricota	Host-associated;Reptilia;Unclassified	1
+Hofneiviricota	Host-associated;Unclassified;Unclassified	228
+Kitrinoviricota	;;	621
+Kitrinoviricota	Engineered;Artificial ecosystem;Plant growth chamber	59
+Kitrinoviricota	Engineered;Artificial ecosystem;Soil microcosm	22
+Kitrinoviricota	Engineered;Bioreactor;Anaerobic	4253
+Kitrinoviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	2
+Kitrinoviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	10
+Kitrinoviricota	Engineered;Food production;Fermented vegetables	109
+Kitrinoviricota	Engineered;Solid waste;Zoo waste	1
+Kitrinoviricota	Engineered;WWTP;Activated sludge	8
+Kitrinoviricota	Engineered;WWTP;Aerobic digester	310
+Kitrinoviricota	Engineered;WWTP;Effluent	1043
+Kitrinoviricota	Engineered;WWTP;Wastewater	13
+Kitrinoviricota	Engineered;Wastewater;Activated Sludge	437
+Kitrinoviricota	Environmental;Aquatic;Aquaculture	3
+Kitrinoviricota	Environmental;Aquatic;Deep subsurface	65
+Kitrinoviricota	Environmental;Aquatic;Freshwater	21967
+Kitrinoviricota	Environmental;Aquatic;Marine	16813
+Kitrinoviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	1634
+Kitrinoviricota	Environmental;Aquatic;Thermal springs	2
+Kitrinoviricota	Environmental;Terrestrial;Deep subsurface	1
+Kitrinoviricota	Environmental;Terrestrial;Plant litter	2627
+Kitrinoviricota	Environmental;Terrestrial;Soil	22492
+Kitrinoviricota	Host-associated;Amphibia;Digestive system	1
+Kitrinoviricota	Host-associated;Arthropoda: Chelicerates;Unclassified	2
+Kitrinoviricota	Host-associated;Arthropoda: Chelicerates;Whole body	5
+Kitrinoviricota	Host-associated;Arthropoda: Insects;Digestive system	2
+Kitrinoviricota	Host-associated;Arthropoda: Insects;Unclassified	15
+Kitrinoviricota	Host-associated;Arthropoda;	1
+Kitrinoviricota	Host-associated;Arthropoda;Unclassified	1
+Kitrinoviricota	Host-associated;Fish;Unclassified	4
+Kitrinoviricota	Host-associated;Fungi;Unclassified	20
+Kitrinoviricota	Host-associated;Human;	1
+Kitrinoviricota	Host-associated;Human;Unclassified	2
+Kitrinoviricota	Host-associated;Invertebrates;Cnidaria	185
+Kitrinoviricota	Host-associated;Invertebrates;Nematoda	4
+Kitrinoviricota	Host-associated;Invertebrates;Unclassified	35
+Kitrinoviricota	Host-associated;Mammals: Human;Unclassified	7
+Kitrinoviricota	Host-associated;Mammals;Digestive system	816
+Kitrinoviricota	Host-associated;Mammals;Unclassified	23
+Kitrinoviricota	Host-associated;Microbial;Bacteria	3
+Kitrinoviricota	Host-associated;Plants;	1
+Kitrinoviricota	Host-associated;Plants;Peat moss	110
+Kitrinoviricota	Host-associated;Plants;Phyllosphere	1056
+Kitrinoviricota	Host-associated;Plants;Roots	4677
+Kitrinoviricota	Host-associated;Plants;Unclassified	196
+Kitrinoviricota	Host-associated;Porifera;Unclassified	7
+Kitrinoviricota	Host-associated;Unclassified;Unclassified	18
+Lenarviricota	;;	38
+Lenarviricota	Engineered;Artificial ecosystem;Plant growth chamber	2
+Lenarviricota	Engineered;Artificial ecosystem;Soil microcosm	225
+Lenarviricota	Engineered;Bioreactor;Anaerobic	6806
+Lenarviricota	Engineered;Bioreactor;Denitrification	70
+Lenarviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	18
+Lenarviricota	Engineered;Lab enrichment;Defined media	14
+Lenarviricota	Engineered;Solid waste;Zoo waste	11
+Lenarviricota	Engineered;WWTP;Aerobic digester	856
+Lenarviricota	Engineered;WWTP;Effluent	1507
+Lenarviricota	Engineered;Wastewater;Activated Sludge	464
+Lenarviricota	Environmental;Aquatic;Deep subsurface	341
+Lenarviricota	Environmental;Aquatic;Freshwater	15734
+Lenarviricota	Environmental;Aquatic;Marine	19640
+Lenarviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	372
+Lenarviricota	Environmental;Aquatic;Thermal springs	42
+Lenarviricota	Environmental;Terrestrial;Plant litter	8101
+Lenarviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	1
+Lenarviricota	Environmental;Terrestrial;Soil	71039
+Lenarviricota	Host-associated;Arthropoda: Insects;Digestive system	6
+Lenarviricota	Host-associated;Fungi;Unclassified	40
+Lenarviricota	Host-associated;Invertebrates;Cnidaria	97
+Lenarviricota	Host-associated;Invertebrates;Unclassified	6
+Lenarviricota	Host-associated;Mammals;Digestive system	636
+Lenarviricota	Host-associated;Microbial;Bacteria	4
+Lenarviricota	Host-associated;Plants;Peat moss	40
+Lenarviricota	Host-associated;Plants;Phyllosphere	1651
+Lenarviricota	Host-associated;Plants;Roots	12711
+Lenarviricota	Host-associated;Plants;Unclassified	2
+Lenarviricota	Host-associated;Porifera;Unclassified	1
+Lenarviricota	Host-associated;Protists;Oomycetes	1
+Lenarviricota	Host-associated;Protozoa;Unclassified	1
+Negarnaviricota	;;	686
+Negarnaviricota	Engineered;Artificial ecosystem;Soil microcosm	17
+Negarnaviricota	Engineered;Bioreactor;Anaerobic	325
+Negarnaviricota	Engineered;Bioreactor;Denitrification	8
+Negarnaviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	16
+Negarnaviricota	Engineered;Solid waste;Mixed feedstock	7
+Negarnaviricota	Engineered;Solid waste;Zoo waste	1
+Negarnaviricota	Engineered;WWTP;Aerobic digester	32
+Negarnaviricota	Engineered;WWTP;Effluent	395
+Negarnaviricota	Engineered;Wastewater;Activated Sludge	2
+Negarnaviricota	Environmental;Aquatic;Freshwater	1369
+Negarnaviricota	Environmental;Aquatic;Marine	647
+Negarnaviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	14
+Negarnaviricota	Environmental;Terrestrial;Plant litter	365
+Negarnaviricota	Environmental;Terrestrial;Soil	2246
+Negarnaviricota	Host-associated;Algae;Green algae	1
+Negarnaviricota	Host-associated;Arthropoda: Chelicerates;Unclassified	4
+Negarnaviricota	Host-associated;Arthropoda: Chelicerates;Whole body	43
+Negarnaviricota	Host-associated;Arthropoda: Crustaceans;Unclassified	22
+Negarnaviricota	Host-associated;Arthropoda: Crustaceans;Whole body	1
+Negarnaviricota	Host-associated;Arthropoda: Insects;Digestive system	13
+Negarnaviricota	Host-associated;Arthropoda: Insects;Unclassified	82
+Negarnaviricota	Host-associated;Arthropoda;	2
+Negarnaviricota	Host-associated;Arthropoda;Unclassified	45
+Negarnaviricota	Host-associated;Birds;	1
+Negarnaviricota	Host-associated;Birds;Unclassified	45
+Negarnaviricota	Host-associated;Fish;Unclassified	20
+Negarnaviricota	Host-associated;Fungi;Unclassified	4
+Negarnaviricota	Host-associated;Human;	8
+Negarnaviricota	Host-associated;Human;Unclassified	66
+Negarnaviricota	Host-associated;Invertebrates;Cnidaria	17
+Negarnaviricota	Host-associated;Invertebrates;Echinodermata	2
+Negarnaviricota	Host-associated;Invertebrates;Nematoda	8
+Negarnaviricota	Host-associated;Invertebrates;Platyhelminthes	2
+Negarnaviricota	Host-associated;Invertebrates;Unclassified	221
+Negarnaviricota	Host-associated;Mammals: Human;Unclassified	32
+Negarnaviricota	Host-associated;Mammals;	3
+Negarnaviricota	Host-associated;Mammals;Digestive system	68
+Negarnaviricota	Host-associated;Mammals;Nervous system	1
+Negarnaviricota	Host-associated;Mammals;Unclassified	99
+Negarnaviricota	Host-associated;Mollusca;Unclassified	2
+Negarnaviricota	Host-associated;Plants;	1
+Negarnaviricota	Host-associated;Plants;Peat moss	16
+Negarnaviricota	Host-associated;Plants;Phyllosphere	372
+Negarnaviricota	Host-associated;Plants;Roots	511
+Negarnaviricota	Host-associated;Plants;Unclassified	106
+Negarnaviricota	Host-associated;Reptilia;Circulatory system	1
+Negarnaviricota	Host-associated;Reptilia;Digestive system	8
+Negarnaviricota	Host-associated;Reptilia;Nervous system	2
+Negarnaviricota	Host-associated;Reptilia;Respiratory system	1
+Negarnaviricota	Host-associated;Reptilia;Unclassified	8
+Negarnaviricota	Host-associated;Reptilia;Urinary system	5
+Negarnaviricota	Host-associated;Unclassified;Unclassified	90
+Nucleocytoviricota	;;	89
+Nucleocytoviricota	Engineered;Artificial ecosystem;Plant growth chamber	12
+Nucleocytoviricota	Engineered;Artificial ecosystem;Sand microcosm	83
+Nucleocytoviricota	Engineered;Artificial ecosystem;Soil microcosm	12
+Nucleocytoviricota	Engineered;Bioreactor;Anaerobic	42
+Nucleocytoviricota	Engineered;Bioreactor;Denitrification	5
+Nucleocytoviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	2
+Nucleocytoviricota	Engineered;Bioreactor;Thiocyanate-remediating	35
+Nucleocytoviricota	Engineered;Bioremediation;Thiocyanate	15
+Nucleocytoviricota	Engineered;Built environment;Canal	6
+Nucleocytoviricota	Engineered;Built environment;Oil refinery	1
+Nucleocytoviricota	Engineered;Built environment;Spacecraft Assembly Cleanrooms	1
+Nucleocytoviricota	Engineered;Lab enrichment;Unclassified	3
+Nucleocytoviricota	Engineered;Solid waste;Grass	4
+Nucleocytoviricota	Engineered;Solid waste;Landfill	35
+Nucleocytoviricota	Engineered;Solid waste;Mixed feedstock	2
+Nucleocytoviricota	Engineered;WWTP;Activated sludge	6
+Nucleocytoviricota	Engineered;WWTP;Aerobic digester	10
+Nucleocytoviricota	Engineered;WWTP;Effluent	13
+Nucleocytoviricota	Engineered;WWTP;Influent	3
+Nucleocytoviricota	Engineered;WWTP;Wastewater	7
+Nucleocytoviricota	Engineered;Wastewater;Activated Sludge	11
+Nucleocytoviricota	Engineered;Wastewater;Industrial wastewater	42
+Nucleocytoviricota	Engineered;Wastewater;Nutrient removal	7
+Nucleocytoviricota	Engineered;Wastewater;Sewage	2
+Nucleocytoviricota	Environmental;Aquatic;Deep subsurface	527
+Nucleocytoviricota	Environmental;Aquatic;Floodplain	9
+Nucleocytoviricota	Environmental;Aquatic;Freshwater	47363
+Nucleocytoviricota	Environmental;Aquatic;Marine	47028
+Nucleocytoviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	7204
+Nucleocytoviricota	Environmental;Aquatic;Sediment	101
+Nucleocytoviricota	Environmental;Aquatic;Thermal springs	70
+Nucleocytoviricota	Environmental;Aquatic;Unclassified	128
+Nucleocytoviricota	Environmental;Terrestrial;Deep subsurface	315
+Nucleocytoviricota	Environmental;Terrestrial;Floodplain	1
+Nucleocytoviricota	Environmental;Terrestrial;Plant litter	13
+Nucleocytoviricota	Environmental;Terrestrial;Soil	625
+Nucleocytoviricota	Host-associated;Algae;Green algae	129
+Nucleocytoviricota	Host-associated;Algae;Red algae	5
+Nucleocytoviricota	Host-associated;Algae;Unclassified	9
+Nucleocytoviricota	Host-associated;Amphibia;Unclassified	1
+Nucleocytoviricota	Host-associated;Arthropoda: Insects;Digestive system	11
+Nucleocytoviricota	Host-associated;Birds;Digestive system	3
+Nucleocytoviricota	Host-associated;Birds;Unclassified	5
+Nucleocytoviricota	Host-associated;Cephalochordata;Digestive system	7
+Nucleocytoviricota	Host-associated;Fish;Integumentary system	11
+Nucleocytoviricota	Host-associated;Fish;Unclassified	4
+Nucleocytoviricota	Host-associated;Human;Digestive system	12
+Nucleocytoviricota	Host-associated;Invertebrates;Cnidaria	1
+Nucleocytoviricota	Host-associated;Invertebrates;Unclassified	9
+Nucleocytoviricota	Host-associated;Mammals: Human;Digestive system	5
+Nucleocytoviricota	Host-associated;Mammals;Digestive system	16
+Nucleocytoviricota	Host-associated;Mammals;Unclassified	10
+Nucleocytoviricota	Host-associated;Microbial;Bacteria	5
+Nucleocytoviricota	Host-associated;Plants;Peat moss	30
+Nucleocytoviricota	Host-associated;Plants;Phyllosphere	33
+Nucleocytoviricota	Host-associated;Plants;Roots	66
+Nucleocytoviricota	Host-associated;Porifera;Sponge	4
+Nucleocytoviricota	Host-associated;Protists;Unclassified	1
+Nucleocytoviricota	Host-associated;Protozoa;Unclassified	5
+Nucleocytoviricota	Host-associated;Unclassified;Unclassified	6
+Peploviricota	;;	92
+Peploviricota	Engineered;Artificial ecosystem;Plant growth chamber	1
+Peploviricota	Engineered;Wastewater;Industrial wastewater	4
+Peploviricota	Environmental;Aquatic;Freshwater	7
+Peploviricota	Environmental;Aquatic;Marine	70
+Peploviricota	Environmental;Aquatic;Thermal springs	1
+Peploviricota	Environmental;Terrestrial;Soil	1
+Peploviricota	Host-associated;Amphibia;Unclassified	1
+Peploviricota	Host-associated;Annelida;Digestive system	4
+Peploviricota	Host-associated;Arthropoda: Insects;Digestive system	1
+Peploviricota	Host-associated;Fish;Unclassified	2
+Peploviricota	Host-associated;Human;Digestive system	5
+Peploviricota	Host-associated;Mammals: Human;Digestive system	5
+Peploviricota	Host-associated;Mammals;	2
+Peploviricota	Host-associated;Mammals;Nervous system	3
+Peploviricota	Host-associated;Mammals;Unclassified	22
+Peploviricota	Host-associated;Unclassified;Unclassified	8
+Phixviricota	;;	346
+Phixviricota	Engineered;Artificial ecosystem;Plant growth chamber	1
+Phixviricota	Engineered;Bioreactor;Aerobic	12
+Phixviricota	Engineered;Bioreactor;Anaerobic	88
+Phixviricota	Engineered;Bioreactor;Continuous culture	95
+Phixviricota	Engineered;Bioreactor;DHS reactor	1
+Phixviricota	Engineered;Bioreactor;Denitrification	1
+Phixviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	5
+Phixviricota	Engineered;Bioreactor;Microbial fuel cells/MFC	1
+Phixviricota	Engineered;Bioreactor;Thiocyanate-remediating	1
+Phixviricota	Engineered;Bioremediation;Hydrocarbon	6
+Phixviricota	Engineered;Bioremediation;Terephthalate	2
+Phixviricota	Engineered;Biotransformation;Microbial enhanced oil recovery	1
+Phixviricota	Engineered;Built environment;Canal	2
+Phixviricota	Engineered;Built environment;City	1
+Phixviricota	Engineered;Built environment;Spacecraft Assembly Cleanrooms	5
+Phixviricota	Engineered;Built environment;Tailings pond	3
+Phixviricota	Engineered;Built environment;Unclassified	5
+Phixviricota	Engineered;Food production;Dairy products	2
+Phixviricota	Engineered;Food production;Fermented beverages	1
+Phixviricota	Engineered;Food production;Unclassified	11
+Phixviricota	Engineered;Industrial production;Chemical products	2
+Phixviricota	Engineered;Industrial production;Engineered product	5
+Phixviricota	Engineered;Lab enrichment;Defined media	6
+Phixviricota	Engineered;Lab enrichment;Unclassified	2
+Phixviricota	Engineered;Lab synthesis;Unclassified	2
+Phixviricota	Engineered;Modeled;Simulated communities (DNA mixture)	1
+Phixviricota	Engineered;Modeled;Simulated communities (microbial mixture)	2
+Phixviricota	Engineered;Solid waste;Landfill	4
+Phixviricota	Engineered;Solid waste;Mixed feedstock	3
+Phixviricota	Engineered;Unclassified;Unclassified	1
+Phixviricota	Engineered;WWTP;Activated sludge	25
+Phixviricota	Engineered;WWTP;Aerobic digester	6
+Phixviricota	Engineered;WWTP;Effluent	16
+Phixviricota	Engineered;WWTP;Wastewater	79
+Phixviricota	Engineered;Wastewater;Activated Sludge	16
+Phixviricota	Engineered;Wastewater;Digestate	1
+Phixviricota	Engineered;Wastewater;Industrial wastewater	17
+Phixviricota	Engineered;Wastewater;Nutrient removal	13
+Phixviricota	Engineered;Wastewater;Sewage	2
+Phixviricota	Engineered;Wastewater;Unclassified	4
+Phixviricota	Environmental;Air;Outdoor Air	3
+Phixviricota	Environmental;Aquatic;Aquaculture	181
+Phixviricota	Environmental;Aquatic;Deep subsurface	41
+Phixviricota	Environmental;Aquatic;Floodplain	12
+Phixviricota	Environmental;Aquatic;Freshwater	7296
+Phixviricota	Environmental;Aquatic;Marine	4733
+Phixviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	23
+Phixviricota	Environmental;Aquatic;Sediment	196
+Phixviricota	Environmental;Aquatic;Thermal springs	36
+Phixviricota	Environmental;Aquatic;Unclassified	11
+Phixviricota	Environmental;Terrestrial;Deep subsurface	58
+Phixviricota	Environmental;Terrestrial;Geologic	4
+Phixviricota	Environmental;Terrestrial;Oil reservoir	6
+Phixviricota	Environmental;Terrestrial;Plant litter	10
+Phixviricota	Environmental;Terrestrial;Rock-dwelling (endoliths)	6
+Phixviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	4
+Phixviricota	Environmental;Terrestrial;Soil	201
+Phixviricota	Environmental;Terrestrial;Unclassified	1
+Phixviricota	Environmental;Unclassified;Unclassified	1
+Phixviricota	Host-associated;Algae;Brown Algae	2
+Phixviricota	Host-associated;Algae;Green algae	1
+Phixviricota	Host-associated;Algae;Microalgae	7
+Phixviricota	Host-associated;Algae;Red algae	1
+Phixviricota	Host-associated;Arthropoda: Insects;Circulatory system	2
+Phixviricota	Host-associated;Arthropoda: Insects;Digestive system	344
+Phixviricota	Host-associated;Arthropoda: Insects;Larva	3
+Phixviricota	Host-associated;Arthropoda: Insects;Whole body	25
+Phixviricota	Host-associated;Birds;Digestive system	10
+Phixviricota	Host-associated;Cephalochordata;Digestive system	5
+Phixviricota	Host-associated;Fish;Digestive system	3
+Phixviricota	Host-associated;Fish;Integumentary system	13
+Phixviricota	Host-associated;Fish;Unclassified	2
+Phixviricota	Host-associated;Fungi;Mycelium	2
+Phixviricota	Host-associated;Human;Circulatory system	7
+Phixviricota	Host-associated;Human;Digestive system	1136
+Phixviricota	Host-associated;Human;Lymphatic system	1
+Phixviricota	Host-associated;Human;Reproductive system	1
+Phixviricota	Host-associated;Human;Respiratory system	8
+Phixviricota	Host-associated;Human;Unclassified	367
+Phixviricota	Host-associated;Invertebrates;Bryozoans	2
+Phixviricota	Host-associated;Invertebrates;Cnidaria	41
+Phixviricota	Host-associated;Invertebrates;Ctenophora	1
+Phixviricota	Host-associated;Invertebrates;Nematoda	1
+Phixviricota	Host-associated;Mammals: Human;Circulatory system	7
+Phixviricota	Host-associated;Mammals: Human;Digestive system	2516
+Phixviricota	Host-associated;Mammals: Human;Lymphatic system	7
+Phixviricota	Host-associated;Mammals: Human;Respiratory system	20
+Phixviricota	Host-associated;Mammals: Human;Unclassified	1
+Phixviricota	Host-associated;Mammals: Human;Urinary system	6
+Phixviricota	Host-associated;Mammals;Digestive system	484
+Phixviricota	Host-associated;Mammals;Integumentary system	2
+Phixviricota	Host-associated;Mammals;Unclassified	50
+Phixviricota	Host-associated;Microbial;Bacteria	181
+Phixviricota	Host-associated;Mollusca;Digestive system	1
+Phixviricota	Host-associated;Mollusca;Respiratory system	23
+Phixviricota	Host-associated;Mollusca;Shell	1
+Phixviricota	Host-associated;Plants;Peat moss	3
+Phixviricota	Host-associated;Plants;Phyllosphere	16
+Phixviricota	Host-associated;Plants;Roots	100
+Phixviricota	Host-associated;Plants;Unclassified	16
+Phixviricota	Host-associated;Porifera;Sponge	7
+Phixviricota	Host-associated;Porifera;Unclassified	5
+Phixviricota	Host-associated;Tunicates;Ascidians	1
+Phixviricota	Host-associated;Unclassified;Unclassified	11
+Pisuviricota	;;	677
+Pisuviricota	Engineered;Artificial ecosystem;Plant growth chamber	543
+Pisuviricota	Engineered;Artificial ecosystem;Soil microcosm	118
+Pisuviricota	Engineered;Bioreactor;Anaerobic	6271
+Pisuviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	8
+Pisuviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	12
+Pisuviricota	Engineered;Bioreactor;Unclassified	4
+Pisuviricota	Engineered;Food production;Fermented vegetables	56
+Pisuviricota	Engineered;Solid waste;Mixed feedstock	2
+Pisuviricota	Engineered;Solid waste;Zoo waste	5
+Pisuviricota	Engineered;WWTP;Aerobic digester	181
+Pisuviricota	Engineered;WWTP;Effluent	851
+Pisuviricota	Engineered;WWTP;Wastewater	1
+Pisuviricota	Engineered;Wastewater;Activated Sludge	503
+Pisuviricota	Environmental;Aquatic;Aquaculture	55
+Pisuviricota	Environmental;Aquatic;Deep subsurface	128
+Pisuviricota	Environmental;Aquatic;Freshwater	26502
+Pisuviricota	Environmental;Aquatic;Marine	45596
+Pisuviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	571
+Pisuviricota	Environmental;Aquatic;Thermal springs	304
+Pisuviricota	Environmental;Aquatic;Unclassified	1
+Pisuviricota	Environmental;Terrestrial;Plant litter	2334
+Pisuviricota	Environmental;Terrestrial;Soil	29865
+Pisuviricota	Host-associated;;	1
+Pisuviricota	Host-associated;Algae;Unclassified	6
+Pisuviricota	Host-associated;Amoebozoa;Pessonella	2
+Pisuviricota	Host-associated;Amphibia;Unclassified	1
+Pisuviricota	Host-associated;Annelida;Unclassified	1
+Pisuviricota	Host-associated;Arthropoda: Chelicerates;Unclassified	1
+Pisuviricota	Host-associated;Arthropoda: Crustaceans;Unclassified	2
+Pisuviricota	Host-associated;Arthropoda: Insects;Digestive system	9
+Pisuviricota	Host-associated;Arthropoda: Insects;Unclassified	19
+Pisuviricota	Host-associated;Arthropoda;Unclassified	3
+Pisuviricota	Host-associated;Birds;Digestive system	6
+Pisuviricota	Host-associated;Birds;Unclassified	22
+Pisuviricota	Host-associated;Fish;Unclassified	5
+Pisuviricota	Host-associated;Fungi;Unclassified	76
+Pisuviricota	Host-associated;Human;Digestive system	3
+Pisuviricota	Host-associated;Human;Unclassified	6
+Pisuviricota	Host-associated;Invertebrates;Cnidaria	127
+Pisuviricota	Host-associated;Invertebrates;Nematoda	1
+Pisuviricota	Host-associated;Invertebrates;Unclassified	51
+Pisuviricota	Host-associated;Mammals: Human;Digestive system	4
+Pisuviricota	Host-associated;Mammals: Human;Unclassified	16
+Pisuviricota	Host-associated;Mammals;	2
+Pisuviricota	Host-associated;Mammals;Digestive system	1233
+Pisuviricota	Host-associated;Mammals;Multiple systems	1
+Pisuviricota	Host-associated;Mammals;Unclassified	76
+Pisuviricota	Host-associated;Microbial;Dinoflagellates	1
+Pisuviricota	Host-associated;Mollusca;Unclassified	2
+Pisuviricota	Host-associated;Plants;Peat moss	129
+Pisuviricota	Host-associated;Plants;Phyllosphere	976
+Pisuviricota	Host-associated;Plants;Roots	7209
+Pisuviricota	Host-associated;Plants;Unclassified	186
+Pisuviricota	Host-associated;Porifera;Unclassified	4
+Pisuviricota	Host-associated;Protozoa;Unclassified	2
+Pisuviricota	Host-associated;Reptilia;Unclassified	7
+Pisuviricota	Host-associated;Tunicates;Unclassified	1
+Pisuviricota	Host-associated;Unclassified;Unclassified	54
+Preplasmiviricota	;;	140
+Preplasmiviricota	Engineered;Artificial ecosystem;Plant growth chamber	6
+Preplasmiviricota	Engineered;Artificial ecosystem;Sand microcosm	10
+Preplasmiviricota	Engineered;Artificial ecosystem;Soil microcosm	1
+Preplasmiviricota	Engineered;Bioreactor;Anaerobic	4
+Preplasmiviricota	Engineered;Bioreactor;Continuous culture	2
+Preplasmiviricota	Engineered;Bioreactor;Denitrification	2
+Preplasmiviricota	Engineered;Bioreactor;Membrane bioreactor	1
+Preplasmiviricota	Engineered;Bioreactor;Thiocyanate-remediating	7
+Preplasmiviricota	Engineered;Bioremediation;Thiocyanate	3
+Preplasmiviricota	Engineered;Built environment;City	2
+Preplasmiviricota	Engineered;Food production;Dairy products	1
+Preplasmiviricota	Engineered;Food production;Unclassified	2
+Preplasmiviricota	Engineered;Industrial production;Chemical products	3
+Preplasmiviricota	Engineered;Lab enrichment;Defined media	1
+Preplasmiviricota	Engineered;Lab enrichment;Unclassified	1
+Preplasmiviricota	Engineered;Solid waste;Agricultural waste	1
+Preplasmiviricota	Engineered;Solid waste;Grass	3
+Preplasmiviricota	Engineered;Solid waste;Landfill	7
+Preplasmiviricota	Engineered;Solid waste;Mixed feedstock	1
+Preplasmiviricota	Engineered;WWTP;Activated sludge	1
+Preplasmiviricota	Engineered;WWTP;Effluent	4
+Preplasmiviricota	Engineered;WWTP;Influent	1
+Preplasmiviricota	Engineered;WWTP;Wastewater	9
+Preplasmiviricota	Engineered;Wastewater;Activated Sludge	17
+Preplasmiviricota	Engineered;Wastewater;Industrial wastewater	10
+Preplasmiviricota	Engineered;Wastewater;Sewage	1
+Preplasmiviricota	Engineered;Wastewater;Unclassified	2
+Preplasmiviricota	Environmental;Aquatic;Aquaculture	1
+Preplasmiviricota	Environmental;Aquatic;Deep subsurface	46
+Preplasmiviricota	Environmental;Aquatic;Floodplain	8
+Preplasmiviricota	Environmental;Aquatic;Freshwater	6154
+Preplasmiviricota	Environmental;Aquatic;Marine	1486
+Preplasmiviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	527
+Preplasmiviricota	Environmental;Aquatic;Sediment	18
+Preplasmiviricota	Environmental;Aquatic;Thermal springs	37
+Preplasmiviricota	Environmental;Aquatic;Unclassified	8
+Preplasmiviricota	Environmental;Terrestrial;Cave	1
+Preplasmiviricota	Environmental;Terrestrial;Deep subsurface	29
+Preplasmiviricota	Environmental;Terrestrial;Floodplain	1
+Preplasmiviricota	Environmental;Terrestrial;Geologic	4
+Preplasmiviricota	Environmental;Terrestrial;Nest	1
+Preplasmiviricota	Environmental;Terrestrial;Plant litter	6
+Preplasmiviricota	Environmental;Terrestrial;Soil	581
+Preplasmiviricota	Host-associated;;	1
+Preplasmiviricota	Host-associated;Algae;Green algae	1
+Preplasmiviricota	Host-associated;Algae;Microalgae	1
+Preplasmiviricota	Host-associated;Annelida;Digestive system	2
+Preplasmiviricota	Host-associated;Arthropoda: Insects;Digestive system	10
+Preplasmiviricota	Host-associated;Arthropoda: Insects;Larva	1
+Preplasmiviricota	Host-associated;Birds;Unclassified	4
+Preplasmiviricota	Host-associated;Cephalochordata;Digestive system	2
+Preplasmiviricota	Host-associated;Fish;Unclassified	2
+Preplasmiviricota	Host-associated;Human;Unclassified	2
+Preplasmiviricota	Host-associated;Mammals: Human;Digestive system	37
+Preplasmiviricota	Host-associated;Mammals;Digestive system	25
+Preplasmiviricota	Host-associated;Mammals;Unclassified	18
+Preplasmiviricota	Host-associated;Microbial;Bacteria	5
+Preplasmiviricota	Host-associated;Mollusca;Unclassified	3
+Preplasmiviricota	Host-associated;Plants;Peat moss	29
+Preplasmiviricota	Host-associated;Plants;Phyllosphere	4
+Preplasmiviricota	Host-associated;Plants;Roots	131
+Preplasmiviricota	Host-associated;Plants;Unclassified	1
+Preplasmiviricota	Host-associated;Porifera;Sponge	2
+Preplasmiviricota	Host-associated;Reptilia;Unclassified	1
+Preplasmiviricota	Host-associated;Tunicates;Ascidians	1
+Preplasmiviricota	Host-associated;Unclassified;Unclassified	9
+Saleviricota	;;	10
+Saleviricota	Environmental;Aquatic;Marine	1
+Saleviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	11
+Saleviricota	Host-associated;Microbial;Unclassified	5
+Taleaviricota	;;	12
+Taleaviricota	Environmental;Aquatic;Deep subsurface	4
+Taleaviricota	Environmental;Aquatic;Freshwater	1
+Taleaviricota	Environmental;Aquatic;Marine	38
+Taleaviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	21
+Taleaviricota	Environmental;Aquatic;Thermal springs	151
+Taleaviricota	Environmental;Terrestrial;Soil	2
+Taleaviricota	Host-associated;Microbial;Bacteria	1
+Taleaviricota	Host-associated;Microbial;Unclassified	15
+Unassigned	;;	569
+Unassigned	Engineered;Artificial ecosystem;Plant growth chamber	57
+Unassigned	Engineered;Artificial ecosystem;Sand microcosm	1
+Unassigned	Engineered;Artificial ecosystem;Soil microcosm	36
+Unassigned	Engineered;Bioreactor;Aerobic	1
+Unassigned	Engineered;Bioreactor;Anaerobic	1524
+Unassigned	Engineered;Bioreactor;Continuous culture	2
+Unassigned	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	16
+Unassigned	Engineered;Bioreactor;Membrane bioreactor	1
+Unassigned	Engineered;Bioreactor;Microbial fuel cells/MFC	6
+Unassigned	Engineered;Bioreactor;SSF (Solid state fermentation)	6
+Unassigned	Engineered;Bioreactor;Semi-continuous	5
+Unassigned	Engineered;Bioreactor;Thiocyanate-remediating	12
+Unassigned	Engineered;Bioreactor;Unclassified	1
+Unassigned	Engineered;Bioremediation;Thiocyanate	1
+Unassigned	Engineered;Built environment;Canal	2
+Unassigned	Engineered;Built environment;City	9
+Unassigned	Engineered;Built environment;Oil refinery	1
+Unassigned	Engineered;Built environment;Solar panel	1
+Unassigned	Engineered;Built environment;Tailings pond	3
+Unassigned	Engineered;Built environment;Unclassified	1
+Unassigned	Engineered;Food production;Fermented vegetables	3
+Unassigned	Engineered;Food production;Unclassified	1
+Unassigned	Engineered;Industrial production;Chemical products	2
+Unassigned	Engineered;Lab enrichment;Defined media	7
+Unassigned	Engineered;Lab synthesis;Unclassified	1
+Unassigned	Engineered;Modeled;Unclassified	1
+Unassigned	Engineered;Solid waste;Bio- and green waste (BGW)	1
+Unassigned	Engineered;Solid waste;Feedstock	2
+Unassigned	Engineered;Solid waste;Grass	2
+Unassigned	Engineered;Solid waste;Landfill	146
+Unassigned	Engineered;Solid waste;Mixed feedstock	7
+Unassigned	Engineered;Solid waste;Zoo waste	2
+Unassigned	Engineered;Unclassified;Unclassified	2
+Unassigned	Engineered;WWTP;Activated sludge	1
+Unassigned	Engineered;WWTP;Aerobic digester	283
+Unassigned	Engineered;WWTP;Effluent	666
+Unassigned	Engineered;WWTP;Influent	5
+Unassigned	Engineered;WWTP;Wastewater	10
+Unassigned	Engineered;Wastewater;Activated Sludge	168
+Unassigned	Engineered;Wastewater;Industrial wastewater	31
+Unassigned	Engineered;Wastewater;Nutrient removal	7
+Unassigned	Engineered;Wastewater;Sewage	7
+Unassigned	Engineered;Wastewater;Unclassified	1
+Unassigned	Environmental;Aquatic;Aquaculture	8
+Unassigned	Environmental;Aquatic;Deep subsurface	272
+Unassigned	Environmental;Aquatic;Floodplain	30
+Unassigned	Environmental;Aquatic;Freshwater	12890
+Unassigned	Environmental;Aquatic;Marine	23825
+Unassigned	Environmental;Aquatic;Non-marine Saline and Alkaline	1113
+Unassigned	Environmental;Aquatic;Sediment	97
+Unassigned	Environmental;Aquatic;Thermal springs	476
+Unassigned	Environmental;Aquatic;Unclassified	22
+Unassigned	Environmental;Terrestrial;Deep subsurface	161
+Unassigned	Environmental;Terrestrial;Floodplain	7
+Unassigned	Environmental;Terrestrial;Geologic	10
+Unassigned	Environmental;Terrestrial;Oil reservoir	2
+Unassigned	Environmental;Terrestrial;Plant litter	2264
+Unassigned	Environmental;Terrestrial;Rock-dwelling (endoliths)	7
+Unassigned	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	23
+Unassigned	Environmental;Terrestrial;Soil	15108
+Unassigned	Host-associated;Algae;Green algae	26
+Unassigned	Host-associated;Algae;Microalgae	1
+Unassigned	Host-associated;Algae;Red algae	5
+Unassigned	Host-associated;Algae;Unclassified	2
+Unassigned	Host-associated;Annelida;Unclassified	33
+Unassigned	Host-associated;Arthropoda: Chelicerates;Unclassified	50
+Unassigned	Host-associated;Arthropoda: Chelicerates;Whole body	9
+Unassigned	Host-associated;Arthropoda: Crustaceans;Unclassified	194
+Unassigned	Host-associated;Arthropoda: Insects;Circulatory system	2
+Unassigned	Host-associated;Arthropoda: Insects;Digestive system	70
+Unassigned	Host-associated;Arthropoda: Insects;Larva	2
+Unassigned	Host-associated;Arthropoda: Insects;Unclassified	143
+Unassigned	Host-associated;Arthropoda: Insects;Whole body	1
+Unassigned	Host-associated;Arthropoda;Unclassified	356
+Unassigned	Host-associated;Birds;Digestive system	2
+Unassigned	Host-associated;Cephalochordata;Digestive system	7
+Unassigned	Host-associated;Fish;Unclassified	6
+Unassigned	Host-associated;Fungi;Mycelium	16
+Unassigned	Host-associated;Fungi;Unclassified	43
+Unassigned	Host-associated;Human;Digestive system	85
+Unassigned	Host-associated;Human;Reproductive system	1
+Unassigned	Host-associated;Human;Unclassified	7
+Unassigned	Host-associated;Invertebrates;Cnidaria	157
+Unassigned	Host-associated;Invertebrates;Echinodermata	5
+Unassigned	Host-associated;Invertebrates;Nematoda	28
+Unassigned	Host-associated;Invertebrates;Unclassified	79
+Unassigned	Host-associated;Mammals: Human;Digestive system	16
+Unassigned	Host-associated;Mammals: Human;Reproductive system	1
+Unassigned	Host-associated;Mammals: Human;Unclassified	17
+Unassigned	Host-associated;Mammals;Digestive system	599
+Unassigned	Host-associated;Mammals;Unclassified	18
+Unassigned	Host-associated;Microbial;Bacteria	41
+Unassigned	Host-associated;Microbial;Unclassified	10
+Unassigned	Host-associated;Mollusca;Unclassified	207
+Unassigned	Host-associated;Plants;Peat moss	95
+Unassigned	Host-associated;Plants;Phyllosphere	707
+Unassigned	Host-associated;Plants;Roots	2827
+Unassigned	Host-associated;Plants;Unclassified	90
+Unassigned	Host-associated;Porifera;Sponge	30
+Unassigned	Host-associated;Porifera;Unclassified	3
+Unassigned	Host-associated;Tunicates;Unclassified	5
+Unassigned	Host-associated;Unclassified;Unclassified	3
+Uroviricota	;;	121193
+Uroviricota	Engineered;Animal feed production;Fermentation	2
+Uroviricota	Engineered;Artificial ecosystem;Algal pond	49
+Uroviricota	Engineered;Artificial ecosystem;Mesocosm	109
+Uroviricota	Engineered;Artificial ecosystem;Plant growth chamber	5793
+Uroviricota	Engineered;Artificial ecosystem;Sand microcosm	1716
+Uroviricota	Engineered;Artificial ecosystem;Soil microcosm	4970
+Uroviricota	Engineered;Bioreactor;Aerobic	2270
+Uroviricota	Engineered;Bioreactor;Anaerobic	76085
+Uroviricota	Engineered;Bioreactor;Continuous culture	1239
+Uroviricota	Engineered;Bioreactor;DHS reactor	670
+Uroviricota	Engineered;Bioreactor;Denitrification	3482
+Uroviricota	Engineered;Bioreactor;EBPR (Enhanced biological phosphorus removal)	1354
+Uroviricota	Engineered;Bioreactor;Membrane bioreactor	4991
+Uroviricota	Engineered;Bioreactor;Microbial fuel cells/MFC	281
+Uroviricota	Engineered;Bioreactor;SSF (Solid state fermentation)	3926
+Uroviricota	Engineered;Bioreactor;Semi-continuous	1848
+Uroviricota	Engineered;Bioreactor;Thiocyanate-remediating	2177
+Uroviricota	Engineered;Bioreactor;Unclassified	4202
+Uroviricota	Engineered;Bioreactor;Wastewater	12
+Uroviricota	Engineered;Bioremediation;Hydrocarbon	122
+Uroviricota	Engineered;Bioremediation;Metal	18
+Uroviricota	Engineered;Bioremediation;Persistent organic pollutants (POP)	63
+Uroviricota	Engineered;Bioremediation;Terephthalate	275
+Uroviricota	Engineered;Bioremediation;Tetrachloroethylene and derivatives	126
+Uroviricota	Engineered;Bioremediation;Thiocyanate	620
+Uroviricota	Engineered;Bioremediation;Unclassified	21
+Uroviricota	Engineered;Biotransformation;Microbial enhanced oil recovery	44
+Uroviricota	Engineered;Biotransformation;Microbial solubilization of coal	167
+Uroviricota	Engineered;Biotransformation;Mixed alcohol bioreactor	55
+Uroviricota	Engineered;Biotransformation;Unclassified	62
+Uroviricota	Engineered;Built environment;Canal	1400
+Uroviricota	Engineered;Built environment;Cement wall	2
+Uroviricota	Engineered;Built environment;City	13073
+Uroviricota	Engineered;Built environment;Hospital	20
+Uroviricota	Engineered;Built environment;House	158
+Uroviricota	Engineered;Built environment;Monument	2
+Uroviricota	Engineered;Built environment;Oil refinery	443
+Uroviricota	Engineered;Built environment;Pipeline	128
+Uroviricota	Engineered;Built environment;Solar panel	76
+Uroviricota	Engineered;Built environment;Spacecraft Assembly Cleanrooms	206
+Uroviricota	Engineered;Built environment;Tailings pond	1260
+Uroviricota	Engineered;Built environment;Unclassified	793
+Uroviricota	Engineered;Built environment;Water treatment plant	3
+Uroviricota	Engineered;Feedstock;Composting	6
+Uroviricota	Engineered;Food production;Bread production	24
+Uroviricota	Engineered;Food production;Dairy products	617
+Uroviricota	Engineered;Food production;Fermented beverages	387
+Uroviricota	Engineered;Food production;Fermented food	12
+Uroviricota	Engineered;Food production;Fermented seafood	13
+Uroviricota	Engineered;Food production;Fermented vegetables	276
+Uroviricota	Engineered;Food production;Fish products	6
+Uroviricota	Engineered;Food production;Meat products	205
+Uroviricota	Engineered;Food production;Seafood	1
+Uroviricota	Engineered;Food production;Seafood product	6
+Uroviricota	Engineered;Food production;Silage fermentation	55
+Uroviricota	Engineered;Food production;Unclassified	2200
+Uroviricota	Engineered;Industrial production;Chemical products	1455
+Uroviricota	Engineered;Industrial production;Engineered product	377
+Uroviricota	Engineered;Industrial production;Unclassified	52
+Uroviricota	Engineered;Lab culture;Culture media	27
+Uroviricota	Engineered;Lab enrichment;Defined media	2199
+Uroviricota	Engineered;Lab enrichment;Unclassified	413
+Uroviricota	Engineered;Lab synthesis;Unclassified	367
+Uroviricota	Engineered;Laboratory developed;Genetically modified	25
+Uroviricota	Engineered;Laboratory developed;Unclassified	11
+Uroviricota	Engineered;Modeled;Simulated communities (DNA mixture)	119
+Uroviricota	Engineered;Modeled;Simulated communities (microbial mixture)	1760
+Uroviricota	Engineered;Modeled;Simulated communities (sequence read mixture)	5
+Uroviricota	Engineered;Modeled;Unclassified	79
+Uroviricota	Engineered;Sewage treatment plant;Sludge	10
+Uroviricota	Engineered;Sewage treatment plant;Wastewater	36
+Uroviricota	Engineered;Solid waste;Agricultural waste	405
+Uroviricota	Engineered;Solid waste;Animal waste	189
+Uroviricota	Engineered;Solid waste;Bio- and green waste (BGW)	531
+Uroviricota	Engineered;Solid waste;Cellulose associated waste	2
+Uroviricota	Engineered;Solid waste;Composting	6
+Uroviricota	Engineered;Solid waste;Feedstock	550
+Uroviricota	Engineered;Solid waste;Food waste	2
+Uroviricota	Engineered;Solid waste;Grass	702
+Uroviricota	Engineered;Solid waste;Household waste	42
+Uroviricota	Engineered;Solid waste;Industrial waste	5
+Uroviricota	Engineered;Solid waste;Landfill	18752
+Uroviricota	Engineered;Solid waste;Mixed feedstock	2809
+Uroviricota	Engineered;Solid waste;Unclassified	53
+Uroviricota	Engineered;Solid waste;Unknown material	21
+Uroviricota	Engineered;Solid waste;Urban waste	3
+Uroviricota	Engineered;Solid waste;Vegetable	1
+Uroviricota	Engineered;Solid waste;Vermicompost	1
+Uroviricota	Engineered;Solid waste;Wood	22
+Uroviricota	Engineered;Solid waste;Zoo waste	1043
+Uroviricota	Engineered;Unclassified;Unclassified	543
+Uroviricota	Engineered;WWTP;Activated sludge	868
+Uroviricota	Engineered;WWTP;Aerobic digester	2267
+Uroviricota	Engineered;WWTP;Effluent	3165
+Uroviricota	Engineered;WWTP;Influent	667
+Uroviricota	Engineered;WWTP;Wastewater	10996
+Uroviricota	Engineered;Wastewater;Activated Sludge	12777
+Uroviricota	Engineered;Wastewater;Anaerobic digestor	313
+Uroviricota	Engineered;Wastewater;Digestate	129
+Uroviricota	Engineered;Wastewater;Industrial wastewater	22876
+Uroviricota	Engineered;Wastewater;Nutrient removal	5829
+Uroviricota	Engineered;Wastewater;Sewage	5635
+Uroviricota	Engineered;Wastewater;Sludge	4
+Uroviricota	Engineered;Wastewater;Unclassified	1448
+Uroviricota	Environmental;Air;Indoor Air	31
+Uroviricota	Environmental;Air;Outdoor Air	350
+Uroviricota	Environmental;Air;Unclassified	73
+Uroviricota	Environmental;Aquatic;Aquaculture	1702
+Uroviricota	Environmental;Aquatic;Deep subsurface	61556
+Uroviricota	Environmental;Aquatic;Floodplain	7914
+Uroviricota	Environmental;Aquatic;Freshwater	1395680
+Uroviricota	Environmental;Aquatic;Marine	1847903
+Uroviricota	Environmental;Aquatic;Non-marine Saline and Alkaline	127238
+Uroviricota	Environmental;Aquatic;Sediment	5670
+Uroviricota	Environmental;Aquatic;Thermal springs	17036
+Uroviricota	Environmental;Aquatic;Unclassified	3490
+Uroviricota	Environmental;Terrestrial;Agricultural field	54
+Uroviricota	Environmental;Terrestrial;Asphalt lakes	689
+Uroviricota	Environmental;Terrestrial;Cave	205
+Uroviricota	Environmental;Terrestrial;Deep subsurface	23144
+Uroviricota	Environmental;Terrestrial;Floodplain	1395
+Uroviricota	Environmental;Terrestrial;Geologic	716
+Uroviricota	Environmental;Terrestrial;Mud volcano	75
+Uroviricota	Environmental;Terrestrial;Nest	23011
+Uroviricota	Environmental;Terrestrial;Oil reservoir	687
+Uroviricota	Environmental;Terrestrial;Plant litter	5372
+Uroviricota	Environmental;Terrestrial;Rock-dwelling (endoliths)	1026
+Uroviricota	Environmental;Terrestrial;Rock-dwelling (subaerial biofilms)	1370
+Uroviricota	Environmental;Terrestrial;Soil	279116
+Uroviricota	Environmental;Terrestrial;Subsurface	1
+Uroviricota	Environmental;Terrestrial;Unclassified	317
+Uroviricota	Environmental;Terrestrial;Volcanic	15
+Uroviricota	Environmental;Unclassified;Unclassified	250
+Uroviricota	Host-associated;Algae;Brown Algae	224
+Uroviricota	Host-associated;Algae;Diatoms	85
+Uroviricota	Host-associated;Algae;Dinoflagellata	4
+Uroviricota	Host-associated;Algae;Green algae	2298
+Uroviricota	Host-associated;Algae;Haptophytes	38
+Uroviricota	Host-associated;Algae;Microalgae	1424
+Uroviricota	Host-associated;Algae;Red algae	849
+Uroviricota	Host-associated;Algae;Unclassified	89
+Uroviricota	Host-associated;Amoebozoa;Unclassified	4
+Uroviricota	Host-associated;Amphibia;Unclassified	11
+Uroviricota	Host-associated;Annelida;Digestive system	436
+Uroviricota	Host-associated;Annelida;Integument	216
+Uroviricota	Host-associated;Annelida;Intracellular endosymbionts	1
+Uroviricota	Host-associated;Annelida;Reproductive system	15
+Uroviricota	Host-associated;Annelida;Tissue	1
+Uroviricota	Host-associated;Annelida;Unclassified	26
+Uroviricota	Host-associated;Annelida;Whole body	16
+Uroviricota	Host-associated;Arthropoda: Crustaceans;Circulatory system	1
+Uroviricota	Host-associated;Arthropoda: Crustaceans;Digestive system	21
+Uroviricota	Host-associated;Arthropoda: Crustaceans;Unclassified	55
+Uroviricota	Host-associated;Arthropoda: Insects;Circulatory system	13
+Uroviricota	Host-associated;Arthropoda: Insects;Digestive system	8456
+Uroviricota	Host-associated;Arthropoda: Insects;Larva	900
+Uroviricota	Host-associated;Arthropoda: Insects;Ootheca/Egg mass	5
+Uroviricota	Host-associated;Arthropoda: Insects;Unclassified	215
+Uroviricota	Host-associated;Arthropoda: Insects;Whole body	210
+Uroviricota	Host-associated;Arthropoda;Digestive system	2
+Uroviricota	Host-associated;Arthropoda;Unclassified	2
+Uroviricota	Host-associated;Birds;Circulatory system	69
+Uroviricota	Host-associated;Birds;Digestive system	2443
+Uroviricota	Host-associated;Birds;Integumentary system	43
+Uroviricota	Host-associated;Birds;Nervous system	8
+Uroviricota	Host-associated;Birds;Reproductive system	28
+Uroviricota	Host-associated;Birds;Respiratory system	32
+Uroviricota	Host-associated;Birds;Unclassified	704
+Uroviricota	Host-associated;Cephalochordata;Digestive system	1617
+Uroviricota	Host-associated;Cnidaria;Unclassified	84
+Uroviricota	Host-associated;Fish;Digestive system	295
+Uroviricota	Host-associated;Fish;Integumentary system	198
+Uroviricota	Host-associated;Fish;Nervous system	1
+Uroviricota	Host-associated;Fish;Reproductive system	4
+Uroviricota	Host-associated;Fish;Respiratory system	7
+Uroviricota	Host-associated;Fish;Unclassified	600
+Uroviricota	Host-associated;Fish;Urinary system	14
+Uroviricota	Host-associated;Fungi;Fruiting body	5
+Uroviricota	Host-associated;Fungi;Lichen	4
+Uroviricota	Host-associated;Fungi;Mycelium	2879
+Uroviricota	Host-associated;Fungi;Unclassified	71
+Uroviricota	Host-associated;Human;Abdomen	1
+Uroviricota	Host-associated;Human;Circulatory system	1567
+Uroviricota	Host-associated;Human;Digestive system	210757
+Uroviricota	Host-associated;Human;Lymphatic system	14
+Uroviricota	Host-associated;Human;Nervous system	11
+Uroviricota	Host-associated;Human;Reproductive system	921
+Uroviricota	Host-associated;Human;Respiratory system	4327
+Uroviricota	Host-associated;Human;Unclassified	28533
+Uroviricota	Host-associated;Invertebrates;Bryozoans	5
+Uroviricota	Host-associated;Invertebrates;Cnidaria	861
+Uroviricota	Host-associated;Invertebrates;Echinodermata	2
+Uroviricota	Host-associated;Invertebrates;Nematoda	492
+Uroviricota	Host-associated;Invertebrates;Unclassified	22
+Uroviricota	Host-associated;Mammals: Human;Abdominal/Peritoneal cavity	19
+Uroviricota	Host-associated;Mammals: Human;Auditory/Hearing system	46
+Uroviricota	Host-associated;Mammals: Human;Circulatory system	645
+Uroviricota	Host-associated;Mammals: Human;Digestive system	221208
+Uroviricota	Host-associated;Mammals: Human;Fetus	7
+Uroviricota	Host-associated;Mammals: Human;Integumentary system	4303
+Uroviricota	Host-associated;Mammals: Human;Lymphatic system	711
+Uroviricota	Host-associated;Mammals: Human;Nervous system	140
+Uroviricota	Host-associated;Mammals: Human;Remains	60
+Uroviricota	Host-associated;Mammals: Human;Reproductive system	163
+Uroviricota	Host-associated;Mammals: Human;Respiratory system	1586
+Uroviricota	Host-associated;Mammals: Human;Skeletal system	27
+Uroviricota	Host-associated;Mammals: Human;Unclassified	3973
+Uroviricota	Host-associated;Mammals: Human;Urinary system	1054
+Uroviricota	Host-associated;Mammals: Human;Visual system	24
+Uroviricota	Host-associated;Mammals;Circulatory system	30
+Uroviricota	Host-associated;Mammals;Digestive system	166849
+Uroviricota	Host-associated;Mammals;Integumentary system	1409
+Uroviricota	Host-associated;Mammals;Lymphatic	30
+Uroviricota	Host-associated;Mammals;Lymphatic system	3
+Uroviricota	Host-associated;Mammals;Multiple systems	10
+Uroviricota	Host-associated;Mammals;Nervous system	8
+Uroviricota	Host-associated;Mammals;Reproductive system	66
+Uroviricota	Host-associated;Mammals;Respiratory system	870
+Uroviricota	Host-associated;Mammals;Unclassified	3974
+Uroviricota	Host-associated;Mammals;Unspecified system	370
+Uroviricota	Host-associated;Mammals;Urinary system	34
+Uroviricota	Host-associated;Microbial;Bacteria	3804
+Uroviricota	Host-associated;Microbial;Dinoflagellates	10
+Uroviricota	Host-associated;Microbial;Unclassified	60
+Uroviricota	Host-associated;Mollusca;Digestive system	34
+Uroviricota	Host-associated;Mollusca;Oyster	3
+Uroviricota	Host-associated;Mollusca;Respiratory system	101
+Uroviricota	Host-associated;Mollusca;Shell	76
+Uroviricota	Host-associated;Mollusca;Tissue	6
+Uroviricota	Host-associated;Mollusca;Unclassified	90
+Uroviricota	Host-associated;Nematoda;Unclassified	2
+Uroviricota	Host-associated;Plants;Endosphere	7
+Uroviricota	Host-associated;Plants;Nodule	13
+Uroviricota	Host-associated;Plants;Peat moss	5033
+Uroviricota	Host-associated;Plants;Phyllosphere	12716
+Uroviricota	Host-associated;Plants;Rhizome	15
+Uroviricota	Host-associated;Plants;Roots	106917
+Uroviricota	Host-associated;Plants;Tissue	30
+Uroviricota	Host-associated;Plants;Unclassified	3756
+Uroviricota	Host-associated;Plants;Wood	9
+Uroviricota	Host-associated;Porifera;Sponge	894
+Uroviricota	Host-associated;Porifera;Unclassified	588
+Uroviricota	Host-associated;Protists;Dinoflagellates	2
+Uroviricota	Host-associated;Protists;Excavata	3
+Uroviricota	Host-associated;Protists;Unclassified	55
+Uroviricota	Host-associated;Reptilia;Integumentary system	5
+Uroviricota	Host-associated;Reptilia;Unclassified	35
+Uroviricota	Host-associated;Tunicates;Ascidians	25
+Uroviricota	Host-associated;Unclassified;Unclassified	6874

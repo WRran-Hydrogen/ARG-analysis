@@ -1,0 +1,54 @@
+# COLOR MAPPING GUIDE (ARG_research)
+
+## 1. ENVIRONMENTAL HABITATS (14 Categories: Fig 1, Fig 2A Ring 1)
+Digestive                  #F16913  Warm Orange
+Other Host-associated      #FDBE85  Soft Apricot
+Marine                     #08519C  Deep Navy
+Freshwater                 #41B6C4  Cyan Blue
+Wastewater                 #756BB1  Slate Purple
+Soil                       #8C510A  Umber Brown
+Plants                     #31A354  Leaf Green
+Thermal                    #800026  Deep Burgundy
+Solid                      #BA68C8  Medium Orchid
+Microbial                  #BF812D  Golden Amber
+Bioreactor                 #525252  Dark Slate
+Other engineered           #808080  Cool Gray
+Other enviroment           #A6BDDB  Silver Blue
+Unclassfied                #D9D9D9  Light Gray
+
+## 2. VIRAL PHYLA (5 Phyla: Fig 1C, 1D, Fig 2A Ring 3)
+Uroviricota                #B3CDE3  Pastel Ice Blue
+Nucleocytoviricota         #FBB4AE  Pastel Rose
+Phixviricota               #FFF2AE  Pastel Cream
+Preplasmiviricota          #CCEBC5  Pastel Mint
+Hofneiviricota             #DECBE4  Pastel Lilac
+
+## 3. BACTERIAL HOST PHYLA (Fig 2A Ring 4)
+Bacillota                  #5C6BC0  Iris Indigo
+Pseudomonadota             #00897B  Deep Pine Teal
+Actinobacteriota           #C0CA33  Mustard Gold
+Bacteroidota               #E57373  Soft Coral
+Cyanobacteria              #00E676  Electric Mint
+Others                     #8E24AA  Mulberry Purple
+Unassigned                 #ECEFF1  Light Silver
+
+## 4. FIGURE 2 PANEL C HOST ORDERS (Alpha, Beta, Gamma Ladders)
+[Alphaproteobacteria]
+Hyphomicrobiales           #B45309  Amber Bronze (Dark)
+Rhodospirillales           #F59E0B  Golden Amber
+Burkholderiales            #FBBF24  Wheat Gold
+
+
+[Betaproteobacteria]
+Neisseriales               #1E3A8A  Midnight Cobalt (Dark)
+Rhodocyclales              #2563EB  Royal Blue
+Candidatus                 #60A5FA  Vivid Azure
+
+
+[Gammaproteobacteria]
+Pseudomonadales            #023E2A  Dark Pine (Darkest)
+Cardiobacteriales          #065F46  Deep Emerald
+Chromatiales               #059669  Classic Green
+Xanthomonadales            #10B981  Jade Mint
+Moraxellales               #6EE7B7  Light Seafoam
+Steroidobacterales         #D1FAE5  Ice Mint (Lightest)

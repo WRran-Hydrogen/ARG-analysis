@@ -1,0 +1,32 @@
+name: sbl_hpc
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.13
+  - pandas>=2.2
+  - numpy>=1.26
+  - scipy>=1.13
+  - biopython>=1.83
+  - hmmer=3.4
+  - mmseqs2=18.8cc5c
+  - meme=5.5.9
+  - checkv=1.0.3
+  - genomad=1.8.1  # note: viral screening used genomad=1.7 (genomad_db v1.7); bacterial screening used genomad=1.8.1
+  - eggnog-mapper=2.1.12
+  - prodigal=2.6.3
+  - mafft=7.526
+  - muscle=5.3
+  - clipkit=2.14.0
+  - trimal=1.5.0
+  - iqtree=2.4.0
+  - hyphy=2.5.93
+  - diamond=2.1.24
+  - foldseek=10.941cd33
+  - foldmason  # run used build 4bd8b8d8c20d439b52ff8a3fccc50a3aba2be286
+  - pal2nal=14.1
+  - pip
+  - pip:
+      - pastml==1.9.42
+      - ete4

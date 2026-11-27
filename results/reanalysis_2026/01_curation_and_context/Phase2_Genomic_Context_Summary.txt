@@ -1,0 +1,66 @@
+=== Phase 2: viral genomic neighbourhoods and viral-origin tiers ===
+Total primary curated viral loci (cov>=0.65 & FIMO<=1e-5): 4,203 (IMG/VR: 4,193, MOSAiC: 10)
+  Focal IMG/VR (PF00144+PF00905+PF13354): 3,357 | Sister PRE IMG/VR (PF00768): 836
+Median % ORFs annotated per viral contig (Pfam-A + eggNOG): 45.86%
+Gene-origin evidence on ORFs of these contigs (285,324 ORFs): viral 47.8%, host only 4.9%; CheckV viral 28.2%, CheckV microbial 6.2%, geNomad virus-first marker 44.4%, eggNOG Viruses seed 8.8%
+>= 1 geNomad virus hallmark (no recombination markers) in viral region: 2,249 / 4,193 (53.64%)
+geNomad hallmark on >= 1 side: 2,246 / 4,193 (53.57%); on BOTH sides: 837 / 4,193 (19.96%)
+Viral-evidence ORF on >= 1 side: 4,082 / 4,193 (97.35%); on BOTH sides: 2,941 / 4,193 (70.14%); on both sides within 10 ORFs: 2,806 / 4,193 (66.92%)
+Recombination / integrase / lysogeny gene in region (annotation text, MGE background only): 1,885 / 4,193 (44.96%)
+Median min distance to viral region boundary (IMG/VR): 5160.0 bp
+
+Breakdown by (Pfam category, primary viral-origin tier) on the primary curated cohort:
+  aux_PF00768      | MOSAiC_Proteome_Verified_vMAG : 1
+  aux_PF00768      | Tier1_HighConfidence_Viral    : 258
+  aux_PF00768      | Tier2_Supported_Viral         : 306
+  aux_PF00768      | Tier3_Fragment_or_Borderline  : 272
+  focal_PF00144    | MOSAiC_Proteome_Verified_vMAG : 8
+  focal_PF00144    | Tier1_HighConfidence_Viral    : 1,173
+  focal_PF00144    | Tier2_Supported_Viral         : 443
+  focal_PF00144    | Tier3_Fragment_or_Borderline  : 252
+  focal_PF00905    | MOSAiC_Proteome_Verified_vMAG : 1
+  focal_PF00905    | Tier1_HighConfidence_Viral    : 139
+  focal_PF00905    | Tier2_Supported_Viral         : 395
+  focal_PF00905    | Tier3_Fragment_or_Borderline  : 707
+  focal_PF13354    | Tier1_HighConfidence_Viral    : 126
+  focal_PF13354    | Tier2_Supported_Viral         : 79
+  focal_PF13354    | Tier3_Fragment_or_Borderline  : 43
+
+Primary-tier counts by family (T1 / T2 / T3): primary | local w10 | text rule
+  PF00144  n=1,868  1173/443/252  |  1202/600/66  |  1165/325/378
+  PF00768  n=  836  258/306/272  |  283/515/38  |  232/196/408
+  PF00905  n=1,241  139/395/707  |  205/735/301  |  128/215/898
+  PF13354  n=  248  126/79/43  |  123/113/12  |  125/50/73
+
+Host-gene check (basis, pass with focal correction, focal ORF CheckV category):
+  checkv_viral_region      pass=False focal=host    : 3
+  checkv_viral_region      pass=True  focal=host    : 74
+  checkv_viral_region      pass=True  focal=no_hit  : 24
+  checkv_viral_region      pass=True  focal=viral   : 1
+  genomad_provirus_skip    pass=True  focal=host    : 224
+  genomad_provirus_skip    pass=True  focal=no_hit  : 3
+  genomad_provirus_skip    pass=True  focal=viral   : 12
+  whole_contig             pass=False focal=host    : 980
+  whole_contig             pass=False focal=no_hit  : 149
+  whole_contig             pass=True  focal=host    : 1,571
+  whole_contig             pass=True  focal=no_hit  : 279
+  whole_contig             pass=True  focal=unmapped: 3
+  whole_contig             pass=True  focal=viral   : 870
+
+Tier shift, text rule (rows) -> primary (columns), primary IMG/VR loci:
+                                     Tier1     Tier2     Tier3
+  Tier1_HighConfidence_Viral         1,603        46         1
+  Tier2_Supported_Viral                 40       713        33
+  Tier3_Fragment_or_Borderline          53       464     1,240
+
+Tier shift, primary (rows) -> local w10 sensitivity (columns), primary IMG/VR loci:
+                                     Tier1     Tier2     Tier3
+  Tier1_HighConfidence_Viral         1,594        79        23
+  Tier2_Supported_Viral                 26     1,163        34
+  Tier3_Fragment_or_Borderline         193       721       360
+
+Tier shift, lenient rule (rows) -> primary (columns), primary IMG/VR loci:
+                                     Tier1     Tier2     Tier3
+  Tier1_HighConfidence_Viral         1,356        40       143
+  Tier2_Supported_Viral                340       965       692
+  Tier3_Fragment_or_Borderline           0       218       439

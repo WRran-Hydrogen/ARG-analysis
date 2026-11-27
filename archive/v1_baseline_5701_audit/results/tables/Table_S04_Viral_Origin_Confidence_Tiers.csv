@@ -1,0 +1,7 @@
+stratum,n_sbl_loci,pct_of_total_loci,n_unique_contigs,median_genomad_score,median_genomad_markers,pct_with_ge1_genomad_marker,median_checkv_contamination,median_min_dist_to_boundary_bp,n_with_orf_neighborhood_map,pct_mapped_with_viral_hallmark_on_contig,pct_mapped_flanked_any_viral_recomb,pct_mapped_flanked_both_sides
+All_Viral_SBL_Loci,5701,100.0,5618,0.9495,7.0,89.23,0.0,3755.0,879,86.35,98.18,76.45
+Tier1_HighConfidence_Viral,1254,22.0,1236,0.9709,34.0,71.13,0.0,20473.0,856,86.1,98.13,77.45
+Tier2_Supported_Viral,3238,56.8,3207,0.9523,7.0,100.0,0.0,2834.5,9,100.0,100.0,33.33
+Tier3_Fragment_or_Borderline,1209,21.21,1175,0.7986,2.0,79.16,0.0,1728.0,14,92.86,100.0,42.86
+ORF_Neighborhood_Mapped_Subset,879,15.42,872,0.9733,20.0,59.27,0.0,21602.0,879,86.35,98.18,76.45
+Prophage_Subregion_Subset,1088,19.08,1075,0.9579,32.0,100.0,0.0,11414.0,237,90.72,99.58,63.71

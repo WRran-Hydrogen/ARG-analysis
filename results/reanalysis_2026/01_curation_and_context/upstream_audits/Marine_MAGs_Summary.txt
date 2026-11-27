@@ -1,0 +1,16 @@
+=== 259 Dereplicated Marine Bacterial MAGs Audit Summary ===
+Total raw candidate proteins across 259 MAGs: 2692
+CDS translation verification among CL0013 GA non-drop hits: 2659 / 2659 (100.00%)
+Total clean non-prophage, complete-ORF bacterial marine MAG SBLs kept: 2495
+
+Detailed status breakdown:
+  DROP_genomad_full_viral_contig: 2
+  DROP_partial_orf: 162
+  KEEP_focal_PF00144_chromosome: 1400
+  KEEP_focal_PF00144_plasmid: 22
+  KEEP_focal_PF00905_chromosome: 990
+  KEEP_focal_PF00905_plasmid: 5
+  KEEP_focal_PF13354_chromosome: 74
+  KEEP_focal_PF13354_plasmid: 4
+  drop_no_pfam_ga: 29
+  drop_non_CL0013_only: 4

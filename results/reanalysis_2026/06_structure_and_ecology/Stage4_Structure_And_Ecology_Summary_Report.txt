@@ -1,0 +1,58 @@
+========================================================================
+Stage 4B Report: 3D Biophysics, Controlled Diversity & Stratified Ecology
+2026 Strictly Curated CL0013 Viral Cohort (pass_cov65 & pass_fimo_1e5)
+========================================================================
+Curated viral cohort size: n=4203 (matched info.xlsx: 4193)
+Reliable host subset (Isolate/CRISPR): n=941
+High-confidence viral origin (Tier1+Tier2+MOSAiC): n=2929
+
+--- 1. 3D Structural Localization of Constraint vs Diversification ---
+  Ref_Crystal        | PF00144                  | n=304 | dist(cat/div/bg)=6.036/18.895/20.216 A (p_div>cat=2.52e-07) | RSA(cat/div/bg)=0.0151/0.2315/0.0893 (p_div>cat=6.50e-04) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.7489 vs 0.9492 (p=1.61e-03)
+  Ref_Crystal        | PF00905                  | n=255 | dist(cat/div/bg)=6.085/20.115/17.516 A (p_div>cat=1.22e-04) | RSA(cat/div/bg)=0.1767/0.2532/0.057 (p_div>cat=4.05e-01) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.4911 vs 0.87 (p=1.92e-09)
+  Ref_Crystal        | PF13354                  | n=250 | dist(cat/div/bg)=6.614/18.44/17.787 A (p_div>cat=1.42e-08) | RSA(cat/div/bg)=0.028/0.2343/0.1168 (p_div>cat=6.25e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6066 vs 0.9022 (p=9.62e-07)
+  Ref_Crystal        | All_Ref_Crystal_Pooled   | n=809 | dist(cat/div/bg)=6.56/19.162/18.425 A (p_div>cat=5.06e-17) | RSA(cat/div/bg)=0.0562/0.2433/0.0807 (p_div>cat=9.92e-06) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6088 vs 0.9162 (p=1.76e-15)
+  Viral_ESMFold_2026 | PF00144                  | n=318 | dist(cat/div/bg)=5.954/18.932/19.237 A (p_div>cat=1.61e-07) | RSA(cat/div/bg)=0.0194/0.2775/0.1324 (p_div>cat=2.47e-04) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.712 vs 0.9628 (p=8.58e-07)
+  Viral_ESMFold_2026 | PF00905                  | n=298 | dist(cat/div/bg)=5.945/19.338/17.443 A (p_div>cat=1.29e-07) | RSA(cat/div/bg)=0.0098/0.3899/0.1303 (p_div>cat=4.80e-07) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.4084 vs 0.8764 (p=6.47e-11)
+  Viral_ESMFold_2026 | PF13354                  | n=222 | dist(cat/div/bg)=7.481/17.884/16.76 A (p_div>cat=2.91e-08) | RSA(cat/div/bg)=0.0904/0.296/0.1911 (p_div>cat=3.08e-05) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6031 vs 0.9146 (p=1.40e-07)
+  Viral_ESMFold_2026 | PF00768                  | n=226 | dist(cat/div/bg)=15.717/18.958/18.272 A (p_div>cat=1.31e-02) | RSA(cat/div/bg)=0.1284/0.2695/0.1848 (p_div>cat=2.46e-03) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.6391 vs 0.7812 (p=1.27e-02)
+  Viral_ESMFold_2026 | All_Viral_ESMFold_2026_Pooled | n=1064 | dist(cat/div/bg)=6.686/18.802/17.893 A (p_div>cat=1.07e-20) | RSA(cat/div/bg)=0.0698/0.3149/0.1473 (p_div>cat=1.07e-14) | omega_ng(<10A vs >=10A&RSA>=0.20)=0.5962 vs 0.8966 (p=8.27e-20)
+
+--- 2. Confounder-Controlled Structural & Phylogenetic Diversity ---
+  1_Global_Baseline_Unfiltered             | V/B PDB=1337/170 | rarefied_k=50 PD(V/B)=70.3011/35.0358 (p=4.83e-67) | norm_Rg(V/B)=2.7853/2.6897 (MW_p=1.11e-38)
+  2_Global_Curated_2026                    | V/B PDB= 825/170 | rarefied_k=50 PD(V/B)=65.9031/35.0358 (p=4.83e-67) | norm_Rg(V/B)=2.7604/2.6897 (MW_p=1.75e-27)
+  3_Within_PF00144                         | V/B PDB= 441/ 33 | rarefied_k=32 PD(V/B)=44.0497/8.9556 (p=1.33e-67) | norm_Rg(V/B)=2.7519/2.6862 (MW_p=3.71e-14)
+  3_Within_PF00905                         | V/B PDB= 324/ 56 | rarefied_k=50 PD(V/B)=33.4981/30.1309 (p=3.63e-44) | norm_Rg(V/B)=2.8332/2.7464 (MW_p=3.73e-05)
+  3_Within_PF13354                         | V/B PDB=  57/ 81 | rarefied_k=50 PD(V/B)=28.237/15.6342 (p=4.83e-67) | norm_Rg(V/B)=2.6784/2.6793 (MW_p=9.12e-01)
+  3_Within_PF00768_ViralOnly               | V/B PDB=   3/  0 | rarefied_k= 0 PD(V/B)=nan/nan (p=nan) | norm_Rg(V/B)=2.6716/nan (MW_p=nan)
+  4_Tier_PBP_or_PRE_Homolog                | V/B PDB= 806/ 33 | rarefied_k=31 PD(V/B)=46.5405/31.3661 (p=3.07e-67) | norm_Rg(V/B)=2.7638/2.8009 (MW_p=5.12e-01)
+  4_Tier_Putative_Hydrolytic_BetaLactamase | V/B PDB=  19/137 | rarefied_k=19 PD(V/B)=20.1225/19.4372 (p=1.18e-06) | norm_Rg(V/B)=2.6885/2.6862 (MW_p=1.92e-01)
+  5_ViralOrigin_Tier1_Tier2_HighConf       | V/B PDB= 566/170 | rarefied_k=50 PD(V/B)=66.6425/35.0358 (p=4.83e-67) | norm_Rg(V/B)=2.7568/2.6897 (MW_p=3.56e-24)
+  6_ReliableHost_Isolate_CRISPR            | V/B PDB= 143/170 | rarefied_k=50 PD(V/B)=49.7161/35.0358 (p=7.92e-67) | norm_Rg(V/B)=2.7485/2.6897 (MW_p=1.83e-08)
+
+--- 3. Confounder-Controlled Ecological Enrichment (CMH Summary) ---
+  [A_Full_Curated_2026_IMGVR] evaluated=38, global_BH<0.05=38, persists_after_FamilyXPhylum_FDR05=13
+    PF00768_DD_Peptidase             @ Freshwater           | a= 710 | gOR=30.325 (gFDR=1.35e-309) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    PF00905_Transpeptidase           @ Human_Digestive      | a= 849 | gOR=13.757 (gFDR=2.79e-256) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    PF00144_ClassC                   @ Human_Respiratory    | a= 369 | gOR=659.154 (gFDR=4.88e-148) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    motif2_SXN_PBP                   @ Human_Respiratory    | a= 368 | gOR=247.54 (gFDR=2.09e-121) | CMH_FamXPhy_OR=2887.696 (cFDR=0.00e+00) | persists=True
+    PF00144_ClassC                   @ Soil_Terrestrial     | a= 272 | gOR=12.02 (gFDR=5.14e-68) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    motif2_SXN_PBP                   @ Freshwater           | a= 826 | gOR=3.332 (gFDR=1.31e-63) | CMH_FamXPhy_OR=0.28 (cFDR=0.00e+00) | persists=False
+    motif3_KTG_hmm                   @ Freshwater           | a= 753 | gOR=2.548 (gFDR=7.77e-40) | CMH_FamXPhy_OR=0.399 (cFDR=2.50e-06) | persists=False
+    motif1_SXXK_hmm                  @ Freshwater           | a=1179 | gOR=6.5 (gFDR=1.37e-37) | CMH_FamXPhy_OR=2.299 (cFDR=1.73e-03) | persists=True
+    PF00905_Transpeptidase           @ NonHuman_Digestive   | a= 130 | gOR=7.739 (gFDR=4.36e-34) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    motif2_YAN_ClassC                @ Soil_Terrestrial     | a=  81 | gOR=6.323 (gFDR=3.52e-28) | CMH_FamXPhy_OR=2.653 (cFDR=4.49e-10) | persists=True
+    motif1_SXXK_hmm                  @ Human_Respiratory    | a= 370 | gOR=nan (gFDR=4.39e-21) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    PF00905_Transpeptidase           @ Other_Environmental  | a=  99 | gOR=5.462 (gFDR=4.53e-21) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+  [B_Curated_2026_MotifNetwork] evaluated=16, global_BH<0.05=16, persists_after_FamilyXPhylum_FDR05=11
+    SXN                              @ Digestive            | a= 227 | gOR=15.729 (gFDR=1.55e-60) | CMH_FamXPhy_OR=0.687 (cFDR=4.37e-01) | persists=False
+    KXG                              @ Digestive            | a= 195 | gOR=7.706 (gFDR=4.19e-37) | CMH_FamXPhy_OR=0.147 (cFDR=7.90e-04) | persists=False
+    GLMH                             @ Digestive            | a=  30 | gOR=64.597 (gFDR=1.45e-12) | CMH_FamXPhy_OR=10.563 (cFDR=9.34e-03) | persists=True
+    MQG                              @ Digestive            | a=  24 | gOR=nan (gFDR=4.72e-11) | CMH_FamXPhy_OR=nan (cFDR=1.00e+00) | persists=False
+    YCS                              @ Freshwater           | a=  19 | gOR=21.042 (gFDR=1.40e-08) | CMH_FamXPhy_OR=6.477 (cFDR=7.12e-03) | persists=True
+    YXN                              @ Soil                 | a=  41 | gOR=4.579 (gFDR=6.68e-08) | CMH_FamXPhy_OR=2.46 (cFDR=8.58e-03) | persists=True
+    AR-                              @ Freshwater           | a=  20 | gOR=8.283 (gFDR=1.35e-06) | CMH_FamXPhy_OR=3.274 (cFDR=2.65e-02) | persists=True
+    WV-                              @ Freshwater           | a=  16 | gOR=10.426 (gFDR=5.58e-06) | CMH_FamXPhy_OR=10.116 (cFDR=5.09e-06) | persists=True
+    YSG                              @ Freshwater           | a=  19 | gOR=6.945 (gFDR=7.86e-06) | CMH_FamXPhy_OR=3.255 (cFDR=8.58e-03) | persists=True
+    HXG                              @ Soil                 | a=  28 | gOR=3.31 (gFDR=7.19e-05) | CMH_FamXPhy_OR=1.774 (cFDR=6.20e-02) | persists=False
+    SXXK                             @ Freshwater           | a= 191 | gOR=3.48 (gFDR=7.19e-05) | CMH_FamXPhy_OR=2.325 (cFDR=4.06e-02) | persists=True
+    YXN                              @ Other Host-associated | a=  19 | gOR=3.239 (gFDR=3.97e-03) | CMH_FamXPhy_OR=12.654 (cFDR=7.12e-03) | persists=True

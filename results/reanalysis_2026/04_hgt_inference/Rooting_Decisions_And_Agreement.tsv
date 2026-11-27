@@ -1,0 +1,6 @@
+family	primary_rooting	primary_alignment_track	crown_clade_f1	crown_monophyly_ufboot	crown_monophyly_shalrt	crown_root_split_ufboot	crown_n_family_outside_clade	crown_s1_n	crown_s2_n	crown_reliable_this_sample	crown_root_split_ufboot_replicates	crown_reliable	primary_root_split_ufboot	primary_root_on_terminal_branch	primary_root_split_small_side_n	root_agreement_primary_in_Crown	root_agreement_primary_in_MAD	root_agreement_primary_in_MinVar	root_agreement_primary_in_Midpoint	root_agreement_clean_prof_out	root_agreement_legacy_sarg24_out	crown_root_agreement_only_PF04960	crown_root_agreement_only_PF06089
+PF00144	MAD	hmm	1.0	100.0	100.0	66.0	0	89	1	False	81	False		True	1	0.0005	1.0	0.0006	0.0045	0.0005	0.0005	0.0021	0.0021
+PF00905	MAD	hmm	1.0	100.0	100.0	97.0	0	89	1	True	49	False	100.0	False	49	0.0286	1.0	0.0346	0.1317	0.0286	0.0286	0.0023	0.0023
+PF13354	MAD	hmm	0.5124	100.0	99.9	53.0	59	29	2	False	44	False	100.0	False	17	0.0109	1.0	0.0156	0.0116	0.0109	0.0109	0.0039	0.019
+PF00768	MAD	hmm	1.0	100.0	100.0	63.0	0	88	2	False	61	False		True	1	0.0006	1.0	0.0056	0.0006	0.0006	0.0006	1.0	1.0
+PF13354_PF00768	MAD	struct	0.5124	100.0	99.9	100.0	-1	90	90	False	34	False	100.0	False	655	1.0	1.0	1.0	1.0	0.3714	0.3714	1.0	1.0
